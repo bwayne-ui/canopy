@@ -7,7 +7,7 @@ import MetricCard from '@/components/MetricCard';
 import DataTable, { Column } from '@/components/DataTable';
 import StatusBadge from '@/components/StatusBadge';
 import { fmtDate } from '@/lib/utils';
-import { FileBarChart, Lock, Users, Globe2, Building, Plus } from 'lucide-react';
+import { FileBarChart, Lock, Users, Globe2, Building, Plus, Eye } from 'lucide-react';
 
 interface ReportRow {
   id: string;
@@ -20,7 +20,8 @@ interface ReportRow {
   querySource: string;
   ownerName: string;
   visibility: string;
-  requiredRole: string | null;
+  minGrade: string | null;
+  exportFormats: string[];
   status: string;
   version: string;
   lastRunAt: string | null;
@@ -33,6 +34,16 @@ const visibilityIcon = (v: string) => {
   if (v === 'Team') return <Users className="w-3 h-3" />;
   if (v === 'Org') return <Building className="w-3 h-3" />;
   return <Globe2 className="w-3 h-3" />;
+};
+
+const gradeBadge = (g: string | null) => {
+  if (!g) return <span className="text-gray-300 text-[10px]">—</span>;
+  const isMgr = g.startsWith('M');
+  return (
+    <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold ${
+      isMgr ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+    }`}>{g}+</span>
+  );
 };
 
 export default function ReportsPage() {
@@ -55,18 +66,23 @@ export default function ReportsPage() {
     { key: 'category', label: 'Category', sortable: true, render: (v: string) => (
       <span className="inline-block rounded-full bg-gray-100 text-gray-700 px-2 py-0.5 text-[10px] font-medium">{v}</span>
     )},
-    { key: 'querySource', label: 'Source', render: (v: string) => (
-      <span className="font-mono text-[10px] text-gray-500">{v}</span>
-    )},
     { key: 'frequency', label: 'Frequency', sortable: true },
+    { key: 'minGrade', label: 'Entitlement', sortable: true, render: (v: string | null) => gradeBadge(v) },
     { key: 'visibility', label: 'Visibility', render: (v: string) => (
       <span className="inline-flex items-center gap-1 text-[11px] text-gray-600">{visibilityIcon(v)}{v}</span>
     )},
-    { key: 'requiredRole', label: 'Min Role', render: (v: string | null) => v ?? <span className="text-gray-300">—</span> },
+    { key: 'exportFormats', label: 'Formats', render: (v: string[]) => (
+      <span className="font-mono text-[10px] text-gray-500">{(v ?? []).join(' · ')}</span>
+    )},
     { key: 'ownerName', label: 'Owner', sortable: true, render: (v: string) => <span className="text-[11px]">{v}</span> },
     { key: 'runCount', label: 'Runs', sortable: true, align: 'right', render: (v: number) => <span className="font-mono text-[11px]">{v}</span> },
     { key: 'lastRunAt', label: 'Last Run', sortable: true, render: (v: string | null) => v ? fmtDate(v) : '—' },
     { key: 'status', label: 'Status', sortable: true, render: (v: string) => <StatusBadge status={v} /> },
+    { key: 'id', label: '', render: (_v, row: ReportRow) => (
+      <Link href={`/reports/${row.reportId}`} className="text-[#00C97B] hover:text-[#00A866]" title="View">
+        <Eye className="w-3.5 h-3.5" />
+      </Link>
+    )},
   ];
 
   if (loading) return <div className="flex items-center justify-center h-96 text-gray-400 text-xs">Loading reports...</div>;
@@ -75,7 +91,7 @@ export default function ReportsPage() {
     <div className="space-y-5">
       <PageHeader
         title="Reports"
-        subtitle="Reusable query logic, parameter framework, and permissioned execution"
+        subtitle="Reusable query logic, parameter framework, and grade-based entitlements"
         actions={
           <Link href="/reports/new" className="bg-[#00C97B] hover:bg-[#00A866] text-white text-xs font-semibold px-3 py-1.5 rounded-md flex items-center gap-1.5">
             <Plus className="w-3 h-3" /> New Report

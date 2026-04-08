@@ -1,29 +1,31 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { meetsEntitlement } from '@/lib/grades';
 
 // POST /api/reports/[id]/run
-// Body: { user: { id, name, role }, parameters: {...} }
+// Body: { user: { id, name, grade }, parameters: {...} }
 // Permission check → optional skill dispatch → create ReportRun row → return result.
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   const body = await req.json().catch(() => ({}));
-  const userObj = body.user ?? { id: 'anonymous', name: 'Anonymous', role: 'Guest' };
+  const userObj = body.user ?? { id: 'anonymous', name: 'Anonymous', grade: null };
   const parameters = body.parameters ?? {};
 
   const r = await prisma.report.findFirst({ where: { OR: [{ id: params.id }, { reportId: params.id }] } });
   if (!r) return NextResponse.json({ error: 'not found' }, { status: 404 });
 
   // ── Permission gate ────────────────────────────────────────
-  // Visibility = Private → only owner can run
-  // Visibility = Team/Org/Public → require min role if set
+  // Visibility = Private → only owner can run.
+  // Otherwise: user.grade must meet report.minGrade per the IC/Mgr hierarchy.
   const isOwner = userObj.id === r.ownerId;
-  const roleHierarchy = ['Guest', 'Analyst', 'IR', 'Tax', 'Legal', 'Compliance', 'Treasury', 'Fund Accountant', 'Manager', 'Controller', 'CFO', 'Admin'];
-  const userRoleIdx = roleHierarchy.indexOf(userObj.role ?? 'Guest');
-  const requiredIdx = r.requiredRole ? roleHierarchy.indexOf(r.requiredRole) : -1;
 
   let blocked: string | null = null;
-  if (r.visibility === 'Private' && !isOwner) blocked = 'Private report — only owner may execute';
-  else if (requiredIdx >= 0 && userRoleIdx < requiredIdx)
-    blocked = `Requires role ≥ ${r.requiredRole}, you have ${userObj.role}`;
+  if (r.visibility === 'Private' && !isOwner) {
+    blocked = 'Private report — only owner may execute';
+  } else if (!meetsEntitlement(userObj.grade, r.minGrade)) {
+    blocked = r.minGrade
+      ? `Entitlement: requires ${r.minGrade}+, you have ${userObj.grade ?? 'no grade'}`
+      : 'Entitlement: a grade is required to run reports';
+  }
 
   // Create the run row regardless (for audit) — but mark Blocked when denied.
   const runCount = await prisma.reportRun.count();

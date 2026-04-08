@@ -787,7 +787,8 @@ model Report {
   visibility      String      @default("Private")   // Private | Team | Org | Public
   sharedWithRoles String?                           // JSON array of role strings
   sharedWithUsers String?                           // JSON array of InternalUser ids
-  requiredRole    String?                           // Min role to execute
+  minGrade        String?                           // Entitlement: P1..P5 (IC) or M2..M6 (Mgmt). Null = open.
+  exportFormats   String   @default("csv,json,xml,html,xlsx") // comma-sep allowed export formats
   // Lifecycle
   status          String      @default("Active")    // Draft | Active | Archived | Deprecated
   version         String      @default("1.0.0")

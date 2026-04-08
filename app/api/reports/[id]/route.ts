@@ -12,6 +12,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   return NextResponse.json({
     ...r,
     parametersSchema: r.parametersSchema ? JSON.parse(r.parametersSchema) : [],
+    exportFormats: r.exportFormats.split(',').map((s) => s.trim()).filter(Boolean),
     runs: r.runs.map((run) => ({
       ...run,
       startedAt: run.startedAt.toISOString(),
@@ -43,7 +44,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
         ? (typeof body.parametersSchema === 'string' ? body.parametersSchema : JSON.stringify(body.parametersSchema))
         : r.parametersSchema,
       visibility: body.visibility ?? r.visibility,
-      requiredRole: body.requiredRole ?? r.requiredRole,
+      minGrade: body.minGrade !== undefined ? body.minGrade : r.minGrade,
+      exportFormats: body.exportFormats ?? r.exportFormats,
       status: body.status ?? r.status,
       version: body.version ?? r.version,
     },
