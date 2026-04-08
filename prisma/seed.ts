@@ -4,6 +4,10 @@ const prisma = new PrismaClient();
 
 async function main() {
   // Clear existing data
+  await prisma.timesheetEntry.deleteMany();
+  await prisma.timesheet.deleteMany();
+  await prisma.reportRun.deleteMany();
+  await prisma.report.deleteMany();
   await prisma.relationship.deleteMany();
   await prisma.rule.deleteMany();
   await prisma.cashFlow.deleteMany();
@@ -828,6 +832,151 @@ async function main() {
     prisma.relationship.create({ data: { relationshipId: 'REL-020', sourceType: 'entity', sourceId: entities[11].id, sourceName: 'WFM Global Opportunities FoF', targetType: 'entity', targetId: entities[1].id, targetName: 'Walker Enterprise Fund III LP', relationshipType: 'invests_in', status: 'Active', effectiveDate: new Date('2021-06-15'), notes: 'FoF allocation to Walker III via co-investment commitment' }}),
   ]);
   console.log('Created 20 relationships');
+
+  // ═══════════════════════════════════════════════
+  // REPORTS — query-logic library
+  // ═══════════════════════════════════════════════
+  const allUsers = await prisma.internalUser.findMany();
+  const owner = allUsers[0] ?? { id: 'unknown', firstName: 'System', lastName: 'Admin' };
+  const ownerName = `${owner.firstName} ${owner.lastName}`;
+
+  const reportSeed = [
+    { code: 'RPT-001', name: 'Monthly NAV Package', category: 'NAV', frequency: 'Monthly', format: 'PDF + Excel', recipients: 'GP, LPs, Auditor', querySource: 'prisma', queryLogic: JSON.stringify({ model: 'entity', where: {}, select: ['entityId', 'name', 'navMm', 'commitmentMm', 'netIrrPct'] }), parametersSchema: JSON.stringify([{ name: 'entityId', type: 'string', required: false, default: '*' }, { name: 'period', type: 'month', required: true, default: '2026-03' }]), visibility: 'Org', requiredRole: 'Fund Accountant' },
+    { code: 'RPT-002', name: 'Quarterly Capital Account Statement', category: 'Investor Services', frequency: 'Quarterly', format: 'PDF', recipients: 'All LPs', querySource: 'prisma', queryLogic: JSON.stringify({ model: 'investor', where: {}, select: ['investorId', 'name', 'commitmentMm', 'navMm', 'distributedMm'] }), parametersSchema: JSON.stringify([{ name: 'entityId', type: 'string', required: true }, { name: 'asOf', type: 'date', required: true, default: '2026-03-31' }]), visibility: 'Org', requiredRole: 'IR' },
+    { code: 'RPT-003', name: 'Annual K-1 Tax Package', category: 'Tax', frequency: 'Annually', format: 'PDF', recipients: 'US LPs', querySource: 'skill', queryLogic: JSON.stringify({ skill: 'k1-generation' }), parametersSchema: JSON.stringify([{ name: 'entityId', type: 'string', required: true }, { name: 'tax_year', type: 'number', required: true, default: 2025 }]), visibility: 'Team', requiredRole: 'Tax' },
+    { code: 'RPT-004', name: 'Board Package', category: 'Reporting', frequency: 'Quarterly', format: 'PowerPoint', recipients: 'Board Members', querySource: 'composite', queryLogic: JSON.stringify({ sources: ['nav', 'attribution', 'compliance'] }), parametersSchema: JSON.stringify([{ name: 'entityId', type: 'string', required: true }, { name: 'quarter', type: 'string', required: true, options: ['Q1', 'Q2', 'Q3', 'Q4'] }]), visibility: 'Team', requiredRole: 'Manager' },
+    { code: 'RPT-005', name: 'Compliance Dashboard', category: 'Compliance', frequency: 'Monthly', format: 'Dashboard', recipients: 'CCO, Compliance Team', querySource: 'skill', queryLogic: JSON.stringify({ skill: 'compliance-check' }), parametersSchema: JSON.stringify([{ name: 'entityId', type: 'string', required: false, default: '*' }, { name: 'scope', type: 'string', options: ['full', 'incremental'], default: 'incremental' }]), visibility: 'Team', requiredRole: 'Compliance' },
+    { code: 'RPT-006', name: 'FATCA/CRS Report', category: 'Regulatory', frequency: 'Annually', format: 'XML', recipients: 'Tax Authorities', querySource: 'sql', queryLogic: 'SELECT investorId, name, domicile, taxExempt FROM Investor WHERE status = "Active"', parametersSchema: JSON.stringify([{ name: 'tax_year', type: 'number', required: true }]), visibility: 'Private', requiredRole: 'Compliance' },
+    { code: 'RPT-007', name: 'Bank Reconciliation Report', category: 'Reconciliation', frequency: 'Monthly', format: 'Excel', recipients: 'Fund Accounting', querySource: 'prisma', queryLogic: JSON.stringify({ model: 'cashFlow', where: { status: 'Settled' } }), parametersSchema: JSON.stringify([{ name: 'accountName', type: 'string', required: true }, { name: 'period', type: 'month', required: true }]), visibility: 'Team', requiredRole: 'Fund Accountant' },
+    { code: 'RPT-008', name: 'Management Fee Invoice', category: 'Fees', frequency: 'Quarterly', format: 'PDF', recipients: 'GP, Fund', querySource: 'skill', queryLogic: JSON.stringify({ skill: 'fee-reconciliation' }), parametersSchema: JSON.stringify([{ name: 'entityId', type: 'string', required: true }, { name: 'period_start', type: 'date', required: true }, { name: 'period_end', type: 'date', required: true }]), visibility: 'Team', requiredRole: 'Fund Accountant' },
+    { code: 'RPT-009', name: 'Carried Interest Waterfall', category: 'Fees', frequency: 'Quarterly', format: 'Excel', recipients: 'GP', querySource: 'skill', queryLogic: JSON.stringify({ skill: 'waterfall-modeling' }), parametersSchema: JSON.stringify([{ name: 'entityId', type: 'string', required: true }, { name: 'distributable_amount_mm', type: 'number', required: true }, { name: 'scenario', type: 'string', options: ['actual', 'hypothetical'], default: 'actual' }]), visibility: 'Private', requiredRole: 'Fund Accountant' },
+    { code: 'RPT-010', name: 'Portfolio Valuation Report', category: 'Portfolio', frequency: 'Monthly', format: 'PDF + Excel', recipients: 'GP, Board', querySource: 'prisma', queryLogic: JSON.stringify({ model: 'security', where: {}, select: ['securityId', 'name', 'marketValue', 'costBasis', 'unrealizedGain', 'sector'] }), parametersSchema: JSON.stringify([{ name: 'sector', type: 'string', required: false }, { name: 'asOf', type: 'date', required: true }]), visibility: 'Org', requiredRole: 'Analyst' },
+    { code: 'RPT-011', name: 'Cash Flow Forecast', category: 'Treasury', frequency: 'Weekly', format: 'Excel', recipients: 'Treasury, CFO', querySource: 'prisma', queryLogic: JSON.stringify({ model: 'cashFlow', orderBy: { transactionDate: 'desc' } }), parametersSchema: JSON.stringify([{ name: 'horizon_days', type: 'number', default: 30 }]), visibility: 'Team', requiredRole: 'Treasury' },
+    { code: 'RPT-012', name: 'Investor Activity Report', category: 'Investor Services', frequency: 'Monthly', format: 'PDF', recipients: 'IR Team', querySource: 'prisma', queryLogic: JSON.stringify({ model: 'investor' }), parametersSchema: JSON.stringify([{ name: 'entityName', type: 'string', required: false }]), visibility: 'Team', requiredRole: 'IR' },
+    { code: 'RPT-013', name: 'AML/KYC Status Report', category: 'Compliance', frequency: 'Quarterly', format: 'Dashboard', recipients: 'Compliance', querySource: 'sql', queryLogic: 'SELECT * FROM Investor WHERE status = "Active"', parametersSchema: JSON.stringify([]), visibility: 'Team', requiredRole: 'Compliance' },
+    { code: 'RPT-014', name: 'Trial Balance', category: 'Accounting', frequency: 'Monthly', format: 'Excel', recipients: 'Fund Accounting', querySource: 'sql', queryLogic: 'SELECT * FROM CashFlow ORDER BY transactionDate DESC', parametersSchema: JSON.stringify([{ name: 'period', type: 'month', required: true }]), visibility: 'Team', requiredRole: 'Fund Accountant' },
+    { code: 'RPT-015', name: 'Side Letter Compliance Tracker', category: 'Legal', frequency: 'On-Demand', format: 'Excel', recipients: 'Legal, IR', querySource: 'skill', queryLogic: JSON.stringify({ skill: 'side-letter-mfn-scan' }), parametersSchema: JSON.stringify([{ name: 'entityId', type: 'string', required: true }]), visibility: 'Team', requiredRole: 'Legal' },
+    { code: 'RPT-016', name: 'Performance Attribution Report', category: 'Portfolio', frequency: 'Quarterly', format: 'PDF + Excel', recipients: 'GP, Board, LPs', querySource: 'skill', queryLogic: JSON.stringify({ skill: 'performance-attribution' }), parametersSchema: JSON.stringify([{ name: 'entityId', type: 'string', required: true }, { name: 'period_start', type: 'date', required: true }, { name: 'period_end', type: 'date', required: true }, { name: 'dimensions', type: 'string', default: 'sector,holding' }]), visibility: 'Org', requiredRole: 'Analyst' },
+  ];
+
+  const reports: { id: string; reportId: string }[] = [];
+  for (let i = 0; i < reportSeed.length; i++) {
+    const r = reportSeed[i];
+    const ownerForReport = allUsers[i % allUsers.length] ?? owner;
+    const created = await prisma.report.create({
+      data: {
+        reportId: r.code,
+        name: r.name,
+        description: `${r.name} — produced for ${r.recipients}.`,
+        category: r.category,
+        format: r.format,
+        frequency: r.frequency,
+        recipients: r.recipients,
+        querySource: r.querySource,
+        queryLogic: r.queryLogic,
+        parametersSchema: r.parametersSchema,
+        ownerId: ownerForReport.id,
+        ownerName: `${ownerForReport.firstName} ${ownerForReport.lastName}`,
+        visibility: r.visibility,
+        requiredRole: r.requiredRole,
+        status: 'Active',
+        version: '1.0.0',
+        lastRunAt: new Date('2026-03-31'),
+        nextRunAt: r.frequency === 'On-Demand' ? null : new Date('2026-04-30'),
+        runCount: Math.floor(Math.random() * 30) + 5,
+        tags: [r.category, r.frequency].join(','),
+      },
+    });
+    reports.push({ id: created.id, reportId: created.reportId });
+  }
+  console.log(`Created ${reports.length} reports`);
+
+  // Seed a couple of report runs
+  for (let i = 0; i < 8; i++) {
+    const rep = reports[i % reports.length];
+    const u = allUsers[(i + 1) % allUsers.length] ?? owner;
+    await prisma.reportRun.create({
+      data: {
+        runId: `RUN-${String(i + 1).padStart(4, '0')}`,
+        reportId: rep.id,
+        triggeredById: u.id,
+        triggeredBy: `${u.firstName} ${u.lastName}`,
+        parameters: JSON.stringify({ entityId: 'WALKER-III', period: '2026-03' }),
+        status: i === 7 ? 'Failed' : 'Success',
+        rowCount: Math.floor(Math.random() * 500) + 10,
+        durationMs: Math.floor(Math.random() * 4000) + 200,
+        outputRef: i === 7 ? null : `/exports/${rep.reportId}-2026-03.pdf`,
+        error: i === 7 ? 'Permission denied: requires role Compliance' : null,
+        finishedAt: new Date(Date.now() - i * 3600_000),
+      },
+    });
+  }
+  console.log('Created 8 report runs');
+
+  // ═══════════════════════════════════════════════
+  // TIMESHEETS — one current week per active user
+  // ═══════════════════════════════════════════════
+  const today = new Date('2026-04-08');
+  const day = today.getUTCDay();
+  const monday = new Date(today);
+  monday.setUTCDate(today.getUTCDate() - ((day + 6) % 7));
+  monday.setUTCHours(0, 0, 0, 0);
+
+  const taskSamples = [
+    { client: 'Walker Capital', entity: 'WALKER-III', project: 'Monthly Close — Mar 2026', taskCode: 'NAV-CALC', cat: 'Billable' },
+    { client: 'Sullivan Asset Mgmt', entity: 'SULLIVAN-ALPHA', project: 'Q4 Fee True-Up', taskCode: 'FEE-REC', cat: 'Billable' },
+    { client: 'Cruz Capital', entity: 'CRUZ-II', project: '2025 K-1 Prep', taskCode: 'K1-DRAFT', cat: 'Billable' },
+    { client: null, entity: null, project: 'Internal — Training', taskCode: 'TRAIN', cat: 'Non-Billable' },
+    { client: null, entity: null, project: 'PTO', taskCode: 'PTO', cat: 'PTO' },
+  ];
+
+  let tsCounter = 0;
+  for (const u of allUsers.slice(0, 12)) {
+    tsCounter++;
+    const total = 36 + Math.random() * 8;
+    const billable = Math.min(total, 28 + Math.random() * 10);
+    const ts = await prisma.timesheet.create({
+      data: {
+        timesheetId: `TS-${String(tsCounter).padStart(4, '0')}`,
+        userId: u.id,
+        userName: `${u.firstName} ${u.lastName}`,
+        weekStarting: monday,
+        status: tsCounter <= 3 ? 'Approved' : tsCounter <= 8 ? 'Submitted' : 'Draft',
+        totalHours: Number(total.toFixed(2)),
+        billableHours: Number(billable.toFixed(2)),
+        utilizationPct: Number(((billable / 40) * 100).toFixed(1)),
+        submittedAt: tsCounter <= 8 ? new Date() : null,
+        approvedAt: tsCounter <= 3 ? new Date() : null,
+        approvedById: tsCounter <= 3 ? owner.id : null,
+        approvedByName: tsCounter <= 3 ? ownerName : null,
+      },
+    });
+
+    // 5 daily entries Mon-Fri
+    for (let d = 0; d < 5; d++) {
+      const date = new Date(monday);
+      date.setUTCDate(monday.getUTCDate() + d);
+      const sample = taskSamples[(d + tsCounter) % taskSamples.length];
+      const hours = sample.cat === 'PTO' ? 8 : Number((6 + Math.random() * 3).toFixed(2));
+      await prisma.timesheetEntry.create({
+        data: {
+          timesheetId: ts.id,
+          date,
+          clientName: sample.client,
+          entityName: sample.entity,
+          projectName: sample.project,
+          taskCode: sample.taskCode,
+          category: sample.cat,
+          description: `${sample.project} — daily work`,
+          hours,
+          billable: sample.cat === 'Billable',
+          billRate: sample.cat === 'Billable' ? 350 : null,
+          approved: tsCounter <= 3,
+        },
+      });
+    }
+  }
+  console.log(`Created ${tsCounter} timesheets with daily entries`);
 
   console.log('\n✅ Seed complete!');
 }

@@ -762,3 +762,101 @@ model Relationship {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 }
+
+// ──────────────────────────────────────────────
+// REPORTS — query-logic library, reusable, permissioned
+// ──────────────────────────────────────────────
+
+model Report {
+  id              String      @id @default(cuid())
+  reportId        String      @unique               // RPT-001 etc.
+  name            String
+  description     String?
+  category        String                            // NAV, Tax, Compliance, Portfolio, …
+  format          String      @default("PDF")       // PDF, Excel, Dashboard, XML, JSON
+  frequency       String      @default("On-Demand") // Monthly, Quarterly, Annually, On-Demand, Weekly
+  recipients      String?                           // free-text, comma-sep
+  // Reusable query logic
+  querySource     String      @default("prisma")    // prisma | sql | skill | composite
+  queryLogic      String                            // JSON: { model, where, select, … } OR raw SQL OR skill name
+  // Parameters the user can edit at run time. JSON schema-ish.
+  parametersSchema String?                          // JSON-encoded array of { name, type, default, required, options? }
+  // Permissioning
+  ownerId         String                            // InternalUser.id
+  ownerName       String?
+  visibility      String      @default("Private")   // Private | Team | Org | Public
+  sharedWithRoles String?                           // JSON array of role strings
+  sharedWithUsers String?                           // JSON array of InternalUser ids
+  requiredRole    String?                           // Min role to execute
+  // Lifecycle
+  status          String      @default("Active")    // Draft | Active | Archived | Deprecated
+  version         String      @default("1.0.0")
+  lastRunAt       DateTime?
+  nextRunAt       DateTime?
+  runCount        Int         @default(0)
+  tags            String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  runs            ReportRun[]
+}
+
+model ReportRun {
+  id            String   @id @default(cuid())
+  runId         String   @unique
+  reportId      String
+  report        Report   @relation(fields: [reportId], references: [id])
+  triggeredById String                     // InternalUser.id
+  triggeredBy   String                     // display name
+  parameters    String                     // JSON snapshot of params used
+  status        String   @default("Queued") // Queued | Running | Success | Failed | Blocked
+  rowCount      Int?
+  durationMs    Int?
+  outputRef     String?                    // path or URL to artifact
+  error         String?
+  startedAt     DateTime @default(now())
+  finishedAt    DateTime?
+}
+
+// ──────────────────────────────────────────────
+// TIME TRACKING — staff timesheets
+// ──────────────────────────────────────────────
+
+model Timesheet {
+  id           String           @id @default(cuid())
+  timesheetId  String           @unique
+  userId       String                                // InternalUser.id
+  userName     String
+  weekStarting DateTime                              // Monday of the week (UTC midnight)
+  status       String           @default("Draft")    // Draft | Submitted | Approved | Rejected
+  totalHours   Decimal          @default(0)
+  billableHours Decimal         @default(0)
+  utilizationPct Decimal?
+  submittedAt  DateTime?
+  approvedAt   DateTime?
+  approvedById String?
+  approvedByName String?
+  rejectedReason String?
+  notes        String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  entries      TimesheetEntry[]
+}
+
+model TimesheetEntry {
+  id           String    @id @default(cuid())
+  timesheetId  String
+  timesheet    Timesheet @relation(fields: [timesheetId], references: [id], onDelete: Cascade)
+  date         DateTime                              // the day this entry covers
+  clientName   String?                               // GP — optional
+  entityName   String?                               // Fund — optional
+  projectName  String?                               // Project — optional
+  taskCode     String?                               // links to TaskDefinition.taskCode
+  category     String                                // Billable | Non-Billable | Overhead | PTO | Sick | Holiday
+  description  String
+  hours        Decimal                               // 0.25 increments expected
+  billable     Boolean   @default(true)
+  billRate     Decimal?
+  approved     Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}

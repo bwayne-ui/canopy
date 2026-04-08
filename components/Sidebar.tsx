@@ -271,10 +271,16 @@ export default function Sidebar() {
           <div className="h-px bg-white/[0.06]" />
         </div>
 
-        {/* Report Manager */}
-        <Link href="/report-manager" className={linkClass('/report-manager')}>
+        {/* Reports */}
+        <Link href="/reports" className={linkClass('/reports')}>
           <FileBarChart className="w-3.5 h-3.5 flex-shrink-0" />
-          <span>Report Manager</span>
+          <span>Reports</span>
+        </Link>
+
+        {/* Time Tracking */}
+        <Link href="/time-tracking" className={linkClass('/time-tracking')}>
+          <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>Time Tracking</span>
         </Link>
 
         {/* Agent Marketplace */}
