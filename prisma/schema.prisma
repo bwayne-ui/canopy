@@ -773,6 +773,7 @@ model Report {
   name            String
   description     String?
   category        String                            // NAV, Tax, Compliance, Portfolio, …
+  department      String      @default("Fund Accounting") // Owning team: Fund Accounting, Investor Services, Finance, Billing, Corp Accounting, Rev Ops, Fund Admin Onboarding, Tax, Legal, Compliance, Treasury
   format          String      @default("PDF")       // PDF, Excel, Dashboard, XML, JSON
   frequency       String      @default("On-Demand") // Monthly, Quarterly, Annually, On-Demand, Weekly
   recipients      String?                           // free-text, comma-sep

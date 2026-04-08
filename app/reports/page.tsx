@@ -14,6 +14,7 @@ interface ReportRow {
   reportId: string;
   name: string;
   category: string;
+  department: string;
   format: string;
   frequency: string;
   recipients: string;
@@ -66,13 +67,31 @@ export default function ReportsPage() {
     { key: 'category', label: 'Category', sortable: true, render: (v: string) => (
       <span className="inline-block rounded-full bg-gray-100 text-gray-700 px-2 py-0.5 text-[10px] font-medium">{v}</span>
     )},
+    { key: 'department', label: 'Department', sortable: true, render: (v: string) => (
+      <span className="text-[11px] text-gray-700">{v}</span>
+    )},
     { key: 'frequency', label: 'Frequency', sortable: true },
     { key: 'minGrade', label: 'Entitlement', sortable: true, render: (v: string | null) => gradeBadge(v) },
     { key: 'visibility', label: 'Visibility', render: (v: string) => (
       <span className="inline-flex items-center gap-1 text-[11px] text-gray-600">{visibilityIcon(v)}{v}</span>
     )},
-    { key: 'exportFormats', label: 'Formats', render: (v: string[]) => (
-      <span className="font-mono text-[10px] text-gray-500">{(v ?? []).join(' · ')}</span>
+    { key: 'exportFormats', label: 'Formats', render: (v: string[], row: ReportRow) => (
+      <span className="font-mono text-[10px]">
+        {(v ?? []).map((f, i) => (
+          <span key={f}>
+            {i > 0 && <span className="text-gray-300"> · </span>}
+            <a
+              href={`/api/reports/${row.reportId}/export?format=${f}&grade=M3&user=demo-user`}
+              target="_blank"
+              rel="noopener"
+              onClick={(e) => e.stopPropagation()}
+              className="text-[#00C97B] hover:text-[#00A866] hover:underline uppercase"
+            >
+              {f}
+            </a>
+          </span>
+        ))}
+      </span>
     )},
     { key: 'ownerName', label: 'Owner', sortable: true, render: (v: string) => <span className="text-[11px]">{v}</span> },
     { key: 'runCount', label: 'Runs', sortable: true, align: 'right', render: (v: number) => <span className="font-mono text-[11px]">{v}</span> },
