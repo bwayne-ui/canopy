@@ -1,0 +1,14 @@
+{
+  "$comment": "Four-eyes thresholds. Any action whose monetary impact exceeds the threshold requires N approvers.",
+  "thresholds": [
+    { "category": "capital_call", "amount_usd": 1000000, "approvers_required": 2, "roles": ["controller", "cfo"] },
+    { "category": "distribution", "amount_usd": 500000, "approvers_required": 2, "roles": ["controller", "cfo"] },
+    { "category": "fee_correction", "amount_usd": 10000, "approvers_required": 2, "roles": ["controller", "audit"] },
+    { "category": "journal_entry", "amount_usd": 50000, "approvers_required": 2, "roles": ["controller", "cfo"] },
+    { "category": "wire_transfer", "amount_usd": 10000, "approvers_required": 2, "roles": ["treasury", "controller"] },
+    { "category": "investor_data_export", "amount_usd": 0, "approvers_required": 2, "roles": ["compliance", "controller"] },
+    { "category": "policy_change", "amount_usd": 0, "approvers_required": 2, "roles": ["compliance", "cfo"] }
+  ],
+  "default_approvers_required": 1,
+  "max_approval_age_days": 7
+}

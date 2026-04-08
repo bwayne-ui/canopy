@@ -1,0 +1,5 @@
+{
+  "input": { "document_id": "DOC-LPA-WALKER-III-2022", "schema": "LPA" },
+  "expected_fields": ["fund_name", "vintage", "term_years", "mgmt_fee_pct", "carry_pct", "pref_pct", "waterfall_type", "key_person_clause", "side_letters_permitted"],
+  "every_field_must_have": "page + paragraph citation"
+}

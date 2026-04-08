@@ -1,0 +1,764 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ──────────────────────────────────────────────
+// CORE DOMAIN MODELS
+// ──────────────────────────────────────────────
+
+model Client {
+  id                String   @id @default(cuid())
+  name              String
+  shortName         String?
+  primaryStrategy   String
+  hqCity            String
+  hqCountry         String
+  region            String
+  relationshipStart DateTime
+  status            String   @default("Active")
+  totalEntities     Int      @default(0)
+  totalNavMm        Decimal  @default(0)
+  totalCommitmentMm Decimal  @default(0)
+  revenueL12m       Decimal  @default(0)
+  marginPct         Decimal  @default(0)
+  teamLead          String
+  podId             String?
+  serviceLine       String
+  yearFounded       Int?
+  employeeCount     Int?
+  website           String?
+  notes             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  entities          Entity[]
+}
+
+model Entity {
+  id                   String   @id @default(cuid())
+  entityId             String   @unique
+  name                 String
+  entityType           String
+  structureType        String
+  domicile             String
+  strategy             String
+  vintage              Int?
+  openEnded            Boolean  @default(false)
+  lifecycleStatus      String
+  clientId             String
+  client               Client   @relation(fields: [clientId], references: [id])
+  commitmentMm         Decimal?
+  calledCapitalMm      Decimal?
+  distributedCapitalMm Decimal?
+  navMm                Decimal?
+  unfundedMm           Decimal?
+  prefRatePct          Decimal?
+  carryPct             Decimal?
+  mgmtFeePct           Decimal?
+  waterfallType        String?
+  grossIrrPct          Decimal?
+  netIrrPct            Decimal?
+  moic                 Decimal?
+  tvpi                 Decimal?
+  dpi                  Decimal?
+  revenueL12m          Decimal?
+  costL12m             Decimal?
+  marginPct            Decimal?
+  accountingSystem     String?
+  administrator        String?
+  auditor              String?
+  legalCounsel         String?
+  reportingFrequency   String?
+  navFrequency         String?
+  currency             String   @default("USD")
+  inceptionDate        DateTime?
+  hqCity               String?
+  region               String?
+  dataQualityScore     Decimal?
+  confidenceScore      Decimal?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model Investor {
+  id              String   @id @default(cuid())
+  investorId      String   @unique
+  name            String
+  investorType    String
+  commitmentMm    Decimal
+  calledCapitalMm Decimal?
+  distributedMm   Decimal?
+  navMm           Decimal?
+  domicile        String
+  entityName      String?
+  status          String   @default("Active")
+  contactName     String?
+  contactEmail    String?
+  taxExempt       Boolean  @default(false)
+  erisa           Boolean  @default(false)
+  k1Status        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Security {
+  id             String    @id @default(cuid())
+  securityId     String    @unique
+  name           String
+  securityType   String
+  issuer         String?
+  ticker         String?
+  cusip          String?
+  isin           String?
+  currency       String    @default("USD")
+  marketValue    Decimal?
+  costBasis      Decimal?
+  quantity       Decimal?
+  unrealizedGain Decimal?
+  sector         String?
+  country        String?
+  maturityDate   DateTime?
+  pricePerUnit   Decimal?
+  lastPriceDate  DateTime?
+  ratingAgency   String?
+  creditRating   String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+// ──────────────────────────────────────────────
+// TASK & WORKFLOW MODELS
+// ──────────────────────────────────────────────
+
+model TaskDefinition {
+  id               String           @id @default(cuid())
+  taskCode         String           @unique
+  name             String
+  description      String
+  category         String
+  frequency        String
+  estimatedMinutes Int
+  priority         String
+  department       String
+  steps            String
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  assignments      TaskAssignment[]
+}
+
+model TaskAssignment {
+  id               String          @id @default(cuid())
+  taskDefinitionId String
+  taskDefinition   TaskDefinition  @relation(fields: [taskDefinitionId], references: [id])
+  entityName       String
+  assignedToId     String?
+  assignedTo       InternalUser?   @relation(fields: [assignedToId], references: [id])
+  status           String          @default("Not Started")
+  dueDate          DateTime
+  completedDate    DateTime?
+  periodEnd        String
+  priority         String
+  notes            String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+// ──────────────────────────────────────────────
+// AI & AGENTS
+// ──────────────────────────────────────────────
+
+model AISkill {
+  id                String    @id @default(cuid())
+  name              String
+  description       String
+  category          String
+  status            String    @default("Active")
+  accuracy          Decimal?
+  model             String
+  lastRun           DateTime?
+  runCount          Int       @default(0)
+  avgProcessingTime String?
+  inputType         String
+  outputType        String
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Agent {
+  id            String   @id @default(cuid())
+  name          String
+  description   String
+  category      String
+  provider      String
+  status        String   @default("Available")
+  rating        Decimal?
+  reviewCount   Int      @default(0)
+  monthlyPrice  Decimal?
+  capabilities  String
+  integrations  String
+  avgTimeSaved  String?
+  accuracy      Decimal?
+  icon          String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// ──────────────────────────────────────────────
+// PEOPLE — SUPER GRANULAR INTERNAL USER MODEL
+// 300+ fields tracking everything about staff
+// ──────────────────────────────────────────────
+
+model InternalUser {
+  id                        String   @id @default(cuid())
+  employeeId                String   @unique
+  // ── CORE IDENTITY ──
+  firstName                 String
+  lastName                  String
+  preferredName             String?
+  middleName                String?
+  suffix                    String?
+  email                     String   @unique
+  personalEmail             String?
+  phone                     String?
+  mobilePhone               String?
+  homePhone                 String?
+  dateOfBirth               DateTime?
+  gender                    String?
+  pronouns                  String?
+  nationality               String?
+  citizenship               String?
+  dualCitizenship           String?
+  ethnicity                 String?
+  veteranStatus             String?
+  disabilityStatus          String?
+  maritalStatus             String?
+  emergencyContactName      String?
+  emergencyContactPhone     String?
+  emergencyContactRelation  String?
+  // ── EMPLOYMENT ──
+  title                     String
+  role                      String
+  department                String
+  division                  String?
+  team                      String?
+  podId                     String?
+  managerId                 String?
+  managerName               String?
+  seniorityLevel            String?
+  employmentType            String   @default("Full-Time")
+  employmentStatus          String   @default("Active")
+  hireDate                  DateTime?
+  startDate                 DateTime?
+  promotionDate             DateTime?
+  lastReviewDate            DateTime?
+  nextReviewDate            DateTime?
+  terminationDate           DateTime?
+  terminationReason         String?
+  rehireEligible            Boolean  @default(true)
+  probationEndDate          DateTime?
+  yearsAtCompany            Decimal?
+  yearsInIndustry           Decimal?
+  previousEmployer          String?
+  previousTitle             String?
+  referredBy                String?
+  recruitingSource          String?
+  offerDate                 DateTime?
+  contractEndDate           DateTime?
+  noticePeriodDays          Int?
+  // ── LOCATION & WORKSPACE ──
+  officeLocation            String?
+  building                  String?
+  floor                     String?
+  deskNumber                String?
+  timezone                  String?
+  workAddress               String?
+  homeAddress               String?
+  city                      String?
+  state                     String?
+  country                   String?
+  postalCode                String?
+  remoteStatus              String?
+  homeOfficeApproved        Boolean  @default(false)
+  coworkingStipend          Boolean  @default(false)
+  parkingAssigned           Boolean  @default(false)
+  badgeId                   String?
+  keyCardAccess             String?
+  // ── COMPENSATION ──
+  baseSalary                Decimal?
+  salaryBand                String?
+  salaryBandMin             Decimal?
+  salaryBandMax             Decimal?
+  currency                  String   @default("USD")
+  payFrequency              String?
+  bonusTarget               Decimal?
+  bonusActual               Decimal?
+  equityGrantShares         Int?
+  equityVestingSchedule     String?
+  equityGrantDate           DateTime?
+  equityCliffDate           DateTime?
+  equityVestedShares        Int?
+  signingBonus              Decimal?
+  retentionBonus            Decimal?
+  carAllowance              Decimal?
+  housingAllowance          Decimal?
+  relocationPackage         Boolean  @default(false)
+  severanceEligible         Boolean  @default(false)
+  totalCompensation         Decimal?
+  compRatio                 Decimal?
+  lastSalaryChange          DateTime?
+  lastSalaryChangeAmt       Decimal?
+  // ── BENEFITS ──
+  healthInsurance           String?
+  dentalInsurance           String?
+  visionInsurance           String?
+  lifeInsurance             String?
+  disabilityInsurance       String?
+  healthSavingsAccount      Boolean  @default(false)
+  flexSpendingAccount       Boolean  @default(false)
+  retirement401k            Boolean  @default(false)
+  retirement401kContrib     Decimal?
+  companyMatch401k          Decimal?
+  pensionPlan               Boolean  @default(false)
+  espp                      Boolean  @default(false)
+  wellnessStipend           Decimal?
+  fitnessReimbursement      Boolean  @default(false)
+  tuitionReimbursement      Boolean  @default(false)
+  tuitionReimbursementMax   Decimal?
+  dependentCareAmt          Decimal?
+  ptoBalance                Decimal?
+  ptoDaysTotal              Int?
+  ptoDaysUsed               Int?
+  sickDaysTotal             Int?
+  sickDaysUsed              Int?
+  parentalLeaveDays         Int?
+  bereavementLeaveDays      Int?
+  sabbaticalEligible        Boolean  @default(false)
+  commuterBenefit           Boolean  @default(false)
+  mealStipend               Decimal?
+  phoneStipend              Decimal?
+  internetStipend           Decimal?
+  // ── PERFORMANCE ──
+  performanceRating         String?
+  performanceScore          Decimal?
+  lastPerformanceReview     String?
+  goalCompletionRate        Decimal?
+  nineBoxPosition           String?
+  flightRisk                String?
+  retentionRisk             String?
+  potentialRating           String?
+  leadershipScore           Decimal?
+  technicalScore            Decimal?
+  communicationScore        Decimal?
+  teamworkScore             Decimal?
+  innovationScore           Decimal?
+  clientSatisfaction        Decimal?
+  peerFeedbackAvg           Decimal?
+  managerFeedbackAvg        Decimal?
+  selfAssessmentScore       Decimal?
+  pipStatus                 String?
+  pipStartDate              DateTime?
+  pipEndDate                DateTime?
+  mentorId                  String?
+  mentorName                String?
+  menteeCount               Int      @default(0)
+  coachingHoursQ            Decimal?
+  // ── UTILIZATION & PRODUCTIVITY ──
+  billableRate              Decimal?
+  costRate                  Decimal?
+  utilizationTarget         Decimal?
+  utilizationActual         Decimal?
+  billableHoursYtd          Decimal?
+  nonBillableHoursYtd       Decimal?
+  overtimeHoursYtd          Decimal?
+  avgWeeklyHours            Decimal?
+  projectsActive            Int      @default(0)
+  projectsCompleted         Int      @default(0)
+  tasksAssigned             Int      @default(0)
+  tasksCompleted            Int      @default(0)
+  tasksOverdue              Int      @default(0)
+  avgTaskCompletionDays     Decimal?
+  clientsManaged            Int      @default(0)
+  entitiesManaged           Int      @default(0)
+  investorsManaged          Int      @default(0)
+  revenueInfluenced         Decimal?
+  costToCompany             Decimal?
+  revenuePerEmployee        Decimal?
+  // ── SKILLS & EXPERTISE ──
+  primaryExpertise          String?
+  secondaryExpertise        String?
+  tertiaryExpertise         String?
+  industrySpecialization    String?
+  strategyExpertise         String?
+  regulatoryExpertise       String?
+  taxExpertise              String?
+  accountingExpertise       String?
+  technologyExpertise       String?
+  languagesSpoken           String?
+  educationLevel            String?
+  university                String?
+  degreeType                String?
+  degreeMajor               String?
+  graduationYear            Int?
+  secondDegree              String?
+  secondUniversity          String?
+  mbaProgram                String?
+  // ── CERTIFICATIONS & LICENSES ──
+  cpaLicense                Boolean  @default(false)
+  cpaState                  String?
+  cpaExpiration             DateTime?
+  cfaCharter                Boolean  @default(false)
+  cfaLevel                  String?
+  caiaCharter               Boolean  @default(false)
+  seriesLicenses            String?
+  otherCertifications       String?
+  ceCreditsRequired         Int?
+  ceCreditsCompleted        Int?
+  ceCreditsDeadline         DateTime?
+  // ── SYSTEMS & ACCESS ──
+  activeDirectoryId         String?
+  ssoProvider               String?
+  vpnAccess                 Boolean  @default(false)
+  emailPlatform             String?
+  chatPlatform              String?
+  projectMgmtTool           String?
+  crmAccess                 Boolean  @default(false)
+  crmRole                   String?
+  accountingSystemAccess    String?
+  investorPortalAccess      Boolean  @default(false)
+  investorPortalRole        String?
+  reportingPlatformAccess   Boolean  @default(false)
+  reportingPlatformRole     String?
+  complianceSystemAccess    Boolean  @default(false)
+  dataWarehouseAccess       Boolean  @default(false)
+  biToolAccess              Boolean  @default(false)
+  apiAccess                 Boolean  @default(false)
+  adminPanelAccess          Boolean  @default(false)
+  documentMgmtAccess        Boolean  @default(false)
+  hrSystemAccess            Boolean  @default(false)
+  payrollSystemAccess       Boolean  @default(false)
+  travelBookingAccess       Boolean  @default(false)
+  expenseSystemAccess       Boolean  @default(false)
+  githubAccess              Boolean  @default(false)
+  githubUsername             String?
+  slackId                   String?
+  teamsId                   String?
+  zoomLicense               Boolean  @default(false)
+  mfaEnabled                Boolean  @default(true)
+  lastPasswordChange        DateTime?
+  lastLogin                 DateTime?
+  failedLoginAttempts       Int      @default(0)
+  accountLocked             Boolean  @default(false)
+  ipWhitelist               String?
+  deviceInventory           String?
+  laptopModel               String?
+  laptopSerial              String?
+  monitorCount              Int?
+  phoneModel                String?
+  softwareAssigned          String?
+  licenseKeys               String?
+  // ── COMPLIANCE & TRAINING ──
+  backgroundCheckDate       DateTime?
+  backgroundCheckStatus     String?
+  drugTestDate              DateTime?
+  drugTestStatus            String?
+  ndaSigned                 Boolean  @default(false)
+  ndaDate                   DateTime?
+  nonCompeteAgreement       Boolean  @default(false)
+  nonCompeteExpiry          DateTime?
+  conflictOfInterestFiled   Boolean  @default(false)
+  conflictOfInterestDate    DateTime?
+  personalTradingDisclosure Boolean  @default(false)
+  insiderTradingTraining    Boolean  @default(false)
+  antiMoneyLaunderingTrain  Boolean  @default(false)
+  amlTrainingDate           DateTime?
+  cyberSecurityTraining     Boolean  @default(false)
+  cyberSecurityTrainDate    DateTime?
+  dataPrivacyTraining       Boolean  @default(false)
+  dataPrivacyTrainDate      DateTime?
+  sexualHarassmentTraining  Boolean  @default(false)
+  sexualHarassmentTrainDate DateTime?
+  diversityTraining         Boolean  @default(false)
+  diversityTrainDate        DateTime?
+  ethicsTraining            Boolean  @default(false)
+  ethicsTrainDate           DateTime?
+  firstAidCertified         Boolean  @default(false)
+  fireSafetyCertified       Boolean  @default(false)
+  requiredTrainingComplete  Boolean  @default(false)
+  complianceScore           Decimal?
+  lastComplianceAudit       DateTime?
+  regulatoryExamsPassed     String?
+  // ── TRAVEL & EXPENSE ──
+  passportNumber            String?
+  passportExpiry            DateTime?
+  passportCountry           String?
+  visaType                  String?
+  visaExpiry                DateTime?
+  workPermitStatus          String?
+  workPermitExpiry          DateTime?
+  frequentFlyerProgram      String?
+  frequentFlyerNumber       String?
+  hotelLoyaltyProgram       String?
+  hotelLoyaltyNumber        String?
+  travelCardOnFile          Boolean  @default(false)
+  corporateCardNumber       String?
+  corporateCardLimit        Decimal?
+  ytdTravelExpense          Decimal?
+  ytdClientEntertainment    Decimal?
+  expensePolicyAck          Boolean  @default(false)
+  travelPolicyAck           Boolean  @default(false)
+  // ── METADATA & TRACKING ──
+  profilePhotoUrl           String?
+  bio                       String?
+  linkedinUrl               String?
+  personalWebsite           String?
+  tShirtSize                String?
+  dietaryRestrictions       String?
+  allergies                 String?
+  bloodType                 String?
+  tags                      String?
+  notes                     String?
+  dataSource                String?
+  lastSyncDate              DateTime?
+  dataQualityScore          Decimal?
+  confidenceScore           Decimal?
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+  taskAssignments           TaskAssignment[]
+}
+
+model ExternalContact {
+  id               String   @id @default(cuid())
+  contactId        String   @unique
+  name             String
+  organization     String
+  role             String
+  contactType      String
+  email            String?
+  phone            String?
+  city             String?
+  country          String?
+  linkedEntityIds  String?
+  status           String   @default("Active")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+// ──────────────────────────────────────────────
+// DOCUMENTS
+// ──────────────────────────────────────────────
+
+model Document {
+  id              String    @id @default(cuid())
+  documentId      String    @unique
+  name            String
+  documentType    String
+  entityName      String?
+  clientName      String?
+  status          String    @default("Draft")
+  uploadedBy      String?
+  uploadDate      DateTime
+  fileSize        String?
+  pageCount       Int?
+  version         String    @default("1.0")
+  confidentiality String    @default("Internal")
+  expirationDate  DateTime?
+  tags            String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// ──────────────────────────────────────────────
+// PROJECTS & CALENDAR
+// ──────────────────────────────────────────────
+
+model Project {
+  id              String    @id @default(cuid())
+  projectId       String    @unique
+  name            String
+  description     String?
+  projectType     String
+  status          String    @default("Planning")
+  priority        String    @default("Medium")
+  clientName      String?
+  leadName        String?
+  startDate       DateTime
+  targetEndDate   DateTime
+  actualEndDate   DateTime?
+  completionPct   Int       @default(0)
+  totalTasks      Int       @default(0)
+  completedTasks  Int       @default(0)
+  budget          Decimal?
+  spent           Decimal?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model CalendarEvent {
+  id            String   @id @default(cuid())
+  eventId       String   @unique
+  title         String
+  description   String?
+  eventType     String
+  startTime     DateTime
+  endTime       DateTime
+  allDay        Boolean  @default(false)
+  location      String?
+  attendees     String?
+  projectName   String?
+  clientName    String?
+  entityName    String?
+  status        String   @default("Scheduled")
+  priority      String   @default("Medium")
+  recurrence    String?
+  createdBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// ──────────────────────────────────────────────
+// COMMUNICATIONS / INTERACTIONS
+// ──────────────────────────────────────────────
+
+model Communication {
+  id                String   @id @default(cuid())
+  communicationId   String   @unique
+  channel           String
+  direction         String
+  subject           String
+  summary           String?
+  fromName          String
+  fromEmail         String?
+  toName            String
+  toEmail           String?
+  ccNames           String?
+  clientName        String?
+  entityName        String?
+  investorName      String?
+  relatedProjectId  String?
+  sentiment         String?
+  urgency           String   @default("Normal")
+  status            String   @default("Open")
+  threadId          String?
+  hasAttachments    Boolean  @default(false)
+  attachmentCount   Int      @default(0)
+  tags              String?
+  communicationDate DateTime
+  followUpDate      DateTime?
+  resolvedDate      DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// ──────────────────────────────────────────────
+// TREASURY CENTER
+// ──────────────────────────────────────────────
+
+model TreasuryAccount {
+  id               String   @id @default(cuid())
+  accountId        String   @unique
+  accountName      String
+  accountType      String
+  institution      String
+  currency         String   @default("USD")
+  currentBalance   Decimal  @default(0)
+  availableBalance Decimal  @default(0)
+  pendingInflows   Decimal  @default(0)
+  pendingOutflows  Decimal  @default(0)
+  interestRate     Decimal?
+  maturityDate     DateTime?
+  entityName       String?
+  clientName       String?
+  status           String   @default("Active")
+  lastActivityDate DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model CashFlow {
+  id              String   @id @default(cuid())
+  cashFlowId      String   @unique
+  flowType        String
+  category        String
+  amount          Decimal
+  currency        String   @default("USD")
+  accountName     String
+  entityName      String?
+  clientName      String?
+  counterparty    String?
+  description     String?
+  transactionDate DateTime
+  settlementDate  DateTime?
+  status          String   @default("Settled")
+  reference       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ──────────────────────────────────────────────
+// TOOLBOX
+// ──────────────────────────────────────────────
+
+model Tool {
+  id           String   @id @default(cuid())
+  toolId       String   @unique
+  name         String
+  description  String
+  category     String
+  builtBy      String
+  status       String   @default("Active")
+  version      String   @default("1.0")
+  language     String?
+  runtime      String?
+  endpoint     String?
+  lastRunDate  DateTime?
+  runCount     Int      @default(0)
+  avgRunTimeMs Int?
+  inputSchema  String?
+  outputSchema String?
+  documentation String?
+  tags         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ──────────────────────────────────────────────
+// RULE GRAPH & RELATIONSHIPS
+// ──────────────────────────────────────────────
+
+model Rule {
+  id           String   @id @default(cuid())
+  ruleId       String   @unique
+  name         String
+  description  String
+  ruleType     String
+  formula      String
+  inputFields  String
+  outputField  String
+  dependsOn    String
+  priority     Int
+  status       String   @default("Active")
+  category     String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Relationship {
+  id               String    @id @default(cuid())
+  relationshipId   String    @unique
+  sourceType       String
+  sourceId         String
+  sourceName       String
+  targetType       String
+  targetId         String
+  targetName       String
+  relationshipType String
+  status           String    @default("Active")
+  effectiveDate    DateTime?
+  notes            String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}

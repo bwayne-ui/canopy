@@ -1,0 +1,5 @@
+{"skill":"nav-calculation","ts":"2026-04-01T00:00:00Z","total":1,"passed":1,"failed":0,"score":1.0,"failures":[]}
+{"skill":"fee-reconciliation","ts":"2026-04-01T00:00:00Z","total":1,"passed":1,"failed":0,"score":1.0,"failures":[]}
+{"skill":"waterfall-modeling","ts":"2026-04-01T00:00:00Z","total":1,"passed":1,"failed":0,"score":1.0,"failures":[]}
+{"skill":"nav-calculation","ts":"2026-04-08T14:11:54.543Z","total":1,"passed":1,"failed":0,"score":1,"failures":[]}
+{"skill":"nav-calculation","ts":"2026-04-08T14:43:10.900Z","total":1,"passed":1,"failed":0,"score":1,"failures":[]}

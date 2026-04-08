@@ -1,0 +1,4 @@
+{
+  "input": { "entity_id": "WALKER-III", "target_side_letter_id": "DOC-SL-AURORA-2026" },
+  "expected_output_shape": ["findings", "summary"]
+}

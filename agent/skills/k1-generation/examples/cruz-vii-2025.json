@@ -1,0 +1,5 @@
+{
+  "input": { "entity_id": "CRUZ-II", "tax_year": 2025 },
+  "expected_output_shape": ["per_lp_k1_data", "roll_forward", "flags"],
+  "reconciliation_check": "sum(per_lp.box_1) within $1 of entity.ordinary_business_income"
+}

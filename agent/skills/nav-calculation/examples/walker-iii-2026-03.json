@@ -1,0 +1,18 @@
+{
+  "input": { "entity_id": "WALKER-III", "period": "2026-03" },
+  "expected_output": {
+    "entity_id": "WALKER-III",
+    "period": "2026-03",
+    "nav_total_mm": 487.3,
+    "components": {
+      "portfolio_market_value_mm": 502.1,
+      "cash_and_equivalents_mm": 12.4,
+      "accrued_income_mm": 1.8,
+      "accrued_expenses_mm": -4.2,
+      "management_fee_accrual_mm": -3.1,
+      "carried_interest_accrual_mm": -21.7
+    },
+    "confidence": 0.97
+  },
+  "tolerances": { "nav_total_mm": 0.5 }
+}

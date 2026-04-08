@@ -1,0 +1,4 @@
+{
+  "input": { "entity_id": "WALKER-III", "distributable_amount_mm": 100, "scenario": "actual" },
+  "lpa_terms": { "type": "European", "pref_pct": 8, "carry_pct": 20, "catchup": "100%" }
+}

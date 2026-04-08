@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Read(./**)",
+      "Glob(./**)",
+      "Grep(./**)",
+      "Bash(npm run *)",
+      "Bash(npx prisma *)",
+      "Bash(npx tsx agent/**)",
+      "Bash(node agent/mcp/**)"
+    ],
+    "deny": [
+      "Bash(rm -rf*)",
+      "Bash(git push --force*)",
+      "Read(./.env*)",
+      "Read(./prisma/dev.db)",
+      "Bash(curl* https://*)"
+    ],
+    "ask": [
+      "Edit(./prisma/schema.prisma)",
+      "Edit(./agent/governance/**)",
+      "Bash(npm install*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Bash|Write|Edit", "hooks": [{ "type": "command", "command": "./agent/hooks/pre-tool-use/approval-gate.sh" }] },
+      { "matcher": "Read|Write|Edit", "hooks": [{ "type": "command", "command": "./agent/hooks/pre-tool-use/pii-redact.sh" }] }
+    ],
+    "PostToolUse": [
+      { "matcher": ".*", "hooks": [{ "type": "command", "command": "./agent/hooks/post-tool-use/audit-log.sh" }] }
+    ]
+  },
+  "mcpServers": {
+    "canopy-db": {
+      "command": "npx",
+      "args": ["tsx", "./agent/mcp/canopy-db/server.ts"],
+      "env": { "DATABASE_URL": "file:./prisma/dev.db", "CANOPY_MCP_MODE": "read-only" }
+    }
+  },
+  "env": {
+    "CANOPY_AGENT_ROOT": "./agent",
+    "CANOPY_AUDIT_LOG_DIR": "./agent/governance/audit-log"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "$comment": "Outbound destinations the agent is allowed to contact. Anything not on this list is blocked at the network layer.",
+  "external_apis": [
+    "api.anthropic.com",
+    "api.openai.com"
+  ],
+  "internal_services": [
+    "localhost:3001",
+    "localhost:5432"
+  ],
+  "file_writes_outside_repo": [],
+  "shell_commands_allowed": [
+    "npm",
+    "npx",
+    "node",
+    "tsx",
+    "git status",
+    "git diff",
+    "git log"
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "input": { "entity_id": "WALKER-III", "period_start": "2026-01-01", "period_end": "2026-03-31", "dimensions": ["sector", "holding"] },
+  "expected_output_shape": ["total_return", "attribution_by_dimension"],
+  "checks": ["sum(attribution_by_dimension.sector.contribs) within 0.0005 of total_return"]
+}

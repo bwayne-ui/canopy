@@ -1,0 +1,4 @@
+{
+  "input": { "entity_id": "WALKER-III", "scope": "full" },
+  "expected_output_shape": ["scorecard", "overall", "must_fix_count"]
+}

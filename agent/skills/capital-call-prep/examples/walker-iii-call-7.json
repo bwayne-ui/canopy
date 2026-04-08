@@ -1,0 +1,5 @@
+{
+  "input": { "entity_id": "WALKER-III", "total_call_amount_mm": 18.5, "purpose": "Follow-on investment in PortCo Theta", "due_date": "2026-04-22" },
+  "expected_output_shape": ["summary", "per_lp", "notice_text", "wire_package"],
+  "checks": ["sum(per_lp.this_call) == 18500000", "every per_lp.investor.status == 'Active'"]
+}

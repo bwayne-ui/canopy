@@ -1,0 +1,8 @@
+{
+  "input": {
+    "entity_id": "WALKER-III",
+    "investor_name": "Aurora Pension System",
+    "sub_doc_path": "DOC-SUBAGMT-AURORA-2026"
+  },
+  "expected_output_shape": ["investor", "checklist", "next_action"]
+}

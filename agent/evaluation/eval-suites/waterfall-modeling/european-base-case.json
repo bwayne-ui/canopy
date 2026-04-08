@@ -1,0 +1,5 @@
+{
+  "input": { "entity_id": "WALKER-III", "distributable_amount_mm": 100, "scenario": "actual" },
+  "expected_output": { "tier_count": 4, "gp_share_mm": 16.0, "lp_share_mm": 84.0 },
+  "tolerances": { "gp_share_mm": 0.1, "lp_share_mm": 0.1 }
+}

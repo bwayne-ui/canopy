@@ -1,0 +1,28 @@
+{
+  "$comment": "Registry of MCP servers used by the Canopy agent layer. Same content also referenced from .claude/settings.json.",
+  "servers": {
+    "canopy-db": {
+      "command": "npx",
+      "args": ["tsx", "./agent/mcp/canopy-db/server.ts"],
+      "transport": "stdio",
+      "env": {
+        "DATABASE_URL": "file:./prisma/dev.db",
+        "CANOPY_MCP_MODE": "read-only"
+      },
+      "description": "Read-only access to the Canopy Prisma database. Exposes one tool per major model.",
+      "tools_provided": [
+        "list_clients",
+        "get_client",
+        "list_entities",
+        "get_entity",
+        "query_nav",
+        "list_investors",
+        "list_securities",
+        "query_cash_flows",
+        "list_treasury_accounts",
+        "list_task_assignments",
+        "list_rules"
+      ]
+    }
+  }
+}

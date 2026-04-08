@@ -1,0 +1,5 @@
+{
+  "input": { "entity_id": "SULLIVAN-ALPHA", "period_start": "2025-10-01", "period_end": "2025-12-31" },
+  "expected_output": { "variance_count": 1, "total_variance_usd": 12500 },
+  "tolerances": { "total_variance_usd": 1 }
+}

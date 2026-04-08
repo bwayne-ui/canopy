@@ -1,0 +1,9 @@
+{
+  "input": { "entity_id": "WALKER-III", "period": "2026-03" },
+  "expected_output": {
+    "entity_id": "WALKER-III",
+    "period": "2026-03",
+    "nav_total_mm": 487.3
+  },
+  "tolerances": { "nav_total_mm": 0.5 }
+}

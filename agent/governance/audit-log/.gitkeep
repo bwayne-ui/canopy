@@ -1,0 +1,2 @@
+# Append-only JSONL audit log directory. One file per day: YYYY-MM-DD.jsonl
+# Each line is a single tool-use event from the hooks.
