@@ -157,7 +157,7 @@ export default function MarketplacePage() {
               <div className="mt-auto flex items-center justify-between pt-4">
                 <div className="flex items-center gap-2">
                   <StatusBadge status={agent.status} />
-                  <span className="text-sm font-semibold text-emerald-600">Free · Internal</span>
+                  <a href="#" className="text-sm font-semibold text-[#00C97B] hover:text-[#00A866] hover:underline">Add to my GitHub</a>
                 </div>
                 <button className="rounded-md bg-[#1B3A4B] px-4 py-2 text-sm text-white hover:bg-[#15303f] transition">
                   Learn More
