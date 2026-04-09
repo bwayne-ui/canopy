@@ -80,15 +80,15 @@ const dashboardItems: NavItem[] = [
 ];
 
 const activityItems: NavItem[] = [
-  { label: 'Transactions', href: '/trans', icon: ArrowLeftRight },
-  { label: 'Projects', href: '/projects', icon: FolderKanban },
-  { label: 'Calendar', href: '/calendar', icon: Calendar },
   { label: 'Communications', href: '/communications', icon: MessageSquare },
-  { label: 'Task List', href: '/activity/task-list', icon: ListChecks },
+  { label: 'Calendar', href: '/calendar', icon: Calendar },
+  { label: 'Tasks', href: '/activity/task-list', icon: ListChecks },
+  { label: 'Projects', href: '/projects', icon: FolderKanban },
   { label: 'GL', href: '/activity/gl', icon: BookOpen },
   { label: 'Cash', href: '/activity/cash', icon: Wallet },
-  { label: 'Portfolio Transactions', href: '/activity/portfolio-transactions', icon: Layers },
+  { label: 'Portfolio', href: '/activity/portfolio-transactions', icon: Layers },
   { label: 'Capital', href: '/activity/capital', icon: BadgeDollarSign },
+  { label: 'All Transactions', href: '/trans', icon: ArrowLeftRight },
 ];
 
 function CollapsibleSection({
@@ -187,8 +187,8 @@ export default function Sidebar() {
             <BookOpen className="w-4 h-4 text-white" />
           </div>
           <div>
-            <div className="text-white font-black text-[15px] tracking-wide leading-none">CANOPY</div>
-            <div className="text-[#00C97B]/70 text-[9px] font-medium tracking-[0.12em] uppercase">Fund Admin Toolkit</div>
+            <div className="text-white font-black text-[15px] tracking-wide leading-none">CANOPY 2.0</div>
+            <div className="text-[#00C97B]/70 text-[9px] font-medium tracking-[0.12em] uppercase">Internal Fund Admin Platform</div>
           </div>
         </Link>
       </div>
@@ -289,16 +289,16 @@ export default function Sidebar() {
           <span>Agent Marketplace</span>
         </Link>
 
-        {/* Toolbox */}
-        <Link href="/toolbox" className={linkClass('/toolbox')}>
-          <Wrench className="w-3.5 h-3.5 flex-shrink-0" />
-          <span>Toolbox</span>
-        </Link>
-
         {/* Agent Console */}
         <Link href="/agent-console" className={linkClass('/agent-console')}>
           <Bot className="w-3.5 h-3.5 flex-shrink-0" />
           <span>Agent Console</span>
+        </Link>
+
+        {/* Toolbox — bottom */}
+        <Link href="/toolbox" className={linkClass('/toolbox')}>
+          <Wrench className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>Toolbox</span>
         </Link>
       </nav>
 

@@ -157,11 +157,7 @@ export default function MarketplacePage() {
               <div className="mt-auto flex items-center justify-between pt-4">
                 <div className="flex items-center gap-2">
                   <StatusBadge status={agent.status} />
-                  {agent.monthlyPrice != null && (
-                    <span className="text-sm font-medium text-gray-700">
-                      {fmtMoney(agent.monthlyPrice)}/mo
-                    </span>
-                  )}
+                  <span className="text-sm font-semibold text-emerald-600">Free · Internal</span>
                 </div>
                 <button className="rounded-md bg-[#1B3A4B] px-4 py-2 text-sm text-white hover:bg-[#15303f] transition">
                   Learn More
