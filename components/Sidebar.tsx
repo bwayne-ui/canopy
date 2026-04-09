@@ -42,7 +42,7 @@ const docsVaultItems: NavItem[] = [
 ];
 
 const ruleGraphItems: NavItem[] = [
-  { label: 'Deterministic Rules Engine', href: '/rule-graph', icon: GitBranch },
+  { label: 'Rules Engine', href: '/rule-graph', icon: GitBranch },
   { label: 'Waterfall Tree', href: '/rule-graph/waterfall', icon: Layers },
   { label: 'Fee Calculation', href: '/rule-graph/fee-calc', icon: Receipt },
   { label: 'NAV Calculation', href: '/rule-graph/nav-calc', icon: CircleDollarSign },
@@ -223,7 +223,7 @@ export default function Sidebar() {
 
         {/* Rule Graph */}
         <CollapsibleSection
-          label="Deterministic Rules Engine"
+          label="Rules Engine"
           icon={GitBranch}
           items={ruleGraphItems}
           isOpen={openSections.ruleGraph}
