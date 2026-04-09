@@ -292,7 +292,7 @@ export default function Sidebar() {
         {/* Agent Console */}
         <Link href="/agent-console" className={linkClass('/agent-console')}>
           <Bot className="w-3.5 h-3.5 flex-shrink-0" />
-          <span>Agent Console</span>
+          <span>Agent Actions</span>
         </Link>
 
         {/* Toolbox — bottom */}
