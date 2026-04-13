@@ -75,7 +75,7 @@ export default function InternalUsersPage() {
   const avgUtilization = utilizations.length > 0 ? utilizations.reduce((s, u) => s + u, 0) / utilizations.length : 0;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       <PageHeader
         title="Internal Users"
         subtitle="Staff directory and utilization tracking"

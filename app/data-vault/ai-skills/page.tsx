@@ -65,7 +65,7 @@ export default function AISkillsPage() {
   const totalRuns = items.reduce((s, i) => s + i.runCount, 0);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       <PageHeader
         title="AI Skills"
         subtitle="Machine learning models and automation skills"
@@ -75,7 +75,7 @@ export default function AISkillsPage() {
         ]}
       />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
         <MetricCard title="Total Skills" value={String(total)} icon={<Brain className="w-4 h-4" />} color="teal" />
         <MetricCard title="Active" value={String(active)} icon={<Activity className="w-4 h-4" />} color="green" />
         <MetricCard title="Avg Accuracy" value={fmtPct(avgAccuracy)} icon={<Target className="w-4 h-4" />} color="signal" />

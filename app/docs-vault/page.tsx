@@ -41,9 +41,9 @@ export default function DocsVaultPage() {
   if (loading) return <div className="flex items-center justify-center h-96"><div className="animate-pulse text-gray-400">Loading Docs Vault...</div></div>;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       <PageHeader title="Docs Vault" subtitle="Document management and storage" />
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-3">
         <MetricCard title="Total Documents" value={items.length} color="teal" />
         <MetricCard title="Executed" value={executed} color="green" />
         <MetricCard title="Under Review" value={underReview} color="amber" />

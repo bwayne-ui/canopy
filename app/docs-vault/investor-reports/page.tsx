@@ -29,9 +29,9 @@ const columns: Column[] = [
 
 export default function InvestorReportsPage() {
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       <PageHeader title="Investor Reports" subtitle="Quarterly letters, K-1s, performance reports, and board materials" breadcrumbs={[{ label: 'Docs Vault', href: '/docs-vault' }, { label: 'Investor Reports' }]} />
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-3">
         <MetricCard title="Total Reports" value={reports.length} icon={<Eye className="w-4 h-4" />} color="teal" />
         <MetricCard title="Distributed" value={reports.filter(r => r.status === 'Distributed').length} icon={<CheckCircle2 className="w-4 h-4" />} color="green" />
         <MetricCard title="In Progress" value={reports.filter(r => r.status === 'In Progress' || r.status === 'Draft').length} icon={<FileText className="w-4 h-4" />} color="signal" />

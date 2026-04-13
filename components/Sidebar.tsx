@@ -289,10 +289,10 @@ export default function Sidebar() {
           <span>Agent Marketplace</span>
         </Link>
 
-        {/* Agent Console */}
+        {/* Agent Prompting Layer */}
         <Link href="/agent-console" className={linkClass('/agent-console')}>
           <Bot className="w-3.5 h-3.5 flex-shrink-0" />
-          <span>Agent Actions</span>
+          <span>Agent Prompting Layer</span>
         </Link>
 
         {/* Toolbox — bottom */}

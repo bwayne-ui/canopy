@@ -34,9 +34,9 @@ const categoryColors: Record<string, string> = {
 
 export default function TemplatesPage() {
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       <PageHeader title="Templates" subtitle="Standardized document templates and forms" breadcrumbs={[{ label: 'Docs Vault', href: '/docs-vault' }, { label: 'Templates' }]} />
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-3">
         <MetricCard title="Total Templates" value={templates.length} icon={<FileText className="w-4 h-4" />} color="teal" />
         <MetricCard title="Total Uses" value={templates.reduce((s, t) => s + t.usageCount, 0)} icon={<Download className="w-4 h-4" />} color="green" />
         <MetricCard title="Categories" value={new Set(templates.map(t => t.category)).size} icon={<CheckCircle2 className="w-4 h-4" />} color="signal" />

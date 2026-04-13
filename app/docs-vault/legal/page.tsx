@@ -28,9 +28,9 @@ const columns: Column[] = [
 
 export default function LegalPage() {
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       <PageHeader title="Legal Documents" subtitle="Engagement letters, opinions, NDAs, and resolutions" breadcrumbs={[{ label: 'Docs Vault', href: '/docs-vault' }, { label: 'Legal' }]} />
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-3">
         <MetricCard title="Total Legal Docs" value={docs.length} icon={<Scale className="w-4 h-4" />} color="teal" />
         <MetricCard title="Active" value={docs.filter(d => d.status === 'Active').length} icon={<CheckCircle2 className="w-4 h-4" />} color="green" />
         <MetricCard title="Pending" value={docs.filter(d => d.status === 'Draft' || d.status === 'Under Review').length} icon={<Clock className="w-4 h-4" />} color="amber" />

@@ -27,7 +27,7 @@ const changeColors = {
 
 export default function MetricCard({ title, value, change, changeType = 'neutral', icon, color = 'teal' }: Props) {
   return (
-    <div className={`bg-white rounded-lg shadow-sm border-l-[3px] p-3.5 ${colorMap[color]} transition-shadow duration-200 hover:shadow-md`}>
+    <div className={`bg-white rounded-lg shadow-sm border-l-[3px] p-2.5 ${colorMap[color]} transition-shadow duration-200 hover:shadow-md`}>
       <div className="flex items-start justify-between">
         <div className="min-w-0">
           <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{title}</p>

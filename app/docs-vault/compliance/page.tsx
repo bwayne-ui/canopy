@@ -29,9 +29,9 @@ const columns: Column[] = [
 
 export default function ComplianceDocsPage() {
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       <PageHeader title="Compliance Documents" subtitle="Regulatory filings, certifications, and compliance records" breadcrumbs={[{ label: 'Docs Vault', href: '/docs-vault' }, { label: 'Compliance' }]} />
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-3">
         <MetricCard title="Total Filings" value={docs.length} icon={<Shield className="w-4 h-4" />} color="teal" />
         <MetricCard title="Current" value={docs.filter(d => d.status === 'Current').length} icon={<CheckCircle2 className="w-4 h-4" />} color="green" />
         <MetricCard title="Due Soon" value={docs.filter(d => d.status === 'Due Soon').length} icon={<AlertCircle className="w-4 h-4" />} color="red" />

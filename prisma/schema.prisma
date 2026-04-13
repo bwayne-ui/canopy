@@ -82,6 +82,321 @@ model Entity {
   confidenceScore      Decimal?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
+
+  // ── GENERAL / ENTITY PROFILE ──
+  assetClass                     String?
+  shortName                      String?
+  domicileCountry                String?
+  domicileCountryOther           String?
+  domicileState                  String?
+  einTaxId                       String?
+  entityRole                     String?
+  entityRoleOther                String?
+  entityTypeOther                String?
+  fundStructure                  String?
+  fundStructureOther             String?
+  regulatoryClassification       String?
+  regulatoryClassificationOther  String?
+  geographyFocus                 String?   // JSON array
+  geographyFocusOther            String?
+  sectorFocus                    String?   // JSON array
+  sectorFocusOther               String?
+  investmentStrategyDetail       String?
+  investmentStrategyDetailOther  String?
+  leveredFund                    Boolean?
+  usesSubFacility                Boolean?
+  targetCommittedCapital         Decimal?
+  targetInvestmentCount          Int?
+  targetInvestorCount            Int?
+  targetLeveragePct              Decimal?
+  fundraisingFirstClose          DateTime?
+  fundraisingFinalClose          DateTime?
+  registeredAddress              String?
+
+  // ── ECONOMICS / FEES & CARRY ──
+  carryStructure                 String?
+  catchUpType                    String?
+  clawbackApplies                Boolean?
+  clawbackTrueUpFrequency        String?
+  feeStepdownExists              Boolean?
+  hurdleType                     String?
+  mgmtFeeBasis                   String?
+  mgmtFeeBasisOther              String?
+  mgmtFeeFrequency               String?
+  mgmtFeeWaiverOffset            String?
+  mgmtFeeWaiverOffsetOther       String?
+  escrowHoldbackApplies          Boolean?
+  escrowHoldbackPct              Decimal?
+  mgmtFeeOffsetPct               Decimal?
+  prefReturnCompounding          String?
+  prefReturnDayCount             String?
+  taxDistributionPolicy          String?
+  taxDistributionPolicyOther     String?
+  unitOfAccount                  String?
+
+  // ── FUND ACCOUNTING — OPERATIONS ──
+  booksComplexityTier            String?
+  chartOfAccountsTemplate        String?
+  chartOfAccountsOther           String?
+  generalLedgerSystem            String?
+  generalLedgerSystemOther       String?
+  closeProcessModel              String?
+  bankFeedEnabled                Boolean?
+  portfolioDataFeedEnabled       Boolean?
+  docMgmtSystem                  String?
+  docMgmtSystemOther             String?
+  multiCloseRebalancing          String?
+  reconciliationTool             String?
+  reconciliationToolOther        String?
+  sideLetterComplexity           String?
+  specialAllocationFrequency     String?
+  waterfallCalcAutomation        String?
+  annualCapitalEventsExpected    String?
+
+  // ── FUND ACCOUNTING — ONBOARDING ──
+  conversionType                 String?
+  conversionStartDate            DateTime?
+  documentConversionScope        String?
+  onboardingOwner                String?
+  sourceSystemsPriorAdmin        String?   // JSON array
+  sourceSystemsPriorAdminOther   String?
+
+  // ── FUND ACCOUNTING — REPORTING ──
+  accountingFramework            String?
+  accountingFrameworkOther       String?
+  financialStatementsFrequency   String?
+  footnoteDisclosureLevel        String?
+  investorStatementsFrequency    String?
+  reportingPackageTimingQeDays   Int?
+  reportingPackageTimingYeDays   Int?
+  valuationDeliverySla           Int?
+
+  // ── INVESTOR SERVICES — COMPLIANCE ──
+  amlProgramRequired             Boolean?
+  fatcaRequired                  Boolean?
+  crsRequired                    Boolean?
+  kycStandard                    String?
+  kycStandardOther               String?
+  benefitPlanInvestorTracking    Boolean?
+  restrictedPersonsTracking      Boolean?
+  support1099Level               String?
+
+  // ── INVESTOR SERVICES — TREASURY OPS ──
+  bankAccountCount               Int?
+  bankConnectivityMethod         String?
+  bankConnectivityOther          String?
+  multiCurrency                  Boolean?
+  paymentApprovalLevels          String?
+  positivePayEnabled             Boolean?
+  primaryCurrency                String?
+  primaryCurrencyOther           String?
+
+  // ── INVESTOR SERVICES — OPERATIONS ──
+  investorPortalEnabled          Boolean?
+  redemptionProcessingModel      String?
+  sideLetterWorkflowAutomation   String?
+
+  // ── SCOPE / MODULES ──
+  scopeFundAccounting            Boolean?
+  scopeInvestorServices          Boolean?
+  scopeTaxServices               String?
+  scopeTaxServicesOther          String?
+  scopeTreasury                  Boolean?
+  scopeLoanAdmin                 Boolean?
+  scopeMgmtCoAccounting          Boolean?
+  scopeRegulatoryReporting       Boolean?
+  scopeAmlKyc                    String?
+  scopeFatcaCrs                  Boolean?
+
+  // ── GOVERNANCE ──
+  auditTrailEnabled              Boolean?
+  dataClassificationLevel        String?
+  entityDataSteward              String?
+
+  // ── RELATIONSHIPS ──
+  custodianPrimeBroker           String?
+  fundComplexName                String?
+  managementCompanyRef           String?
+  sponsorGpOrg                   String?
+  taxPreparer                    String?
+
+  // ── DOMAIN TABLE RELATIONS ──
+  creditDomain                   CreditDomainFields?
+  reDomain                       REDomainFields?
+  oefDomain                      OEFDomainFields?
+  vcDomain                       VCDomainFields?
+  peDomain                       PEDomainFields?
+  fofDomain                      FOFDomainFields?
+  gpCarryDomain                  GPCarryDomainFields?
+  manCoDomain                    ManCoDomainFields?
+  otherDomain                    OtherDomainFields?
+}
+
+// ──────────────────────────────────────────────
+// DOMAIN-SPECIFIC TABLES (1:1 with Entity)
+// ──────────────────────────────────────────────
+
+model CreditDomainFields {
+  id                          String  @id @default(cuid())
+  entityId                    String  @unique
+  entity                      Entity  @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  loanTypeMix                 String?   // JSON array
+  loanTypeMixOther            String?
+  collateralTypeMix           String?   // JSON array
+  collateralTypeMixOther      String?
+  covenantMonitoringRequired  Boolean?
+  covenantFrequency           String?
+  facilityComplexityTier      String?
+  indexType                   String?
+  indexTypeOther              String?
+  interestDayCalcMethod       String?
+  interestDayCalcOther        String?
+  paymentFrequency            String?
+  paymentFrequencyOther       String?
+  pikInterestPresence         Boolean?
+  delayedDrawPresence         Boolean?
+  revolverPresence            Boolean?
+  oidUpfrontFeesPresence      Boolean?
+  prepaymentPenaltyPresence   Boolean?
+  prepaymentPenaltyType       String?
+  prepaymentPenaltyOther      String?
+  loanServicingSystem         String?
+  loanServicingSystemOther    String?
+  workoutRestructuringActivity String?
+}
+
+model REDomainFields {
+  id                          String  @id @default(cuid())
+  entityId                    String  @unique
+  entity                      Entity  @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  propertyTypeMix             String?   // JSON array
+  propertyTypeMixOther        String?
+  propertyCount               String?
+  debtFacilityCount           Int?
+  leaseCount                  Int?
+  stabilizedVsDevelopment     String?
+  geographicDispersion        String?
+  propertyManagerModel        String?
+  propertyDebtExists          Boolean?
+  preferredEquityInstruments  Boolean?
+  appraisalFrequency          String?
+  appraisalFrequencyOther     String?
+  camReconciliationsRequired  Boolean?
+  capexBudgetingRequired      Boolean?
+  constructionDrawsPresence   Boolean?
+  constructionDrawFrequency   String?
+  energyEsgReportingRequired  Boolean?
+  insuranceTrackingRequired   Boolean?
+  leaseAbstractingRequired    Boolean?
+  noiTrackingRequired         Boolean?
+  occupancyReportingRequired  Boolean?
+  rentRollDeliveryFrequency   String?
+  reJointVentureAccounting    Boolean?
+  waterfallAtPropertyLevel    Boolean?
+  tenantConcentrationRisk     String?
+  valuationMethodMix          String?   // JSON array
+}
+
+model OEFDomainFields {
+  id                                String  @id @default(cuid())
+  entityId                          String  @unique
+  entity                            Entity  @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  unitizedFund                      Boolean?
+  numberOfShareClasses              Int?
+  shareClassNames                   String?
+  subscriptionWindow                String?
+  redemptionWindow                  String?
+  lockupPeriodMonths                Int?
+  gateApplies                       Boolean?
+  gatePct                           Decimal?
+  dripOffered                       Boolean?
+  crystallizationTiming             String?
+  crystallizationBasis              String?
+  strategyType                      String?
+  primeBrokerCount                  Int?
+  counterpartyCount                 Int?
+  otcExposurePresence               Boolean?
+  dailyNavRequired                  Boolean?
+  investorLiquidityTerms            String?
+  sidePocketUsage                   Boolean?
+  highWaterMarkTrackingRequired     Boolean?
+  incentiveFeeFrequency             String?
+  equalizationMethod                String?
+  lossCarryforwardTrackingRequired  Boolean?
+}
+
+model VCDomainFields {
+  id                              String  @id @default(cuid())
+  entityId                        String  @unique
+  entity                          Entity  @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  stageFocusMix                   String?   // JSON array
+  safeConvertibleNotePresence     Boolean?
+  bridgeFinancingFrequency        String?
+  warrantOrTokenExposure          String?
+  optionPoolTrackingRequired      Boolean?
+  liquidationPreferenceStructures String?
+  payToPlayClausesPresent         Boolean?
+}
+
+model PEDomainFields {
+  id                              String  @id @default(cuid())
+  entityId                        String  @unique
+  entity                          Entity  @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  averageAddOnCountPerPlatform    Int?
+  coInvestAllocationFrequency     String?
+  portfolioLevelLeveragePresence  Boolean?
+  pikToggleDebtPresence           Boolean?
+}
+
+model FOFDomainFields {
+  id                          String  @id @default(cuid())
+  entityId                    String  @unique
+  entity                      Entity  @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  underlyingFundCount         Int?
+  lookThroughRequired         Boolean?
+  underlyingCarryTransparency String?
+}
+
+model GPCarryDomainFields {
+  id                            String  @id @default(cuid())
+  entityId                      String  @unique
+  entity                        Entity  @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  gpMemberCount                 Int?
+  allocationVariability         String?
+  clawbackAllocationMethod      String?
+  cashlessContributionsPresence Boolean?
+  deferredCompensationLinked    Boolean?
+  vestingScheduleComplexity     String?
+}
+
+model ManCoDomainFields {
+  id                              String  @id @default(cuid())
+  entityId                        String  @unique
+  entity                          Entity  @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  revenueStreamsMonitoringFees    Boolean?
+  revenueStreamsTransactionFees   Boolean?
+  revenueStreamsConsultingFees    Boolean?
+  revenueStreamsOther             String?
+  feeOffsetPctToFund             Decimal?
+  costSharingWithGp              Boolean?
+  sharedExpenseAllocationMethod  String?
+  intercompanyBillingFrequency   String?
+  payrollJurisdictions           String?   // JSON array
+}
+
+model OtherDomainFields {
+  id                          String  @id @default(cuid())
+  entityId                    String  @unique
+  entity                      Entity  @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  historicalErrorRatePct       Decimal?
+  avgInvestorQueryVolumeMonth  Int?
+  customReportingRequests      String?
+  boardReportingRequired       Boolean?
+  esgReportingRequired         Boolean?
+  ilpaTemplateRequired         Boolean?
+  investorConcentrationPct     Decimal?
+  top3LpConcentrationPct       Decimal?
+  strategicAccountFlag         Boolean?
 }
 
 model Investor {

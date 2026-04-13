@@ -70,7 +70,7 @@ export default function ExternalContactsPage() {
   const contactTypes = new Set(items.map((i) => i.contactType)).size;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       <PageHeader
         title="External Contacts"
         subtitle="Third-party contacts and service providers"
@@ -80,7 +80,7 @@ export default function ExternalContactsPage() {
         ]}
       />
 
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3\">
         <MetricCard title="Total Contacts" value={String(total)} icon={<Contact className="w-4 h-4" />} color="teal" />
         <MetricCard title="Active" value={String(active)} icon={<UserCheck className="w-4 h-4" />} color="green" />
         <MetricCard title="Contact Types" value={String(contactTypes)} icon={<Tag className="w-4 h-4" />} color="signal" />

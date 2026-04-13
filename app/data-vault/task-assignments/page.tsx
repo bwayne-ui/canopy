@@ -64,7 +64,7 @@ export default function TaskAssignmentsPage() {
   const overdue = items.filter((i) => i.status === 'Overdue').length;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       <PageHeader
         title="Task Assignments"
         subtitle="Active task assignments across all entities"
@@ -74,7 +74,7 @@ export default function TaskAssignmentsPage() {
         ]}
       />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3\">
         <MetricCard title="Total Assignments" value={String(total)} icon={<ClipboardCheck className="w-4 h-4" />} color="teal" />
         <MetricCard title="Complete" value={String(complete)} icon={<CheckCircle2 className="w-4 h-4" />} color="green" />
         <MetricCard title="In Progress" value={String(inProgress)} icon={<Loader className="w-4 h-4" />} color="signal" />

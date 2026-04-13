@@ -73,7 +73,7 @@ export default function TaskDefinitionsPage() {
         ]}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-3">
         <MetricCard title="Total SOPs" value={totalSops.toLocaleString()} icon={<ClipboardList className="w-4 h-4" />} color="teal" />
         <MetricCard title="Categories" value={categories.toLocaleString()} icon={<FolderOpen className="w-4 h-4" />} color="green" />
         <MetricCard title="Avg Est. Minutes" value={avgEstMinutes.toFixed(0)} icon={<Clock className="w-4 h-4" />} color="signal" />

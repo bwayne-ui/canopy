@@ -12,7 +12,7 @@ import EntityTypeChart from '@/components/charts/EntityTypeChart';
 import {
   DollarSign, Building2, Layers, ClipboardCheck, AlertTriangle, MessageSquare,
   FolderKanban, Landmark, Users, FileText, Shield, TrendingUp, CircleDollarSign,
-  BarChart3, Clock, CheckCircle2
+  BarChart3, Clock, CheckCircle2, BadgeDollarSign
 } from 'lucide-react';
 import type { DashboardData } from '@/types';
 import { fmtMoney } from '@/lib/utils';
@@ -38,7 +38,7 @@ export default function ControlTower() {
       <PageHeader title="Control Tower" subtitle="Canopy Fund Administration Platform" />
 
       {/* KPI Grid — 4x4 = 16 cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
         <MetricCard title="Total AUM" value={fmtMoney(data.totalAum)} change="+3.2% vs prior month" changeType="up" icon={<DollarSign className="w-4 h-4" />} color="green" />
         <MetricCard title="Active GPs" value={String(data.totalClients)} change={`${data.totalEntities} entities`} changeType="neutral" icon={<Building2 className="w-4 h-4" />} color="teal" />
         <MetricCard title="Total NAV" value={fmtMoney(data.totalAum * 0.94)} change="+2.8% MTD" changeType="up" icon={<CircleDollarSign className="w-4 h-4" />} color="green" />
@@ -61,15 +61,38 @@ export default function ControlTower() {
       </div>
 
       {/* Charts Row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
         <AumTrendChart data={data.aumTrend} />
         <StrategyPieChart data={data.strategyBreakdown} />
       </div>
 
       {/* Charts Row 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
         <TaskCompletionChart data={data.tasksByStatus} />
         <EntityTypeChart data={data.entityTypeDistribution} />
+      </div>
+
+      {/* Quick Actions */}
+      <div className="bg-white rounded-lg shadow-sm border p-3 mb-3">
+        <h3 className="text-[12px] font-semibold text-gray-700 mb-2">Quick Actions</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <button className="flex flex-col items-center gap-1.5 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            <BadgeDollarSign className="w-5 h-5 text-green-600" />
+            <span className="text-[11px] font-medium text-gray-700">Capital Call</span>
+          </button>
+          <button className="flex flex-col items-center gap-1.5 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            <FileText className="w-5 h-5 text-blue-600" />
+            <span className="text-[11px] font-medium text-gray-700">Generate Report</span>
+          </button>
+          <button className="flex flex-col items-center gap-1.5 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            <Users className="w-5 h-5 text-purple-600" />
+            <span className="text-[11px] font-medium text-gray-700">Investor Update</span>
+          </button>
+          <button className="flex flex-col items-center gap-1.5 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+            <Shield className="w-5 h-5 text-red-600" />
+            <span className="text-[11px] font-medium text-gray-700">Compliance Check</span>
+          </button>
+        </div>
       </div>
 
       {/* Bottom Row */}

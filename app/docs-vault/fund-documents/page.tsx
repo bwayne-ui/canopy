@@ -28,9 +28,9 @@ const columns: Column[] = [
 
 export default function FundDocumentsPage() {
   return (
-    <div className="space-y-5">
+    <div className="space-y-3">
       <PageHeader title="Fund Documents" subtitle="LPAs, PPMs, subscription agreements, and side letters" breadcrumbs={[{ label: 'Docs Vault', href: '/docs-vault' }, { label: 'Fund Documents' }]} />
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-3">
         <MetricCard title="Total" value={docs.length} icon={<FileText className="w-4 h-4" />} color="teal" />
         <MetricCard title="Executed" value={docs.filter(d => d.status === 'Executed').length} icon={<CheckCircle2 className="w-4 h-4" />} color="green" />
         <MetricCard title="Draft / Review" value={docs.filter(d => d.status === 'Draft' || d.status === 'Under Review').length} icon={<Clock className="w-4 h-4" />} color="amber" />

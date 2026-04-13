@@ -82,7 +82,7 @@ export default function SecurityMasterPage() {
         ]}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-3\">
         <MetricCard title="Total Securities" value={totalSecurities.toLocaleString()} icon={<Shield className="w-4 h-4" />} color="teal" />
         <MetricCard title="Total Market Value" value={fmtMoney(totalMarketValue)} icon={<DollarSign className="w-4 h-4" />} color="green" />
         <MetricCard title="Total Unrealized Gain" value={fmtMoney(totalUnrealizedGain)} icon={<TrendingUp className="w-4 h-4" />} color="signal" />
