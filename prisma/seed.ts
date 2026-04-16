@@ -975,12 +975,6 @@ async function main() {
   const users = await prisma.internalUser.findMany({ orderBy: { employeeId: 'asc' } });
   console.log(`Created ${users.length} internal users from CSV`);
 
-  // Ensure Christine Egbert is TL0 (top of FA org — no manager)
-  await prisma.internalUser.updateMany({
-    where: { lastName: 'Egbert', firstName: 'Christine' },
-    data: { managerName: null },
-  });
-
   // ──── end of InternalUser CSV section ────
 
   // ═══════════════════════════════════════════════

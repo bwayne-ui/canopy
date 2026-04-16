@@ -56,6 +56,7 @@ interface SecurityUser {
 
 function getTlBorderColor(tl: number): string {
   const map: Record<number, string> = {
+    [-1]: 'border-l-yellow-500',
     0: 'border-l-red-500',
     1: 'border-l-purple-500',
     2: 'border-l-teal-500',
@@ -72,6 +73,7 @@ function getTlBorderColor(tl: number): string {
 
 function getTlAvatarColor(tl: number): string {
   const map: Record<number, string> = {
+    [-1]: 'bg-yellow-100 text-yellow-800',
     0: 'bg-red-100 text-red-700',
     1: 'bg-purple-100 text-purple-700',
     2: 'bg-teal-100 text-teal-700',
@@ -129,7 +131,10 @@ function buildAncestryChain(
 // Sub-components
 // ---------------------------------------------------------------------------
 
+// tl is the raw derived level. Display = tl - 1. TL0 (CEO/root) gets no badge.
 function TlBadge({ tl }: { tl: number }) {
+  if (tl === 0) return null; // CEO — above the TL system, no badge
+  const display = tl - 1;
   const colors: Record<number, string> = {
     0: 'bg-red-100 text-red-700',
     1: 'bg-purple-100 text-purple-700',
@@ -142,10 +147,10 @@ function TlBadge({ tl }: { tl: number }) {
     8: 'bg-indigo-100 text-indigo-700',
     9: 'bg-gray-100 text-gray-600',
   };
-  const cls = colors[tl] ?? 'bg-gray-100 text-gray-600';
+  const cls = colors[display] ?? 'bg-gray-100 text-gray-600';
   return (
     <span className={`inline-flex items-center text-[10px] font-semibold rounded-full px-1.5 py-0.5 ${cls}`}>
-      TL{tl}{tl === 0 && ' · SLT'}
+      TL{display}{display === 0 && ' · SLT'}
     </span>
   );
 }
@@ -368,13 +373,14 @@ export default function OrgChartPage() {
     return { nameToUser, reportMap };
   }, [allUsers]);
 
-  const root = useMemo(
-    () =>
-      allUsers
-        .filter((u) => u.tlLevel === 0)
-        .sort((a, b) => b.directReportCount - a.directReportCount)[0] ?? null,
-    [allUsers]
-  );
+  const root = useMemo(() => {
+    // CEO is the org chart root — must have no manager and CEO in title
+    const ceo = allUsers.find((u) => u.managerName === null && /\bCEO\b/i.test(u.title));
+    if (ceo) return ceo;
+    return allUsers
+      .filter((u) => u.tlLevel === 0)
+      .sort((a, b) => b.directReportCount - a.directReportCount)[0] ?? null;
+  }, [allUsers]);
 
   const current = path.length > 0 ? path[path.length - 1] : root;
 

@@ -297,6 +297,16 @@ export default function Sidebar() {
           isActive={isActive}
         />
 
+        {/* Opportunities */}
+        <CollapsibleSection
+          label="Opportunities"
+          icon={TrendingUp}
+          items={opportunitiesItems}
+          isOpen={openSections.opportunities}
+          onToggle={() => toggle('opportunities')}
+          isActive={isActive}
+        />
+
         {/* Separator */}
         <div className="pt-2 pb-1 px-3">
           <div className="h-px bg-white/[0.06]" />

@@ -85,7 +85,10 @@ function RoleBadge({ role }: { role: CanopyRole }) {
   );
 }
 
+// tl is raw derived level. Display = tl - 1. TL0 (CEO) gets no badge.
 function TlBadge({ tl }: { tl: number }) {
+  if (tl === 0) return null;
+  const display = tl - 1;
   const colors: Record<number, string> = {
     0: 'bg-red-100 text-red-700',
     1: 'bg-purple-100 text-purple-700',
@@ -98,10 +101,10 @@ function TlBadge({ tl }: { tl: number }) {
     8: 'bg-indigo-100 text-indigo-700',
     9: 'bg-gray-100 text-gray-600',
   };
-  const cls = colors[tl] ?? 'bg-gray-100 text-gray-600';
+  const cls = colors[display] ?? 'bg-gray-100 text-gray-600';
   return (
     <span className={`inline-flex items-center text-[10px] font-semibold rounded-full px-1.5 py-0.5 ${cls}`}>
-      TL{tl}{tl === 0 && ' · SLT'}
+      TL{display}{display === 0 && ' · SLT'}
     </span>
   );
 }
@@ -609,7 +612,7 @@ interface DeptGroup {
   name: string;
   users: SecurityUser[];
   headcount: number;
-  tlCounts: number[]; // [TL0, TL1, TL2, TL3, TL4, TL5, TL6, TL7, TL8, TL9]
+  tlCounts: number[]; // index = raw tlLevel; raw 0=CEO (no badge), raw 1=TL0 SLT, raw 2=TL1 ...
   mfaPct: number;
   tl0User: SecurityUser | null;
   tl1Leaders: SecurityUser[];
@@ -626,7 +629,7 @@ function buildDeptGroups(users: SecurityUser[]): DeptGroup[] {
 
   const groups: DeptGroup[] = [];
   for (const [name, members] of Array.from(groupMap.entries())) {
-    const tlCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const tlCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; // index = raw tlLevel (0=CEO, 1=TL0 SLT, 2=TL1 ...)
     for (const u of members) {
       const idx = Math.min(u.tlLevel, 9);
       tlCounts[idx]++;
@@ -672,11 +675,10 @@ function buildDeptGroups(users: SecurityUser[]): DeptGroup[] {
 }
 
 const TL_COLORS = [
-  'bg-red-400', 'bg-purple-400', 'bg-teal-400', 'bg-blue-400',
-  'bg-orange-400', 'bg-amber-400', 'bg-lime-400', 'bg-pink-400',
-  'bg-indigo-400', 'bg-gray-300',
+  'bg-gray-300', 'bg-red-400', 'bg-purple-400', 'bg-teal-400', 'bg-blue-400',
+  'bg-orange-400', 'bg-amber-400', 'bg-lime-400', 'bg-pink-400', 'bg-indigo-400',
 ];
-const TL_LABELS = ['TL0', 'TL1', 'TL2', 'TL3', 'TL4', 'TL5', 'TL6', 'TL7', 'TL8', 'TL9'];
+const TL_LABELS = ['CEO', 'TL0', 'TL1', 'TL2', 'TL3', 'TL4', 'TL5', 'TL6', 'TL7', 'TL8'];
 
 function DeptSwimlanCard({ group }: { group: DeptGroup }) {
   const maxModule = Math.max(...Object.values(group.moduleAccess), 1);

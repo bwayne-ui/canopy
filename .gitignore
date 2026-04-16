@@ -9,3 +9,4 @@ prisma/dev.db-journal
 CANOPY_FULL_SOURCE.md
 .vscode/cruise/
 BW-Public-Items
+.vercel
