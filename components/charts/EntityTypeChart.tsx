@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 interface Props {
@@ -7,6 +8,12 @@ interface Props {
 }
 
 export default function EntityTypeChart({ data }: Props) {
+  const router = useRouter();
+
+  function handleClick(entry: { type: string }) {
+    router.push(`/data-vault/entities?search=${encodeURIComponent(entry.type)}`);
+  }
+
   return (
     <div className="bg-white rounded-lg shadow-sm p-4">
       <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Entities by Type</h3>
@@ -16,7 +23,13 @@ export default function EntityTypeChart({ data }: Props) {
           <XAxis type="number" tick={{ fontSize: 11 }} />
           <YAxis dataKey="type" type="category" tick={{ fontSize: 10 }} width={120} />
           <Tooltip />
-          <Bar dataKey="count" fill="#1B3A4B" radius={[0, 4, 4, 0]} />
+          <Bar
+            dataKey="count"
+            fill="#1B3A4B"
+            radius={[0, 4, 4, 0]}
+            style={{ cursor: 'pointer' }}
+            onClick={(_: unknown, index: number) => handleClick(data[index])}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 const COLORS = [
@@ -12,6 +13,12 @@ interface Props {
 }
 
 export default function StrategyPieChart({ data }: Props) {
+  const router = useRouter();
+
+  function handleClick(entry: { strategy: string }) {
+    router.push(`/data-vault/entities?search=${encodeURIComponent(entry.strategy)}`);
+  }
+
   return (
     <div className="bg-white rounded-lg shadow-sm p-4">
       <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">AUM by Strategy</h3>
@@ -24,6 +31,8 @@ export default function StrategyPieChart({ data }: Props) {
             cx="50%"
             cy="50%"
             outerRadius={55}
+            style={{ cursor: 'pointer' }}
+            onClick={(_: unknown, index: number) => handleClick(data[index])}
           >
             {data.map((_, i) => (
               <Cell key={i} fill={COLORS[i % COLORS.length]} />

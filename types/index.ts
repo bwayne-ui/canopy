@@ -23,6 +23,7 @@ export interface ActivityItem {
   timestamp: string;
   user?: string;
   icon?: string;
+  href?: string;
 }
 
 export interface ClientRow {

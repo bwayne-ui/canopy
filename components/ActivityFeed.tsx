@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { CheckCircle, AlertCircle, FileText, Upload, UserPlus, Clock, MessageSquare, DollarSign } from 'lucide-react';
 import type { ActivityItem } from '@/types';
 
@@ -23,21 +24,26 @@ export default function ActivityFeed({ items }: Props) {
     <div className="bg-white rounded-lg shadow-sm p-4">
       <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Recent Activity</h3>
       <div className="space-y-0">
-        {items.map((item) => (
-          <div key={item.id} className="flex items-start gap-2.5 py-1.5 border-b border-gray-50/80 last:border-0">
-            <div className="mt-0.5">{iconMap[item.icon || 'created'] || iconMap.created}</div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-gray-800">
-                <span className="font-medium">{item.action}</span>{' '}
-                <span className="text-gray-500">{item.subject}</span>
-              </p>
-              <div className="flex items-center gap-2 mt-0.5">
-                {item.user && <span className="text-[10px] text-gray-400">{item.user}</span>}
-                <span className="text-[10px] text-gray-300">{item.timestamp}</span>
+        {items.map((item) => {
+          const content = (
+            <div className={`flex items-start gap-2.5 py-1.5 border-b border-gray-50/80 last:border-0 ${item.href ? 'hover:bg-gray-50/60 rounded-md px-1 -mx-1 cursor-pointer transition-colors' : ''}`}>
+              <div className="mt-0.5">{iconMap[item.icon || 'created'] || iconMap.created}</div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-gray-800">
+                  <span className="font-medium">{item.action}</span>{' '}
+                  <span className="text-gray-500">{item.subject}</span>
+                </p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  {item.user && <span className="text-[10px] text-gray-400">{item.user}</span>}
+                  <span className="text-[10px] text-gray-300">{item.timestamp}</span>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+
+          if (item.href) return <Link key={item.id} href={item.href}>{content}</Link>;
+          return <div key={item.id}>{content}</div>;
+        })}
       </div>
     </div>
   );

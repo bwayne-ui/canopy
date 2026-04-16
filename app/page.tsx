@@ -51,17 +51,17 @@ export default function ControlTower() {
 
           {/* KPI tiles — always-visible 6 + conditional timesheet alerts */}
           <div className={`grid gap-2 ${(timesheets?.draft ?? 0) > 0 || (timesheets?.submitted ?? 0) > 0 ? 'grid-cols-4' : 'grid-cols-3'}`}>
-            <MetricCard title="Active GPs" value={String(data.totalClients)} change={`${data.totalEntities} entities`} changeType="neutral" icon={<Building2 className="w-4 h-4" />} color="teal" />
-            <MetricCard title="Incomplete Tasks" value="27" change={`${data.completedTaskCount} completed`} changeType="up" icon={<ClipboardCheck className="w-4 h-4" />} color="signal" />
-            <MetricCard title="Overdue Tasks" value={String(data.overdueTaskCount)} change="Requires attention" changeType="down" icon={<AlertTriangle className="w-4 h-4" />} color="red" />
-            <MetricCard title="Net Margin %" value="42.3%" change="+1.2pp vs prior Q" changeType="up" icon={<Shield className="w-4 h-4" />} color="signal" />
-            <MetricCard title="Active Projects" value={String(data.totalProjects)} change="3 at risk" changeType="neutral" icon={<FolderKanban className="w-4 h-4" />} color="teal" />
-            <MetricCard title="Documents Pending" value={String(Math.round(data.totalProjects * 1.8))} change="Review required" changeType="neutral" icon={<FileText className="w-4 h-4" />} color="amber" />
+            <MetricCard title="Active GPs" value={String(data.totalClients)} change={`${data.totalEntities} entities`} changeType="neutral" icon={<Building2 className="w-4 h-4" />} color="teal" href="/data-vault/clients" />
+            <MetricCard title="Incomplete Tasks" value="27" change={`${data.completedTaskCount} completed`} changeType="up" icon={<ClipboardCheck className="w-4 h-4" />} color="signal" href="/activity/task-list" />
+            <MetricCard title="Overdue Tasks" value={String(data.overdueTaskCount)} change="Requires attention" changeType="down" icon={<AlertTriangle className="w-4 h-4" />} color="red" href="/activity/task-list" />
+            <MetricCard title="Net Margin %" value="42.3%" change="+1.2pp vs prior Q" changeType="up" icon={<Shield className="w-4 h-4" />} color="signal" href="/dashboards/gp-direct-margin" />
+            <MetricCard title="Active Projects" value={String(data.totalProjects)} change="3 at risk" changeType="neutral" icon={<FolderKanban className="w-4 h-4" />} color="teal" href="/projects" />
+            <MetricCard title="Documents Pending" value={String(Math.round(data.totalProjects * 1.8))} change="Review required" changeType="neutral" icon={<FileText className="w-4 h-4" />} color="amber" href="/docs-vault" />
             {timesheets && timesheets.draft > 0 && (
-              <MetricCard title="Missing Timesheets" value={String(timesheets.draft)} change="Submit required" changeType="down" icon={<FileEdit className="w-4 h-4" />} color="amber" />
+              <MetricCard title="Missing Timesheets" value={String(timesheets.draft)} change="Submit required" changeType="down" icon={<FileEdit className="w-4 h-4" />} color="amber" href="/time-tracking" />
             )}
             {timesheets && timesheets.submitted > 0 && (
-              <MetricCard title="Pending Approvals" value={String(timesheets.submitted)} change="Awaiting manager" changeType="neutral" icon={<Send className="w-4 h-4" />} color="signal" />
+              <MetricCard title="Pending Approvals" value={String(timesheets.submitted)} change="Awaiting manager" changeType="neutral" icon={<Send className="w-4 h-4" />} color="signal" href="/time-tracking" />
             )}
           </div>
 

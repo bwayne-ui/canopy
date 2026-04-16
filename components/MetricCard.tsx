@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 interface Props {
@@ -9,6 +10,7 @@ interface Props {
   changeType?: 'up' | 'down' | 'neutral';
   icon?: React.ReactNode;
   color?: 'green' | 'teal' | 'signal' | 'amber' | 'red';
+  href?: string;
 }
 
 const colorMap = {
@@ -25,9 +27,9 @@ const changeColors = {
   neutral: 'text-gray-400',
 };
 
-export default function MetricCard({ title, value, change, changeType = 'neutral', icon, color = 'teal' }: Props) {
-  return (
-    <div className={`bg-white rounded-lg shadow-sm border-l-[3px] p-2.5 ${colorMap[color]} transition-shadow duration-200 hover:shadow-md`}>
+export default function MetricCard({ title, value, change, changeType = 'neutral', icon, color = 'teal', href }: Props) {
+  const card = (
+    <div className={`bg-white rounded-lg shadow-sm border-l-[3px] p-2.5 ${colorMap[color]} transition-shadow duration-200 hover:shadow-md ${href ? 'cursor-pointer' : ''}`}>
       <div className="flex items-start justify-between">
         <div className="min-w-0">
           <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{title}</p>
@@ -45,4 +47,7 @@ export default function MetricCard({ title, value, change, changeType = 'neutral
       </div>
     </div>
   );
+
+  if (href) return <Link href={href}>{card}</Link>;
+  return card;
 }

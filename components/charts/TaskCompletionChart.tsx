@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from 'recharts';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -16,6 +17,12 @@ interface Props {
 }
 
 export default function TaskCompletionChart({ data }: Props) {
+  const router = useRouter();
+
+  function handleClick(entry: { status: string }) {
+    router.push(`/activity/task-list?search=${encodeURIComponent(entry.status)}`);
+  }
+
   return (
     <div className="bg-white rounded-lg shadow-sm p-4">
       <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Tasks by Status</h3>
@@ -25,7 +32,12 @@ export default function TaskCompletionChart({ data }: Props) {
           <XAxis type="number" tick={{ fontSize: 11 }} />
           <YAxis dataKey="status" type="category" tick={{ fontSize: 11 }} width={90} />
           <Tooltip />
-          <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+          <Bar
+            dataKey="count"
+            radius={[0, 4, 4, 0]}
+            style={{ cursor: 'pointer' }}
+            onClick={(_: unknown, index: number) => handleClick(data[index])}
+          >
             {data.map((entry, i) => (
               <Cell key={i} fill={STATUS_COLORS[entry.status] || '#94a3b8'} />
             ))}
