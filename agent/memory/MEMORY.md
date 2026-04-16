@@ -13,8 +13,13 @@ This directory persists context the agent has learned across sessions. Each entr
 - [Sullivan Asset Mgmt](clients/sullivan-asset-mgmt.md) — quarterly NAV; multi-currency; deal-by-deal carry
 
 ## Entities (per-fund)
+
 - [WALKER-III](entities/walker-iii.md) — $487M NAV; PE growth; 8% pref / 20% carry / 100% catchup
 - [CRUZ-II](entities/cruz-ii.md) — VC fund; deal-by-deal; SAFE-heavy portfolio
+
+## Business Context
+
+- [JSQ Business Context](entities/jsq-business-context.md) — JSQ revenue lines (GPX $70M+ ARR, FA 480+ clients/3K entities), BPS pricing, pod model, entity structures by fund type
 
 ## Feedback (user corrections)
 - [decimal-precision-rule](feedback/decimal-precision-rule.md) — never round before final output
@@ -22,3 +27,4 @@ This directory persists context the agent has learned across sessions. Each entr
 
 ## Playbooks (validated workflows)
 - [monthly-close-playbook](playbooks/monthly-close.md) — refined sequence after Jan 2026 retrospective
+- [canopy-2-roadmap](playbooks/canopy-2-roadmap.md) — Canopy 2.0 feature roadmap across all 7 JSQ org personas (RevOps, Marketing, People, Finance, Eng, SLT, BI)

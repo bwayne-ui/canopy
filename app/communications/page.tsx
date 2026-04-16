@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import PageHeader from '@/components/PageHeader';
 import MetricCard from '@/components/MetricCard';
 import DataTable, { Column } from '@/components/DataTable';
@@ -56,9 +57,9 @@ const columns: Column[] = [
   { key: 'channel', label: 'Channel', render: (v: string) => <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${channelStyles[v] || 'bg-gray-100 text-gray-700'}`}>{v}</span> },
   { key: 'direction', label: 'Direction', render: (v: string) => <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${directionStyles[v] || 'bg-gray-100 text-gray-700'}`}>{v}</span> },
   { key: 'subject', label: 'Subject', sortable: true, render: (v: string) => <span className="font-medium text-gray-900 block max-w-[240px] truncate" title={v}>{v}</span> },
-  { key: 'fromName', label: 'From', sortable: true },
-  { key: 'toName', label: 'To', sortable: true },
-  { key: 'clientName', label: 'Client', sortable: true, render: (v: string | null) => v || '—' },
+  { key: 'fromName', label: 'From', sortable: true, render: (v: string) => <Link href={`/data-vault/internal-users?search=${encodeURIComponent(v)}`} className="text-[#00C97B] hover:underline hover:text-[#00A866] transition-colors">{v}</Link> },
+  { key: 'toName', label: 'To', sortable: true, render: (v: string) => <Link href={`/data-vault/internal-users?search=${encodeURIComponent(v)}`} className="text-[#00C97B] hover:underline hover:text-[#00A866] transition-colors">{v}</Link> },
+  { key: 'clientName', label: 'Client', sortable: true, render: (v: string | null) => v ? <Link href={`/data-vault/clients?search=${encodeURIComponent(v)}`} className="text-[#00C97B] hover:underline hover:text-[#00A866] transition-colors">{v}</Link> : '—' },
   { key: 'sentiment', label: 'Sentiment', render: (v: string | null) => v ? (
     <div className="flex items-center gap-2"><span className={`inline-block h-2.5 w-2.5 rounded-full ${sentimentDot[v] || 'bg-gray-400'}`} /><span className="text-xs text-gray-600">{v}</span></div>
   ) : <span className="text-gray-300">—</span> },

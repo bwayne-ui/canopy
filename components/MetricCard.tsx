@@ -21,7 +21,7 @@ const colorMap = {
 
 const changeColors = {
   up: 'text-emerald-600',
-  down: 'text-red-500',
+  down: 'text-red-600',
   neutral: 'text-gray-400',
 };
 

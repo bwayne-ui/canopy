@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Search, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 export interface Column {
@@ -19,6 +19,7 @@ interface Props {
   searchPlaceholder?: string;
   onRowClick?: (row: any) => void;
   emptyMessage?: string;
+  initialSearch?: string;
 }
 
 export default function DataTable({
@@ -28,8 +29,14 @@ export default function DataTable({
   searchPlaceholder = 'Search...',
   onRowClick,
   emptyMessage = 'No data found',
+  initialSearch = '',
 }: Props) {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialSearch);
+
+  // Sync when parent supplies initialSearch after async load (e.g. URL param read via useEffect)
+  useEffect(() => {
+    if (initialSearch) setSearch(initialSearch);
+  }, [initialSearch]);
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
@@ -96,7 +103,7 @@ export default function DataTable({
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className={`px-3 py-2.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wider ${alignClass(col.align)} ${col.width || ''} ${
+                  className={`px-3 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider ${alignClass(col.align)} ${col.width || ''} ${
                     col.sortable ? 'cursor-pointer select-none hover:text-gray-900' : ''
                   }`}
                   onClick={() => col.sortable && handleSort(col.key)}

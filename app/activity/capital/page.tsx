@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import PageHeader from '@/components/PageHeader';
 import MetricCard from '@/components/MetricCard';
 import DataTable, { Column } from '@/components/DataTable';
@@ -28,15 +29,15 @@ const totalCalled = calls.reduce((s, c) => s + c.amount, 0);
 const totalDistributed = dists.reduce((s, c) => s + c.amount, 0);
 
 const columns: Column[] = [
-  { key: 'date', label: 'Date', sortable: true, render: (v) => <span className="font-mono text-[11px]">{v}</span> },
-  { key: 'fund', label: 'Fund', sortable: true, render: (v) => <span className="font-medium text-gray-900">{v}</span> },
-  { key: 'type', label: 'Type', render: (v) => {
+  { key: 'date', label: 'Date', sortable: true, render: (v) => <span className="text-xs">{v}</span> },
+  { key: 'fund', label: 'Fund', sortable: true, render: (v: string) => <Link href={`/data-vault/entities?search=${encodeURIComponent(v)}`} className="font-medium text-gray-900 hover:text-[#00C97B] transition-colors">{v}</Link> },
+  { key: 'type', label: 'Type', render: (v: string) => {
     const colors: Record<string, string> = { 'Capital Call': 'bg-emerald-50 text-emerald-700', 'Distribution': 'bg-blue-50 text-blue-700', 'Redemption': 'bg-amber-50 text-amber-700' };
     return <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${colors[v] || 'bg-gray-100 text-gray-600'}`}>{v}</span>;
   }},
-  { key: 'investor', label: 'Investor', sortable: true },
-  { key: 'amount', label: 'Amount', align: 'right', sortable: true, render: (v) => <span className="font-mono text-[11px]">{fmtMoney(v)}</span> },
-  { key: 'noticeDate', label: 'Notice Date', render: (v) => <span className="font-mono text-[10px] text-gray-400">{v}</span> },
+  { key: 'investor', label: 'Investor', sortable: true, render: (v: string) => <Link href={`/data-vault/investors?search=${encodeURIComponent(v)}`} className="text-[#00C97B] hover:underline hover:text-[#00A866] transition-colors">{v}</Link> },
+  { key: 'amount', label: 'Amount', align: 'right', sortable: true, render: (v) => <span className="text-xs">{fmtMoney(v)}</span> },
+  { key: 'noticeDate', label: 'Notice Date', render: (v) => <span className="text-xs text-gray-400">{v}</span> },
   { key: 'status', label: 'Status', render: (v) => <StatusBadge status={v} /> },
 ];
 

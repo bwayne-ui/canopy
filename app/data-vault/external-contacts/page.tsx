@@ -6,6 +6,7 @@ import MetricCard from '@/components/MetricCard';
 import DataTable, { Column } from '@/components/DataTable';
 import StatusBadge from '@/components/StatusBadge';
 import { Contact, UserCheck, Tag } from 'lucide-react';
+import Link from 'next/link';
 
 interface ExternalContactRow {
   id: number;
@@ -33,15 +34,20 @@ const typeBadgeColors: Record<string, string> = {
 const typeBadge = (type: string) => {
   const color = typeBadgeColors[type] || 'bg-gray-100 text-gray-600';
   return (
-    <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ${color}`}>
+    <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${color}`}>
       {type}
     </span>
   );
 };
 
 const columns: Column[] = [
-  { key: 'contactId', label: 'Contact ID', sortable: true, render: (v) => <span className="font-mono text-gray-600">{v}</span> },
-  { key: 'name', label: 'Name', sortable: true, render: (v) => <span className="font-medium text-gray-900">{v}</span> },
+  { key: 'contactId', label: 'Contact ID', sortable: true, render: (v) => <span className="text-gray-600">{v}</span> },
+  { key: 'name', label: 'Name', sortable: true, render: (v: string, row: any) => (
+    <Link href={`/data-vault/external-contacts/${row.contactId}`} className="block group">
+      <div className="font-semibold text-gray-900 group-hover:text-[#00C97B] transition-colors">{v}</div>
+      <div className="text-[10px] text-gray-400">{row.organization}</div>
+    </Link>
+  ) },
   { key: 'organization', label: 'Organization', sortable: true },
   { key: 'role', label: 'Role', sortable: true },
   { key: 'contactType', label: 'Type', sortable: true, render: (v) => typeBadge(v) },
@@ -53,6 +59,12 @@ const columns: Column[] = [
 export default function ExternalContactsPage() {
   const [items, setItems] = useState<ExternalContactRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchInit, setSearchInit] = useState('');
+
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get('search');
+    if (q) setSearchInit(q);
+  }, []);
 
   useEffect(() => {
     fetch('/api/external-contacts')
@@ -86,7 +98,7 @@ export default function ExternalContactsPage() {
         <MetricCard title="Contact Types" value={String(contactTypes)} icon={<Tag className="w-4 h-4" />} color="signal" />
       </div>
 
-      <DataTable columns={columns} data={items} searchPlaceholder="Search contacts..." />
+      <DataTable columns={columns} data={items} searchPlaceholder="Search contacts..." initialSearch={searchInit} />
     </div>
   );
 }

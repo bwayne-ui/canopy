@@ -1,6 +1,95 @@
 import { PrismaClient } from '@prisma/client';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import { deriveSeniorityFromTitle, deriveModuleAccess } from '../lib/permissions';
+import { seedRevOps } from './seed-revops';
 
 const prisma = new PrismaClient();
+
+// ---------------------------------------------------------------------------
+// CSV parsing helpers
+// ---------------------------------------------------------------------------
+
+function parseCSV(filePath: string): Record<string, string>[] {
+  let raw = readFileSync(resolve(filePath), 'utf-8');
+  if (raw.charCodeAt(0) === 0xfeff) raw = raw.slice(1);
+  const lines = raw.split(/\r?\n/).filter((l) => l.trim());
+  if (lines.length < 2) return [];
+  const headers = parseCSVRow(lines[0]);
+  const rows: Record<string, string>[] = [];
+  for (let i = 1; i < lines.length; i++) {
+    const vals = parseCSVRow(lines[i]);
+    const row: Record<string, string> = {};
+    headers.forEach((h, idx) => { row[h.trim()] = (vals[idx] ?? '').trim(); });
+    rows.push(row);
+  }
+  return rows;
+}
+
+function parseCSVRow(line: string): string[] {
+  const fields: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"' && line[i + 1] === '"') { current += '"'; i++; }
+      else if (ch === '"') { inQuotes = false; }
+      else { current += ch; }
+    } else {
+      if (ch === '"') { inQuotes = true; }
+      else if (ch === ',') { fields.push(current); current = ''; }
+      else { current += ch; }
+    }
+  }
+  fields.push(current);
+  return fields;
+}
+
+function parseName(nameStr: string): { first: string; last: string } {
+  const parts = nameStr.split(',').map((s) => s.trim());
+  if (parts.length >= 2) return { first: parts[1], last: parts[0] };
+  const words = nameStr.trim().split(/\s+/);
+  return { first: words[0] ?? '', last: (words.slice(1).join(' ') || words[0]) ?? '' };
+}
+
+function makeEmail(first: string, last: string, seen: Map<string, number>): string {
+  const f = first.toLowerCase().replace(/[^a-z]/g, '');
+  const l = last.toLowerCase().replace(/[^a-z]/g, '');
+  // JSQ convention: first initial + last name (e.g. bwayne@junipersquare.com)
+  const base = `${f.charAt(0)}${l}`;
+  const count = seen.get(base) ?? 0;
+  seen.set(base, count + 1);
+  return count > 0 ? `${base}${count}@junipersquare.com` : `${base}@junipersquare.com`;
+}
+
+function seedDeriveRole(title: string): string {
+  const t = title.toLowerCase();
+  if (/\b(ceo|cto|cfo|coo|cdo|cpo)\b/.test(t)) return t.match(/\b(ceo|cto|cfo|coo|cdo|cpo)\b/)![0].toUpperCase();
+  if (/\bsvp\b/.test(t)) return 'SVP';
+  if (/\bgeneral manager\b/.test(t) || /\bmanaging director\b/.test(t)) return 'GM';
+  if (/\bvp[, ]|vice president\b/.test(t)) return 'VP';
+  if (/\bsenior director\b/.test(t)) return 'Senior Director';
+  if (/\bdirector\b/.test(t)) return 'Director';
+  if (/\bsenior manager\b/.test(t)) return 'Senior Manager';
+  if (/\bmanager\b/.test(t)) return 'Manager';
+  if (/\blead\b/.test(t) || /\bstaff\b/.test(t) || /\bprincipal\b/.test(t)) return 'Lead';
+  if (/\bsenior\b/.test(t)) return 'Senior';
+  if (/\bassociate\b/.test(t)) return 'Associate';
+  if (/\banalyst\b/.test(t)) return 'Analyst';
+  if (/\bspecialist\b/.test(t)) return 'Specialist';
+  if (/\bcoordinator\b/.test(t)) return 'Coordinator';
+  if (/\bintern\b/.test(t)) return 'Intern';
+  return 'Individual Contributor';
+}
+
+function randomDate(start: Date, end: Date): Date {
+  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+}
+
+function randomInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 async function main() {
   // Clear existing data
@@ -15,6 +104,8 @@ async function main() {
   await prisma.communication.deleteMany();
   await prisma.calendarEvent.deleteMany();
   await prisma.tool.deleteMany();
+  await prisma.employeeEntityAssignment.deleteMany();
+  await prisma.securityEntityLink.deleteMany();
   await prisma.taskAssignment.deleteMany();
   await prisma.taskDefinition.deleteMany();
   await prisma.document.deleteMany();
@@ -34,6 +125,7 @@ async function main() {
   await prisma.otherDomainFields.deleteMany();
   await prisma.entity.deleteMany();
   await prisma.externalContact.deleteMany();
+  await prisma.internalUserSurvey.deleteMany();
   await prisma.internalUser.deleteMany();
   await prisma.client.deleteMany();
 
@@ -559,6 +651,63 @@ async function main() {
       auditTrailEnabled: true, dataClassificationLevel: 'Confidential',
       sponsorGpOrg: 'Rodriguez Capital Management',
     }}),
+    // ── Walker deeper structure: Blocker → Holding → Portfolio Companies ──
+    prisma.entity.create({ data: {
+      entityId: 'ENT-000016', name: 'Walker III UBTI Blocker Corp', entityType: 'Blocker Corp',
+      structureType: 'Corp', domicile: 'Delaware', strategy: 'Private Equity',
+      lifecycleStatus: 'Active', clientId: clients[0].id,
+      reportingFrequency: 'Annually', currency: 'USD',
+      inceptionDate: new Date('2021-04-15'), region: 'Americas',
+      dataQualityScore: 82.0, confidenceScore: 0.78,
+      assetClass: 'Private Equity', shortName: 'Walker III Blocker', domicileCountry: 'United States',
+      domicileState: 'Delaware', entityRole: 'Blocker', fundStructure: 'Corporation',
+      booksComplexityTier: 'Tier 1', generalLedgerSystem: 'JSQ Investran',
+      accountingFramework: 'US GAAP',
+      bankAccountCount: 1, primaryCurrency: 'USD',
+      scopeFundAccounting: true,
+      auditTrailEnabled: true, dataClassificationLevel: 'Confidential',
+      fundComplexName: 'Walker Enterprise Complex', sponsorGpOrg: 'Walker Asset Management',
+    }}),
+    prisma.entity.create({ data: {
+      entityId: 'ENT-000017', name: 'Walker III Holdings LLC', entityType: 'Holding Company',
+      structureType: 'LLC', domicile: 'Delaware', strategy: 'Private Equity',
+      lifecycleStatus: 'Active', clientId: clients[0].id,
+      reportingFrequency: 'Quarterly', currency: 'USD',
+      inceptionDate: new Date('2021-05-01'), region: 'Americas',
+      dataQualityScore: 80.0, confidenceScore: 0.76,
+      assetClass: 'Private Equity', shortName: 'Walker III Holdings', domicileCountry: 'United States',
+      domicileState: 'Delaware', entityRole: 'Holding Company', fundStructure: 'LLC',
+      booksComplexityTier: 'Tier 2', generalLedgerSystem: 'JSQ Investran',
+      accountingFramework: 'US GAAP',
+      bankAccountCount: 2, primaryCurrency: 'USD',
+      scopeFundAccounting: true,
+      auditTrailEnabled: true, dataClassificationLevel: 'Confidential',
+      fundComplexName: 'Walker Enterprise Complex', sponsorGpOrg: 'Walker Asset Management',
+    }}),
+    prisma.entity.create({ data: {
+      entityId: 'ENT-000018', name: 'Apex Manufacturing Inc', entityType: 'Portfolio Company',
+      structureType: 'Corp', domicile: 'Delaware', strategy: 'Private Equity',
+      lifecycleStatus: 'Active', clientId: clients[0].id,
+      navMm: 320, commitmentMm: 280,
+      reportingFrequency: 'Quarterly', currency: 'USD',
+      inceptionDate: new Date('2022-03-15'), region: 'Americas',
+      dataQualityScore: 75.0, confidenceScore: 0.70,
+      assetClass: 'Private Equity', shortName: 'Apex Mfg', domicileCountry: 'United States',
+      domicileState: 'Delaware', entityRole: 'Portfolio Company', fundStructure: 'Corporation',
+      fundComplexName: 'Walker Enterprise Complex', sponsorGpOrg: 'Walker Asset Management',
+    }}),
+    prisma.entity.create({ data: {
+      entityId: 'ENT-000019', name: 'Vanguard Logistics LP', entityType: 'Portfolio Company',
+      structureType: 'LP', domicile: 'Delaware', strategy: 'Private Equity',
+      lifecycleStatus: 'Active', clientId: clients[0].id,
+      navMm: 185, commitmentMm: 160,
+      reportingFrequency: 'Quarterly', currency: 'USD',
+      inceptionDate: new Date('2023-01-10'), region: 'Americas',
+      dataQualityScore: 73.0, confidenceScore: 0.68,
+      assetClass: 'Private Equity', shortName: 'Vanguard Logistics', domicileCountry: 'United States',
+      domicileState: 'Delaware', entityRole: 'Portfolio Company', fundStructure: 'Limited Partnership',
+      fundComplexName: 'Walker Enterprise Complex', sponsorGpOrg: 'Walker Asset Management',
+    }}),
   ]);
   console.log(`Created ${entities.length} entities`);
 
@@ -676,7 +825,7 @@ async function main() {
   // ═══════════════════════════════════════════════
   // SECURITIES (20)
   // ═══════════════════════════════════════════════
-  await Promise.all([
+  const securities = await Promise.all([
     prisma.security.create({ data: { securityId: 'SEC-001', name: 'Microsoft Corp', securityType: 'Equity', issuer: 'Microsoft Corporation', ticker: 'MSFT', cusip: '594918104', isin: 'US5949181045', marketValue: 48200, costBasis: 32100, quantity: 115000, unrealizedGain: 16100, sector: 'Technology', country: 'United States', pricePerUnit: 419.13, lastPriceDate: new Date('2026-03-28') }}),
     prisma.security.create({ data: { securityId: 'SEC-002', name: 'Apple Inc', securityType: 'Equity', issuer: 'Apple Inc', ticker: 'AAPL', cusip: '037833100', isin: 'US0378331005', marketValue: 42800, costBasis: 28500, quantity: 200000, unrealizedGain: 14300, sector: 'Technology', country: 'United States', pricePerUnit: 214.00, lastPriceDate: new Date('2026-03-28') }}),
     prisma.security.create({ data: { securityId: 'SEC-003', name: 'NVIDIA Corp', securityType: 'Equity', issuer: 'NVIDIA Corporation', ticker: 'NVDA', cusip: '67066G104', marketValue: 55300, costBasis: 18200, quantity: 60000, unrealizedGain: 37100, sector: 'Technology', country: 'United States', pricePerUnit: 921.67, lastPriceDate: new Date('2026-03-28') }}),
@@ -701,292 +850,831 @@ async function main() {
   console.log('Created 20 securities');
 
   // ═══════════════════════════════════════════════
+  // SECURITY → ENTITY LINKS (per-client custom setup)
+  // ═══════════════════════════════════════════════
+  await Promise.all([
+    // SEC-001 MSFT — held by Walker III (ENT-000002) and Campbell Growth (ENT-000007)
+    prisma.securityEntityLink.create({ data: { securityId: securities[0].id, entityId: entities[1].id, financialStatementName: 'Microsoft Corporation — Common Stock', clientNickname: 'MSFT', dealPartner: 'James Walker', investmentThesis: 'Core large-cap technology position; cloud and AI tailwinds support long-term compounding. Held as part of the public equity sleeve.', acquisitionDate: new Date('2021-03-15'), costAtAcquisition: 18200, currentCarryingValue: 48200, ownershipPct: 0.042, isActiveholding: true, watchlistFlag: false }}),
+    prisma.securityEntityLink.create({ data: { securityId: securities[0].id, entityId: entities[6].id, financialStatementName: 'Microsoft Corp. — Equity Investment', clientNickname: 'Microsoft', dealPartner: 'Rachel Campbell', investmentThesis: 'Public equity hedge within growth portfolio. Provides liquidity buffer alongside private holdings.', acquisitionDate: new Date('2022-06-01'), costAtAcquisition: 13900, currentCarryingValue: 22100, ownershipPct: 0.018, isActiveholding: true, watchlistFlag: false }}),
+    // SEC-003 NVDA — held by Walker III (ENT-000002) and Sullivan Alpha (ENT-000008)
+    prisma.securityEntityLink.create({ data: { securityId: securities[2].id, entityId: entities[1].id, financialStatementName: 'NVIDIA Corporation — Common Stock', clientNickname: 'NVDA', dealPartner: 'James Walker', investmentThesis: 'High-conviction AI infrastructure bet. Position sized at 3× initial allocation following data center revenue inflection.', acquisitionDate: new Date('2019-11-20'), costAtAcquisition: 5400, currentCarryingValue: 55300, ownershipPct: 0.061, isActiveholding: true, watchlistFlag: false }}),
+    prisma.securityEntityLink.create({ data: { securityId: securities[2].id, entityId: entities[7].id, financialStatementName: 'NVIDIA Corp. — Long Position', clientNickname: 'Jensen Play', dealPartner: 'Nina Sullivan', investmentThesis: 'Tactical allocation to GPU semiconductor cycle. Monitor for AI spending deceleration as exit trigger.', acquisitionDate: new Date('2023-01-10'), costAtAcquisition: 12800, currentCarryingValue: 33200, ownershipPct: 0.029, isActiveholding: true, watchlistFlag: true, notes: 'Watchlisted due to elevated valuation multiple; review at next IC.' }}),
+    // SEC-006 US Treasury — held by White Senior Credit (ENT-000011) and Sullivan Alpha (ENT-000008)
+    prisma.securityEntityLink.create({ data: { securityId: securities[5].id, entityId: entities[10].id, financialStatementName: 'U.S. Treasury Note 4.25% due 11/15/2034', clientNickname: 'UST 10Y', dealPartner: 'Michael White', investmentThesis: 'Risk-free rate anchor. Held as duration hedge against floating-rate credit book exposure.', acquisitionDate: new Date('2024-02-14'), costAtAcquisition: 100000, currentCarryingValue: 98500, ownershipPct: null, isActiveholding: true, watchlistFlag: false }}),
+    prisma.securityEntityLink.create({ data: { securityId: securities[5].id, entityId: entities[7].id, financialStatementName: 'US Treasury Note — 10 Year', clientNickname: 'T-Note 34', dealPartner: 'Nina Sullivan', investmentThesis: 'Safe-haven allocation; increased position during Q3 2025 volatility. Reduces net equity beta.', acquisitionDate: new Date('2025-08-03'), costAtAcquisition: 50000, currentCarryingValue: 49200, ownershipPct: null, isActiveholding: true, watchlistFlag: false }}),
+    // SEC-009 Acme Software (PE) — held by Walker III (ENT-000002) and Campbell Growth (ENT-000007)
+    prisma.securityEntityLink.create({ data: { securityId: securities[8].id, entityId: entities[1].id, financialStatementName: 'Acme Software Holdings, Inc. — Series C Preferred', clientNickname: 'Acme Software', dealPartner: 'James Walker', investmentThesis: 'B2B SaaS platform targeting mid-market ERP replacement. Thesis: margin expansion via net revenue retention > 120% and path to EBITDA profitability by FY2027.', acquisitionDate: new Date('2022-09-12'), costAtAcquisition: 5000, currentCarryingValue: 12500, ownershipPct: 8.4, isActiveholding: true, watchlistFlag: false }}),
+    prisma.securityEntityLink.create({ data: { securityId: securities[8].id, entityId: entities[6].id, financialStatementName: 'Acme Software Holdings — Preferred Stock', clientNickname: 'AcmeSoft', dealPartner: 'Rachel Campbell', investmentThesis: 'Co-invest alongside Walker; entry on same terms. Monitor ARR growth quarterly.', acquisitionDate: new Date('2022-09-12'), costAtAcquisition: 3000, currentCarryingValue: 7200, ownershipPct: 5.1, isActiveholding: true, watchlistFlag: false, notes: 'Co-investment right exercised per LPA Section 7.3' }}),
+    // SEC-010 NexGen Health (PE) — held by Walker III (ENT-000002) and Cruz Ventures (ENT-000009)
+    prisma.securityEntityLink.create({ data: { securityId: securities[9].id, entityId: entities[1].id, financialStatementName: 'NexGen Health Systems, Inc. — Growth Round', clientNickname: 'NexGen Health', dealPartner: 'James Walker', investmentThesis: 'Digital health platform enabling value-based care transitions. Revenue growing 65% YoY. Exit target: strategic acquiree or Series D at 2× current valuation.', acquisitionDate: new Date('2023-05-18'), costAtAcquisition: 8000, currentCarryingValue: 18700, ownershipPct: 11.2, isActiveholding: true, watchlistFlag: false }}),
+    prisma.securityEntityLink.create({ data: { securityId: securities[9].id, entityId: entities[8].id, financialStatementName: 'NexGen Health Systems — Growth Equity', clientNickname: 'NexGen', dealPartner: 'Carlos Cruz', investmentThesis: 'Lead investor in healthcare digitisation. Board seat held. Clinical workflow automation driving sticky enterprise contracts.', acquisitionDate: new Date('2023-05-18'), costAtAcquisition: 7000, currentCarryingValue: 16400, ownershipPct: 9.8, isActiveholding: true, watchlistFlag: false }}),
+    // SEC-012 London Bridge Office — held by Lopez RE (ENT-000010)
+    prisma.securityEntityLink.create({ data: { securityId: securities[11].id, entityId: entities[9].id, financialStatementName: 'London Bridge Office Complex — Freehold', clientNickname: 'London Bridge', dealPartner: 'Maria Lopez', investmentThesis: 'Core-plus London office with 92% occupancy and 7-year WAULT. Targeted 6.5% net yield. Currency hedged to USD via FX forward overlay.', acquisitionDate: new Date('2021-07-01'), costAtAcquisition: 38000, currentCarryingValue: 45000, ownershipPct: 100, isActiveholding: true, watchlistFlag: false, notes: 'GBP/USD hedge reviewed annually. Next review: Q3 2026.' }}),
+    // SEC-018 CloudScale AI (PE) — held by Walker III (ENT-000002) and Cruz Ventures (ENT-000009)
+    prisma.securityEntityLink.create({ data: { securityId: securities[17].id, entityId: entities[1].id, financialStatementName: 'CloudScale AI, Inc. — Series B Preferred', clientNickname: 'CloudScale', dealPartner: 'James Walker', investmentThesis: 'Enterprise AI inference platform. 3× revenue growth in trailing 12 months. Potential strategic acquisition target within 18–24 months.', acquisitionDate: new Date('2024-04-22'), costAtAcquisition: 3000, currentCarryingValue: 8200, ownershipPct: 6.7, isActiveholding: true, watchlistFlag: false }}),
+    prisma.securityEntityLink.create({ data: { securityId: securities[17].id, entityId: entities[8].id, financialStatementName: 'CloudScale AI — Series B', clientNickname: 'CloudScale AI', dealPartner: 'Carlos Cruz', investmentThesis: 'Follow-on from seed. AI-native DevOps toolchain with strong net promoter metrics. Exit horizon 2027.', acquisitionDate: new Date('2024-04-22'), costAtAcquisition: 2000, currentCarryingValue: 5500, ownershipPct: 4.4, isActiveholding: true, watchlistFlag: true, notes: 'Founder vesting cliff reached June 2025. Monitor key-person risk.' }}),
+    // SEC-017 CLO Mezz — held by White Senior Credit (ENT-000011)
+    prisma.securityEntityLink.create({ data: { securityId: securities[16].id, entityId: entities[10].id, financialStatementName: 'CLO Mezzanine Tranche — Ares Capital XXXV', clientNickname: 'Ares CLO XXXV', dealPartner: 'Michael White', investmentThesis: 'Structured credit yield enhancement. BBB-rated mezz tranche of diversified CLO pool. Spread of L+275. Complements senior credit sleeve.', acquisitionDate: new Date('2023-11-01'), costAtAcquisition: 12000, currentCarryingValue: 12000, ownershipPct: null, isActiveholding: true, watchlistFlag: false }}),
+  ]);
+  console.log('Created security entity links');
+
+  // ═══════════════════════════════════════════════
   // TASK DEFINITIONS (12 SOPs)
   // ═══════════════════════════════════════════════
   const taskDefs = await Promise.all([
-    prisma.taskDefinition.create({ data: { taskCode: 'SOP-001', name: 'Monthly NAV Calculation', description: 'Calculate net asset value for all fund entities including position valuation, accrued expenses, and fee computation.', category: 'NAV Calculation', frequency: 'Monthly', estimatedMinutes: 480, priority: 'Critical', department: 'Fund Accounting', steps: JSON.stringify(['Collect position data from custodian', 'Verify market prices and valuations', 'Calculate accrued management fees', 'Calculate accrued carried interest', 'Compute gross and net NAV', 'Prepare NAV package for review', 'Submit for partner sign-off']) }}),
-    prisma.taskDefinition.create({ data: { taskCode: 'SOP-002', name: 'Quarterly Investor Capital Statement', description: 'Prepare and distribute quarterly capital account statements to all limited partners.', category: 'Investor Services', frequency: 'Quarterly', estimatedMinutes: 360, priority: 'High', department: 'Investor Services', steps: JSON.stringify(['Pull capital account balances', 'Calculate period P&L allocation', 'Prepare statement template', 'QC review with second checker', 'Distribute via investor portal', 'Track acknowledgments']) }}),
-    prisma.taskDefinition.create({ data: { taskCode: 'SOP-003', name: 'Annual K-1 Preparation', description: 'Prepare Schedule K-1 tax documents for all US partners and coordinate with external tax advisor.', category: 'Tax', frequency: 'Annually', estimatedMinutes: 960, priority: 'Critical', department: 'Tax', steps: JSON.stringify(['Gather partner tax information', 'Coordinate with external tax advisor', 'Prepare draft K-1 allocations', 'Review state-level nexus', 'Generate K-1 documents', 'Distribute to partners', 'File with IRS']) }}),
-    prisma.taskDefinition.create({ data: { taskCode: 'SOP-004', name: 'Capital Call Processing', description: 'Process capital call notices including calculation, notice generation, wire tracking, and booking.', category: 'Fund Accounting', frequency: 'Event-Driven', estimatedMinutes: 240, priority: 'High', department: 'Fund Accounting', steps: JSON.stringify(['Calculate call amounts per LP', 'Generate call notices', 'Distribute via portal', 'Track wire receipts', 'Reconcile received funds', 'Book journal entries']) }}),
-    prisma.taskDefinition.create({ data: { taskCode: 'SOP-005', name: 'Distribution Notice Processing', description: 'Process fund distributions including waterfall calculations, tax withholding, and wire initiation.', category: 'Fund Accounting', frequency: 'Event-Driven', estimatedMinutes: 300, priority: 'High', department: 'Fund Accounting', steps: JSON.stringify(['Calculate distribution per waterfall', 'Apply withholding rates by jurisdiction', 'Generate distribution notices', 'Obtain GP approval', 'Initiate wire transfers', 'Book journal entries', 'Update capital accounts']) }}),
-    prisma.taskDefinition.create({ data: { taskCode: 'SOP-006', name: 'Annual Audit Coordination', description: 'Coordinate annual financial statement audit with external auditors including PBC list management.', category: 'Reporting', frequency: 'Annually', estimatedMinutes: 2400, priority: 'Critical', department: 'Fund Accounting', steps: JSON.stringify(['Receive PBC list from auditors', 'Assign PBC items to team members', 'Prepare financial statements draft', 'Respond to auditor inquiries', 'Review draft audit report', 'Obtain management sign-off', 'File audited financials']) }}),
-    prisma.taskDefinition.create({ data: { taskCode: 'SOP-007', name: 'FATCA/CRS Reporting', description: 'Prepare and file FATCA and CRS reports for applicable fund entities.', category: 'Compliance', frequency: 'Annually', estimatedMinutes: 480, priority: 'High', department: 'Compliance', steps: JSON.stringify(['Identify reportable accounts', 'Collect self-certification forms', 'Prepare XML filing data', 'QC review of filings', 'Submit to relevant tax authorities', 'Archive confirmation receipts']) }}),
-    prisma.taskDefinition.create({ data: { taskCode: 'SOP-008', name: 'Investor Onboarding / KYC', description: 'Complete full KYC/AML screening and documentation collection for new investor subscriptions.', category: 'Compliance', frequency: 'Event-Driven', estimatedMinutes: 180, priority: 'High', department: 'Compliance', steps: JSON.stringify(['Receive subscription documents', 'Perform identity verification', 'Screen against sanctions lists', 'Verify source of funds', 'Complete risk assessment', 'Obtain compliance approval', 'Issue acceptance letter']) }}),
-    prisma.taskDefinition.create({ data: { taskCode: 'SOP-009', name: 'Monthly Bank Reconciliation', description: 'Reconcile all fund bank accounts against custodian and accounting records.', category: 'Reconciliation', frequency: 'Monthly', estimatedMinutes: 120, priority: 'Medium', department: 'Fund Accounting', steps: JSON.stringify(['Download bank statements', 'Match transactions to GL', 'Investigate unmatched items', 'Prepare reconciliation report', 'Obtain manager sign-off']) }}),
-    prisma.taskDefinition.create({ data: { taskCode: 'SOP-010', name: 'Quarterly Board Package', description: 'Prepare quarterly board reporting package with performance, risk, and compliance summaries.', category: 'Reporting', frequency: 'Quarterly', estimatedMinutes: 420, priority: 'High', department: 'Client Services', steps: JSON.stringify(['Compile performance data', 'Prepare portfolio summary', 'Draft risk commentary', 'Include compliance attestation', 'Format presentation', 'Distribute to board members']) }}),
-    prisma.taskDefinition.create({ data: { taskCode: 'SOP-011', name: 'Management Fee Calculation', description: 'Calculate management fees based on committed capital or NAV per LPA terms.', category: 'Fund Accounting', frequency: 'Quarterly', estimatedMinutes: 180, priority: 'High', department: 'Fund Accounting', steps: JSON.stringify(['Determine fee basis per LPA', 'Calculate fee for period', 'Apply fee offsets if applicable', 'Prepare fee invoice', 'Obtain GP approval', 'Book fee journal entries']) }}),
-    prisma.taskDefinition.create({ data: { taskCode: 'SOP-012', name: 'Carried Interest Waterfall', description: 'Calculate carried interest allocation per the fund waterfall including preferred return, catch-up, and carry splits.', category: 'Fund Accounting', frequency: 'Quarterly', estimatedMinutes: 600, priority: 'Critical', department: 'Fund Accounting', steps: JSON.stringify(['Calculate total distributable proceeds', 'Apply preferred return (8% hurdle)', 'Calculate GP catch-up', 'Apply carry percentage split', 'Verify clawback provisions', 'Prepare waterfall schedule', 'Review with GP']) }}),
+    prisma.taskDefinition.create({ data: { taskCode: 'SOP-001', name: 'Monthly NAV Calculation', description: 'Calculate net asset value for all fund entities including position valuation, accrued expenses, and fee computation.', category: 'NAV Calculation', frequency: 'Monthly', estimatedMinutes: 480, priority: 'Critical', department: 'Fund Accounting', steps: JSON.stringify([{name:'Collect position data from custodian',dueDaysFromStart:0,dueTime:'09:00'},{name:'Verify market prices and valuations',dueDaysFromStart:0,dueTime:'14:00'},{name:'Calculate accrued management fees',dueDaysFromStart:1,dueTime:'10:00'},{name:'Calculate accrued carried interest',dueDaysFromStart:1,dueTime:'14:00'},{name:'Compute gross and net NAV',dueDaysFromStart:1,dueTime:'17:00'},{name:'Prepare NAV package for review',dueDaysFromStart:2,dueTime:'12:00'},{name:'Submit for partner sign-off',dueDaysFromStart:2,dueTime:'17:00'}]) }}),
+    prisma.taskDefinition.create({ data: { taskCode: 'SOP-002', name: 'Quarterly Investor Capital Statement', description: 'Prepare and distribute quarterly capital account statements to all limited partners.', category: 'Investor Services', frequency: 'Quarterly', estimatedMinutes: 360, priority: 'High', department: 'Investor Services', steps: JSON.stringify([{name:'Pull capital account balances',dueDaysFromStart:0,dueTime:'10:00'},{name:'Calculate period P&L allocation',dueDaysFromStart:1,dueTime:'17:00'},{name:'Prepare statement template',dueDaysFromStart:3,dueTime:'17:00'},{name:'QC review with second checker',dueDaysFromStart:5,dueTime:'12:00'},{name:'Distribute via investor portal',dueDaysFromStart:5,dueTime:'17:00'},{name:'Track acknowledgments',dueDaysFromStart:7,dueTime:'17:00'}]) }}),
+    prisma.taskDefinition.create({ data: { taskCode: 'SOP-003', name: 'Annual K-1 Preparation', description: 'Prepare Schedule K-1 tax documents for all US partners and coordinate with external tax advisor.', category: 'Tax', frequency: 'Annually', estimatedMinutes: 960, priority: 'Critical', department: 'Tax', steps: JSON.stringify([{name:'Gather partner tax information',dueDaysFromStart:-14,dueTime:'17:00'},{name:'Coordinate with external tax advisor',dueDaysFromStart:-7,dueTime:'17:00'},{name:'Prepare draft K-1 allocations',dueDaysFromStart:-3,dueTime:'17:00'},{name:'Review state-level nexus',dueDaysFromStart:-2,dueTime:'17:00'},{name:'Generate K-1 documents',dueDaysFromStart:0,dueTime:'12:00'},{name:'Distribute to partners',dueDaysFromStart:1,dueTime:'17:00'},{name:'File with IRS',dueDaysFromStart:2,dueTime:'17:00'}]) }}),
+    prisma.taskDefinition.create({ data: { taskCode: 'SOP-004', name: 'Capital Call Processing', description: 'Process capital call notices including calculation, notice generation, wire tracking, and booking.', category: 'Fund Accounting', frequency: 'Event-Driven', estimatedMinutes: 240, priority: 'High', department: 'Fund Accounting', steps: JSON.stringify([{name:'Calculate call amounts per LP',dueDaysFromStart:0,dueTime:'10:00'},{name:'Generate call notices',dueDaysFromStart:0,dueTime:'14:00'},{name:'Distribute via portal',dueDaysFromStart:0,dueTime:'17:00'},{name:'Track wire receipts',dueDaysFromStart:3,dueTime:'17:00'},{name:'Reconcile received funds',dueDaysFromStart:4,dueTime:'12:00'},{name:'Book journal entries',dueDaysFromStart:4,dueTime:'17:00'}]) }}),
+    prisma.taskDefinition.create({ data: { taskCode: 'SOP-005', name: 'Distribution Notice Processing', description: 'Process fund distributions including waterfall calculations, tax withholding, and wire initiation.', category: 'Fund Accounting', frequency: 'Event-Driven', estimatedMinutes: 300, priority: 'High', department: 'Fund Accounting', steps: JSON.stringify([{name:'Calculate distribution per waterfall',dueDaysFromStart:0,dueTime:'10:00'},{name:'Apply withholding rates by jurisdiction',dueDaysFromStart:0,dueTime:'14:00'},{name:'Generate distribution notices',dueDaysFromStart:1,dueTime:'10:00'},{name:'Obtain GP approval',dueDaysFromStart:1,dueTime:'17:00'},{name:'Initiate wire transfers',dueDaysFromStart:2,dueTime:'12:00'},{name:'Book journal entries',dueDaysFromStart:2,dueTime:'17:00'},{name:'Update capital accounts',dueDaysFromStart:3,dueTime:'10:00'}]) }}),
+    prisma.taskDefinition.create({ data: { taskCode: 'SOP-006', name: 'Annual Audit Coordination', description: 'Coordinate annual financial statement audit with external auditors including PBC list management.', category: 'Reporting', frequency: 'Annually', estimatedMinutes: 2400, priority: 'Critical', department: 'Fund Accounting', steps: JSON.stringify([{name:'Receive PBC list from auditors',dueDaysFromStart:-60,dueTime:'17:00'},{name:'Assign PBC items to team members',dueDaysFromStart:-55,dueTime:'17:00'},{name:'Prepare financial statements draft',dueDaysFromStart:-30,dueTime:'17:00'},{name:'Respond to auditor inquiries',dueDaysFromStart:-14,dueTime:'17:00'},{name:'Review draft audit report',dueDaysFromStart:-7,dueTime:'17:00'},{name:'Obtain management sign-off',dueDaysFromStart:-3,dueTime:'17:00'},{name:'File audited financials',dueDaysFromStart:0,dueTime:'17:00'}]) }}),
+    prisma.taskDefinition.create({ data: { taskCode: 'SOP-007', name: 'FATCA/CRS Reporting', description: 'Prepare and file FATCA and CRS reports for applicable fund entities.', category: 'Compliance', frequency: 'Annually', estimatedMinutes: 480, priority: 'High', department: 'Compliance', steps: JSON.stringify([{name:'Identify reportable accounts',dueDaysFromStart:-30,dueTime:'17:00'},{name:'Collect self-certification forms',dueDaysFromStart:-20,dueTime:'17:00'},{name:'Prepare XML filing data',dueDaysFromStart:-7,dueTime:'17:00'},{name:'QC review of filings',dueDaysFromStart:-3,dueTime:'12:00'},{name:'Submit to relevant tax authorities',dueDaysFromStart:0,dueTime:'17:00'},{name:'Archive confirmation receipts',dueDaysFromStart:1,dueTime:'17:00'}]) }}),
+    prisma.taskDefinition.create({ data: { taskCode: 'SOP-008', name: 'Investor Onboarding / KYC', description: 'Complete full KYC/AML screening and documentation collection for new investor subscriptions.', category: 'Compliance', frequency: 'Event-Driven', estimatedMinutes: 180, priority: 'High', department: 'Compliance', steps: JSON.stringify([{name:'Receive subscription documents',dueDaysFromStart:0,dueTime:'17:00'},{name:'Perform identity verification',dueDaysFromStart:1,dueTime:'17:00'},{name:'Screen against sanctions lists',dueDaysFromStart:2,dueTime:'12:00'},{name:'Verify source of funds',dueDaysFromStart:3,dueTime:'17:00'},{name:'Complete risk assessment',dueDaysFromStart:5,dueTime:'17:00'},{name:'Obtain compliance approval',dueDaysFromStart:7,dueTime:'12:00'},{name:'Issue acceptance letter',dueDaysFromStart:7,dueTime:'17:00'}]) }}),
+    prisma.taskDefinition.create({ data: { taskCode: 'SOP-009', name: 'Monthly Bank Reconciliation', description: 'Reconcile all fund bank accounts against custodian and accounting records.', category: 'Reconciliation', frequency: 'Monthly', estimatedMinutes: 120, priority: 'Medium', department: 'Fund Accounting', steps: JSON.stringify([{name:'Download bank statements',dueDaysFromStart:0,dueTime:'10:00'},{name:'Match transactions to GL',dueDaysFromStart:0,dueTime:'14:00'},{name:'Investigate unmatched items',dueDaysFromStart:1,dueTime:'12:00'},{name:'Prepare reconciliation report',dueDaysFromStart:1,dueTime:'17:00'},{name:'Obtain manager sign-off',dueDaysFromStart:2,dueTime:'12:00'}]) }}),
+    prisma.taskDefinition.create({ data: { taskCode: 'SOP-010', name: 'Quarterly Board Package', description: 'Prepare quarterly board reporting package with performance, risk, and compliance summaries.', category: 'Reporting', frequency: 'Quarterly', estimatedMinutes: 420, priority: 'High', department: 'Client Services', steps: JSON.stringify([{name:'Compile performance data',dueDaysFromStart:-7,dueTime:'17:00'},{name:'Prepare portfolio summary',dueDaysFromStart:-5,dueTime:'17:00'},{name:'Draft risk commentary',dueDaysFromStart:-4,dueTime:'17:00'},{name:'Include compliance attestation',dueDaysFromStart:-3,dueTime:'17:00'},{name:'Format presentation',dueDaysFromStart:-2,dueTime:'17:00'},{name:'Distribute to board members',dueDaysFromStart:0,dueTime:'09:00'}]) }}),
+    prisma.taskDefinition.create({ data: { taskCode: 'SOP-011', name: 'Management Fee Calculation', description: 'Calculate management fees based on committed capital or NAV per LPA terms.', category: 'Fund Accounting', frequency: 'Quarterly', estimatedMinutes: 180, priority: 'High', department: 'Fund Accounting', steps: JSON.stringify([{name:'Determine fee basis per LPA',dueDaysFromStart:0,dueTime:'10:00'},{name:'Calculate fee for period',dueDaysFromStart:0,dueTime:'14:00'},{name:'Apply fee offsets if applicable',dueDaysFromStart:1,dueTime:'10:00'},{name:'Prepare fee invoice',dueDaysFromStart:1,dueTime:'17:00'},{name:'Obtain GP approval',dueDaysFromStart:2,dueTime:'17:00'},{name:'Book fee journal entries',dueDaysFromStart:3,dueTime:'12:00'}]) }}),
+    prisma.taskDefinition.create({ data: { taskCode: 'SOP-012', name: 'Carried Interest Waterfall', description: 'Calculate carried interest allocation per the fund waterfall including preferred return, catch-up, and carry splits.', category: 'Fund Accounting', frequency: 'Quarterly', estimatedMinutes: 600, priority: 'Critical', department: 'Fund Accounting', steps: JSON.stringify([{name:'Calculate total distributable proceeds',dueDaysFromStart:0,dueTime:'10:00'},{name:'Apply preferred return (8% hurdle)',dueDaysFromStart:0,dueTime:'14:00'},{name:'Calculate GP catch-up',dueDaysFromStart:1,dueTime:'10:00'},{name:'Apply carry percentage split',dueDaysFromStart:1,dueTime:'14:00'},{name:'Verify clawback provisions',dueDaysFromStart:2,dueTime:'12:00'},{name:'Prepare waterfall schedule',dueDaysFromStart:2,dueTime:'17:00'},{name:'Review with GP',dueDaysFromStart:3,dueTime:'17:00'}]) }}),
   ]);
   console.log(`Created ${taskDefs.length} task definitions`);
 
   // ═══════════════════════════════════════════════
-  // INTERNAL USERS (10 with 300+ fields populated)
+  // INTERNAL USERS — populated from employees.csv (~949 rows)
   // ═══════════════════════════════════════════════
-  const users = await Promise.all([
-    prisma.internalUser.create({ data: {
-      employeeId: 'EMP-001', firstName: 'Megan', lastName: 'Moore', email: 'megan.moore@lighthouse.io',
-      personalEmail: 'megan.m@gmail.com', phone: '+1-214-555-0101', mobilePhone: '+1-214-555-0102',
-      dateOfBirth: new Date('1982-07-14'), gender: 'Female', pronouns: 'she/her',
-      nationality: 'American', citizenship: 'United States', maritalStatus: 'Married',
-      emergencyContactName: 'David Moore', emergencyContactPhone: '+1-214-555-0199', emergencyContactRelation: 'Spouse',
-      title: 'Managing Director, Client Services', role: 'Partner', department: 'Client Services', division: 'Front Office', team: 'Strategic Clients', podId: 'POD-A',
-      seniorityLevel: 'C-Suite', employmentType: 'Full-Time', employmentStatus: 'Active',
-      hireDate: new Date('2016-03-01'), startDate: new Date('2016-03-15'), promotionDate: new Date('2023-01-01'),
-      lastReviewDate: new Date('2025-12-15'), nextReviewDate: new Date('2026-12-15'),
-      yearsAtCompany: 10.1, yearsInIndustry: 22, previousEmployer: 'Goldman Sachs', previousTitle: 'Vice President, Fund Services',
-      referredBy: 'Board Recruitment', recruitingSource: 'Executive Search',
-      officeLocation: 'Dallas HQ', building: 'One Arts Plaza', floor: '42', deskNumber: '42-001',
-      timezone: 'America/Chicago', city: 'Dallas', state: 'Texas', country: 'United States', postalCode: '75201',
-      remoteStatus: 'Hybrid', homeOfficeApproved: true, parkingAssigned: true, badgeId: 'BDG-1001',
-      baseSalary: 425000, salaryBand: 'L7', salaryBandMin: 350000, salaryBandMax: 550000, currency: 'USD',
-      payFrequency: 'Semi-Monthly', bonusTarget: 212500, bonusActual: 255000,
-      equityGrantShares: 50000, equityVestingSchedule: '4-year with 1-year cliff', equityGrantDate: new Date('2023-01-15'), equityCliffDate: new Date('2024-01-15'), equityVestedShares: 25000,
-      totalCompensation: 935000, compRatio: 1.12, lastSalaryChange: new Date('2025-01-01'), lastSalaryChangeAmt: 25000,
-      healthInsurance: 'Platinum PPO', dentalInsurance: 'Premium', visionInsurance: 'Standard',
-      lifeInsurance: '3x Salary', disabilityInsurance: 'Long-Term',
-      healthSavingsAccount: true, retirement401k: true, retirement401kContrib: 23000, companyMatch401k: 13800,
-      wellnessStipend: 2400, fitnessReimbursement: true, tuitionReimbursement: true, tuitionReimbursementMax: 10000,
-      ptoDaysTotal: 30, ptoDaysUsed: 12, sickDaysTotal: 15, sickDaysUsed: 2,
-      parentalLeaveDays: 20, sabbaticalEligible: true, phoneStipend: 150, internetStipend: 100,
-      performanceRating: 'Exceeds Expectations', performanceScore: 4.5, lastPerformanceReview: 'Q4 2025',
-      goalCompletionRate: 94, nineBoxPosition: 'Star', flightRisk: 'Low', retentionRisk: 'Low',
-      potentialRating: 'High', leadershipScore: 4.8, technicalScore: 4.2, communicationScore: 4.9,
-      teamworkScore: 4.7, innovationScore: 4.3, clientSatisfaction: 4.6, menteeCount: 3, coachingHoursQ: 12,
-      billableRate: 650, costRate: 285, utilizationTarget: 75, utilizationActual: 82,
-      billableHoursYtd: 420, nonBillableHoursYtd: 92, avgWeeklyHours: 48,
-      projectsActive: 4, projectsCompleted: 12, tasksAssigned: 8, tasksCompleted: 6, tasksOverdue: 0,
-      clientsManaged: 4, entitiesManaged: 166, revenueInfluenced: 136800, costToCompany: 935000,
-      primaryExpertise: 'Fund Administration', secondaryExpertise: 'Client Relationship Management',
-      tertiaryExpertise: 'Private Equity Operations', industrySpecialization: 'Alternative Investments',
-      strategyExpertise: 'PE, VC, FoF', regulatoryExpertise: 'SEC, AIFMD',
-      languagesSpoken: 'English, Spanish', educationLevel: 'MBA',
-      university: 'University of Texas at Austin', degreeType: 'BBA', degreeMajor: 'Finance',
-      graduationYear: 2004, mbaProgram: 'Wharton School of Business',
-      cpaLicense: true, cpaState: 'Texas', cpaExpiration: new Date('2027-06-30'),
-      cfaCharter: true, cfaLevel: 'Charterholder',
-      activeDirectoryId: 'mmoore', ssoProvider: 'Okta', vpnAccess: true,
-      emailPlatform: 'Microsoft 365', chatPlatform: 'Slack', projectMgmtTool: 'Asana',
-      crmAccess: true, crmRole: 'Admin', accountingSystemAccess: 'Investran, Geneva',
-      investorPortalAccess: true, investorPortalRole: 'Admin',
-      reportingPlatformAccess: true, reportingPlatformRole: 'Publisher',
-      complianceSystemAccess: true, dataWarehouseAccess: true, biToolAccess: true,
-      apiAccess: true, adminPanelAccess: true, documentMgmtAccess: true,
-      hrSystemAccess: true, travelBookingAccess: true, expenseSystemAccess: true,
-      githubAccess: true, githubUsername: 'mmoore-lh', slackId: 'U001MMOORE',
-      zoomLicense: true, mfaEnabled: true, lastLogin: new Date('2026-04-02'),
-      laptopModel: 'MacBook Pro 16" M3 Max', monitorCount: 2, softwareAssigned: 'Office 365, Tableau, Bloomberg Terminal',
-      backgroundCheckDate: new Date('2016-02-15'), backgroundCheckStatus: 'Clear',
-      ndaSigned: true, ndaDate: new Date('2016-03-01'), nonCompeteAgreement: true, nonCompeteExpiry: new Date('2028-03-01'),
-      conflictOfInterestFiled: true, conflictOfInterestDate: new Date('2026-01-15'),
-      personalTradingDisclosure: true, insiderTradingTraining: true, antiMoneyLaunderingTrain: true,
-      amlTrainingDate: new Date('2025-09-15'), cyberSecurityTraining: true, cyberSecurityTrainDate: new Date('2025-11-01'),
-      dataPrivacyTraining: true, sexualHarassmentTraining: true, diversityTraining: true, ethicsTraining: true,
-      requiredTrainingComplete: true, complianceScore: 98,
-      passportCountry: 'United States', passportExpiry: new Date('2029-08-20'),
-      frequentFlyerProgram: 'American Airlines AAdvantage', hotelLoyaltyProgram: 'Marriott Bonvoy',
-      travelCardOnFile: true, corporateCardLimit: 25000, ytdTravelExpense: 18500, ytdClientEntertainment: 12200,
-      bio: 'Managing Director leading Lighthouse\'s largest client relationships across PE, VC, and Fund of Funds strategies.',
-      linkedinUrl: 'https://linkedin.com/in/meganmoore', tShirtSize: 'M', tags: 'leadership,client-facing,pe-expert',
-      dataQualityScore: 96, confidenceScore: 0.95,
+  const csvRows = parseCSV('prisma/employees.csv');
+  const emailSeen = new Map<string, number>();
+  const HIRE_START = new Date('2019-01-01');
+  const HIRE_END = new Date('2026-03-01');
+  const NOW_MS = Date.now();
+  const SEVEN_DAYS = 7 * 86_400_000;
+  const NINETY_DAYS = 90 * 86_400_000;
+
+  const allUserData = csvRows.map((row, index) => {
+    const { first, last } = parseName(row['Name'] ?? '');
+    const email = makeEmail(first, last, emailSeen);
+    const title = row['Job Title'] ?? '';
+    const department = row['Department'] ?? '';
+    const managerRaw = (row['Reports To'] ?? '').trim();
+    let managerName: string | null = null;
+    if (managerRaw) {
+      const mgr = parseName(managerRaw);
+      managerName = `${mgr.first} ${mgr.last}`;
+    }
+    const seniorityLevel = deriveSeniorityFromTitle(title);
+    const access = deriveModuleAccess(department, seniorityLevel, email);
+
+    return {
+      employeeId: `JSQ-${String(index + 1).padStart(4, '0')}`,
+      firstName: first,
+      lastName: last,
+      email,
+      title,
+      role: seedDeriveRole(title),
+      department,
+      managerName,
+      officeLocation: row['Location'] ?? null,
+      seniorityLevel,
+      employmentStatus: 'Active',
+      employmentType: 'Full-Time',
+      mfaEnabled: true,
+      crmAccess: access.crmAccess,
+      investorPortalAccess: access.investorPortalAccess,
+      reportingPlatformAccess: access.reportingPlatformAccess,
+      complianceSystemAccess: access.complianceSystemAccess,
+      dataWarehouseAccess: access.dataWarehouseAccess,
+      biToolAccess: access.biToolAccess,
+      apiAccess: access.apiAccess,
+      adminPanelAccess: access.adminPanelAccess,
+      documentMgmtAccess: access.documentMgmtAccess,
+      hrSystemAccess: access.hrSystemAccess,
+      githubAccess: access.githubAccess,
+      vpnAccess: access.vpnAccess,
+      hireDate: randomDate(HIRE_START, HIRE_END),
+      lastLogin: new Date(NOW_MS - Math.random() * SEVEN_DAYS),
+      lastPasswordChange: new Date(NOW_MS - Math.random() * NINETY_DAYS),
+      requiredTrainingComplete: Math.random() < 0.92,
+      dataQualityScore: randomInt(70, 99),
+      confidenceScore: randomInt(75, 99) / 100,
+    };
+  });
+
+  await prisma.internalUser.createMany({ data: allUserData });
+  // Guarantee System Admin flags — emails use first-initial+last format (bwayne@, ahyder@, chammond@)
+  const adminEmails = ['bwayne@junipersquare.com', 'ahyder@junipersquare.com', 'chammond@junipersquare.com'];
+  for (const ae of adminEmails) {
+    await prisma.internalUser.updateMany({
+      where: { email: ae },
+      data: {
+        adminPanelAccess: true, crmAccess: true, investorPortalAccess: true,
+        reportingPlatformAccess: true, complianceSystemAccess: true,
+        dataWarehouseAccess: true, biToolAccess: true, apiAccess: true,
+        documentMgmtAccess: true, hrSystemAccess: true, githubAccess: true,
+        vpnAccess: true,
+      },
+    });
+  }
+  const users = await prisma.internalUser.findMany({ orderBy: { employeeId: 'asc' } });
+  console.log(`Created ${users.length} internal users from CSV`);
+
+  // Ensure Christine Egbert is TL0 (top of FA org — no manager)
+  await prisma.internalUser.updateMany({
+    where: { lastName: 'Egbert', firstName: 'Christine' },
+    data: { managerName: null },
+  });
+
+  // ──── end of InternalUser CSV section ────
+
+  // ═══════════════════════════════════════════════
+  // INTERNAL USER SURVEYS (Qualtrics FA Onboarding)
+  // ═══════════════════════════════════════════════
+  const S = (v: string) => v; // level helper for readability
+  const ENTRY   = 'Entry-Level: 0-2 years';
+  const JUNIOR  = 'Junior-Level: 2-5 years';
+  const MID     = 'Mid-Level: 5-7 years';
+  const SENIOR  = 'Senior-Level: 7-10 years';
+  const EXPERT  = 'Specialist/Expert: 10+ years';
+  const NONE    = 'None';
+
+  await Promise.all([
+    // EMP-001 Megan Moore — Managing Director, Private Equity, 18+ yrs industry
+    prisma.internalUserSurvey.create({ data: {
+      employeeId: users[0].id,
+      college: 'University of Texas at Austin', graduateDegree: 'MBA', hasMba: true, hasCpa: false,
+      otherCerts: 'CFA Level III',
+      priorFaFirms: JSON.stringify(['Citco Fund Services', 'Alter Domus']),
+      priorGpFirms: JSON.stringify(['KKR', 'Advent International']),
+      priorAuditFirms: JSON.stringify([]),
+      priorConsultingFirms: JSON.stringify(['McKinsey & Company']),
+      csYears: 18, csLevel: EXPERT,
+      complianceSkills: JSON.stringify({
+        'Tax Services': EXPERT, 'FATCA/CRS Reporting': SENIOR, 'AML/KYC': SENIOR,
+        'SEC Regulatory Reporting': EXPERT, 'State Registration / Blue Sky': SENIOR,
+        'ERISA Compliance': MID, 'SOX Controls': SENIOR, 'Audit Coordination': EXPERT,
+      }),
+      pmYears: 18,
+      pmAssetSkills: JSON.stringify({
+        'Private Equity': EXPERT, 'Venture Capital': SENIOR, 'Real Estate (Equity)': MID,
+        'Real Estate (Debt)': JUNIOR, 'Infrastructure': MID, 'Private Credit / Direct Lending': SENIOR,
+        'CLOs / Structured Credit': JUNIOR, 'Hedge Funds': MID, 'Fund of Funds': SENIOR,
+        'Co-Investments': EXPERT, 'Secondaries': SENIOR, 'GP-Led Secondaries': MID,
+        'Continuation Vehicles': MID, 'Distressed / Special Situations': JUNIOR,
+        'Growth Equity': SENIOR, 'Buyouts (Large-Cap)': EXPERT, 'Buyouts (Mid-Market)': EXPERT,
+        'Buyouts (Small-Cap)': SENIOR, 'SPAC / Public Equity': JUNIOR,
+        'Natural Resources / Commodities': ENTRY, 'Digital Assets / Crypto': NONE,
+      }),
+      allocationSkills: JSON.stringify({
+        'Management Fee Calculations': EXPERT, 'Capital Call Processing': EXPERT,
+        'Distribution Calculations': EXPERT, 'Waterfall Calculations': EXPERT,
+        'Carried Interest Calculations': EXPERT, 'Preferred Return Calculations': EXPERT,
+        'Hurdle Rate Calculations': EXPERT, 'Clawback Provisions': SENIOR,
+        'Equalization / Catch-Up': SENIOR, 'Capital Account Statements': EXPERT,
+        'PFIC Calculations': SENIOR, 'ECI / UBTI Tracking': SENIOR,
+        'Section 754 Adjustments': MID, 'Income Allocation Methods': EXPERT,
+        'Side Pocket Accounting': MID, 'In-Kind Distributions': SENIOR,
+        'Tax Distribution Policy': SENIOR, 'Multi-Class Structures': EXPERT,
+      }),
+      otherOpSkills: JSON.stringify({
+        'Wire Transfers': EXPERT, 'Cash Reconciliation': EXPERT, 'Bank Reconciliation': EXPERT,
+        'Accounts Payable': SENIOR, 'Accounts Receivable': SENIOR, 'Expense Allocations': EXPERT,
+        'GL Journal Entries': EXPERT, 'Month-End Close': EXPERT,
+        'Financial Statement Preparation': EXPERT, 'Audit Support': EXPERT,
+        'Investor Portal Management': SENIOR,
+      }),
+      preferredPmSoftware: 'Investran',
+      technologySkills: JSON.stringify({
+        'Investran': EXPERT, 'Allvue / AltaReturn': SENIOR, 'Geneva / SS&C': MID,
+        'Excel': EXPERT, 'Power BI / Tableau': SENIOR, 'Salesforce': MID,
+        'Juniper Square (Platform)': SENIOR, 'DocuSign / Contract Tools': SENIOR,
+        'Python / SQL': ENTRY,
+      }),
+      submittedAt: new Date('2019-04-01'),
     }}),
-    prisma.internalUser.create({ data: {
-      employeeId: 'EMP-002', firstName: 'Jessica', lastName: 'Cruz', email: 'jessica.cruz@lighthouse.io',
-      phone: '+1-310-555-0201', mobilePhone: '+1-310-555-0202',
-      title: 'Director, Client Services', role: 'Director', department: 'Client Services', division: 'Front Office', team: 'Growth Clients', podId: 'POD-B',
-      seniorityLevel: 'Senior', employmentType: 'Full-Time', employmentStatus: 'Active',
-      hireDate: new Date('2019-08-15'), yearsAtCompany: 6.7, yearsInIndustry: 14,
-      officeLocation: 'Los Angeles', city: 'Los Angeles', state: 'California', country: 'United States',
-      remoteStatus: 'Hybrid', baseSalary: 275000, bonusTarget: 82500, bonusActual: 90000, totalCompensation: 447500,
-      performanceRating: 'Exceeds Expectations', performanceScore: 4.3, utilizationTarget: 80, utilizationActual: 78,
-      billableRate: 475, costRate: 195, clientsManaged: 2, entitiesManaged: 38,
-      primaryExpertise: 'Private Equity', secondaryExpertise: 'Investor Relations',
-      educationLevel: 'MBA', university: 'UCLA Anderson', degreeType: 'MBA', degreeMajor: 'Finance',
-      cpaLicense: true, cpaState: 'California', cfaCharter: false, cfaLevel: 'Level III Candidate',
-      projectsActive: 3, tasksAssigned: 12, tasksCompleted: 9, tasksOverdue: 1,
-      activeDirectoryId: 'jcruz', mfaEnabled: true, lastLogin: new Date('2026-04-02'),
-      requiredTrainingComplete: true, complianceScore: 94,
-      tags: 'client-facing,growth-accounts', dataQualityScore: 88, confidenceScore: 0.86,
+
+    // EMP-002 Jessica Cruz — Director Client Services, 12 yrs
+    prisma.internalUserSurvey.create({ data: {
+      employeeId: users[1].id,
+      college: 'University of Southern California', graduateDegree: null, hasMba: false, hasCpa: false,
+      otherCerts: null,
+      priorFaFirms: JSON.stringify(['SS&C GlobeOp', 'Vistra']),
+      priorGpFirms: JSON.stringify(['Ares Management']),
+      priorAuditFirms: JSON.stringify([]),
+      priorConsultingFirms: JSON.stringify([]),
+      csYears: 12, csLevel: EXPERT,
+      complianceSkills: JSON.stringify({
+        'Tax Services': MID, 'FATCA/CRS Reporting': SENIOR, 'AML/KYC': SENIOR,
+        'SEC Regulatory Reporting': MID, 'State Registration / Blue Sky': JUNIOR,
+        'ERISA Compliance': JUNIOR, 'SOX Controls': MID, 'Audit Coordination': SENIOR,
+      }),
+      pmYears: 12,
+      pmAssetSkills: JSON.stringify({
+        'Private Equity': EXPERT, 'Venture Capital': SENIOR, 'Real Estate (Equity)': JUNIOR,
+        'Real Estate (Debt)': JUNIOR, 'Infrastructure': JUNIOR, 'Private Credit / Direct Lending': SENIOR,
+        'CLOs / Structured Credit': ENTRY, 'Hedge Funds': JUNIOR, 'Fund of Funds': MID,
+        'Co-Investments': SENIOR, 'Secondaries': MID, 'GP-Led Secondaries': ENTRY,
+        'Continuation Vehicles': ENTRY, 'Distressed / Special Situations': JUNIOR,
+        'Growth Equity': SENIOR, 'Buyouts (Large-Cap)': SENIOR, 'Buyouts (Mid-Market)': EXPERT,
+        'Buyouts (Small-Cap)': SENIOR, 'SPAC / Public Equity': NONE,
+        'Natural Resources / Commodities': NONE, 'Digital Assets / Crypto': NONE,
+      }),
+      allocationSkills: JSON.stringify({
+        'Management Fee Calculations': SENIOR, 'Capital Call Processing': EXPERT,
+        'Distribution Calculations': SENIOR, 'Waterfall Calculations': MID,
+        'Carried Interest Calculations': MID, 'Preferred Return Calculations': SENIOR,
+        'Hurdle Rate Calculations': MID, 'Clawback Provisions': JUNIOR,
+        'Equalization / Catch-Up': MID, 'Capital Account Statements': SENIOR,
+        'PFIC Calculations': JUNIOR, 'ECI / UBTI Tracking': JUNIOR,
+        'Section 754 Adjustments': NONE, 'Income Allocation Methods': SENIOR,
+        'Side Pocket Accounting': NONE, 'In-Kind Distributions': MID,
+        'Tax Distribution Policy': MID, 'Multi-Class Structures': MID,
+      }),
+      otherOpSkills: JSON.stringify({
+        'Wire Transfers': SENIOR, 'Cash Reconciliation': SENIOR, 'Bank Reconciliation': SENIOR,
+        'Accounts Payable': MID, 'Accounts Receivable': MID, 'Expense Allocations': SENIOR,
+        'GL Journal Entries': SENIOR, 'Month-End Close': SENIOR,
+        'Financial Statement Preparation': SENIOR, 'Audit Support': SENIOR,
+        'Investor Portal Management': EXPERT,
+      }),
+      preferredPmSoftware: 'Juniper Square',
+      technologySkills: JSON.stringify({
+        'Investran': SENIOR, 'Allvue / AltaReturn': MID, 'Geneva / SS&C': JUNIOR,
+        'Excel': EXPERT, 'Power BI / Tableau': MID, 'Salesforce': SENIOR,
+        'Juniper Square (Platform)': EXPERT, 'DocuSign / Contract Tools': SENIOR,
+        'Python / SQL': NONE,
+      }),
+      submittedAt: new Date('2020-07-15'),
     }}),
-    prisma.internalUser.create({ data: {
-      employeeId: 'EMP-003', firstName: 'Diana', lastName: 'Smith', email: 'diana.smith@lighthouse.io',
-      phone: '+1-212-555-0301',
-      title: 'Director, Fund Accounting', role: 'Director', department: 'Fund Accounting', division: 'Operations', team: 'NAV Team', podId: 'POD-A',
-      seniorityLevel: 'Senior', employmentType: 'Full-Time', employmentStatus: 'Active',
-      hireDate: new Date('2017-04-01'), yearsAtCompany: 9.0, yearsInIndustry: 18,
-      officeLocation: 'New York', city: 'New York', state: 'New York', country: 'United States',
-      baseSalary: 290000, bonusTarget: 87000, totalCompensation: 435000,
-      performanceRating: 'Meets Expectations', performanceScore: 3.8, utilizationTarget: 85, utilizationActual: 88,
-      billableRate: 425, costRate: 175, clientsManaged: 2, entitiesManaged: 70,
-      primaryExpertise: 'NAV Calculation', secondaryExpertise: 'Financial Reporting',
-      educationLevel: 'Masters', university: 'NYU Stern', degreeType: 'MS', degreeMajor: 'Accounting',
-      cpaLicense: true, cpaState: 'New York',
-      projectsActive: 2, tasksAssigned: 15, tasksCompleted: 11, tasksOverdue: 2,
-      activeDirectoryId: 'dsmith', mfaEnabled: true, lastLogin: new Date('2026-04-01'),
-      requiredTrainingComplete: true, complianceScore: 92, tags: 'nav-expert,fund-accounting',
-      dataQualityScore: 90, confidenceScore: 0.88,
+
+    // EMP-003 Diana Smith — Director Fund Accounting, 15 yrs
+    prisma.internalUserSurvey.create({ data: {
+      employeeId: users[2].id,
+      college: 'New York University (Stern)', graduateDegree: 'MBA', hasMba: true, hasCpa: true,
+      otherCerts: null,
+      priorFaFirms: JSON.stringify(['Citco Fund Services', 'Sanne Group']),
+      priorGpFirms: JSON.stringify([]),
+      priorAuditFirms: JSON.stringify(['PricewaterhouseCoopers']),
+      priorConsultingFirms: JSON.stringify([]),
+      csYears: 15, csLevel: EXPERT,
+      complianceSkills: JSON.stringify({
+        'Tax Services': EXPERT, 'FATCA/CRS Reporting': EXPERT, 'AML/KYC': SENIOR,
+        'SEC Regulatory Reporting': EXPERT, 'State Registration / Blue Sky': MID,
+        'ERISA Compliance': SENIOR, 'SOX Controls': EXPERT, 'Audit Coordination': EXPERT,
+      }),
+      pmYears: 15,
+      pmAssetSkills: JSON.stringify({
+        'Private Equity': EXPERT, 'Venture Capital': MID, 'Real Estate (Equity)': MID,
+        'Real Estate (Debt)': JUNIOR, 'Infrastructure': JUNIOR, 'Private Credit / Direct Lending': SENIOR,
+        'CLOs / Structured Credit': MID, 'Hedge Funds': SENIOR, 'Fund of Funds': SENIOR,
+        'Co-Investments': EXPERT, 'Secondaries': SENIOR, 'GP-Led Secondaries': SENIOR,
+        'Continuation Vehicles': MID, 'Distressed / Special Situations': MID,
+        'Growth Equity': SENIOR, 'Buyouts (Large-Cap)': EXPERT, 'Buyouts (Mid-Market)': EXPERT,
+        'Buyouts (Small-Cap)': SENIOR, 'SPAC / Public Equity': JUNIOR,
+        'Natural Resources / Commodities': ENTRY, 'Digital Assets / Crypto': NONE,
+      }),
+      allocationSkills: JSON.stringify({
+        'Management Fee Calculations': EXPERT, 'Capital Call Processing': EXPERT,
+        'Distribution Calculations': EXPERT, 'Waterfall Calculations': EXPERT,
+        'Carried Interest Calculations': EXPERT, 'Preferred Return Calculations': EXPERT,
+        'Hurdle Rate Calculations': EXPERT, 'Clawback Provisions': EXPERT,
+        'Equalization / Catch-Up': SENIOR, 'Capital Account Statements': EXPERT,
+        'PFIC Calculations': EXPERT, 'ECI / UBTI Tracking': EXPERT,
+        'Section 754 Adjustments': SENIOR, 'Income Allocation Methods': EXPERT,
+        'Side Pocket Accounting': SENIOR, 'In-Kind Distributions': SENIOR,
+        'Tax Distribution Policy': EXPERT, 'Multi-Class Structures': EXPERT,
+      }),
+      otherOpSkills: JSON.stringify({
+        'Wire Transfers': EXPERT, 'Cash Reconciliation': EXPERT, 'Bank Reconciliation': EXPERT,
+        'Accounts Payable': EXPERT, 'Accounts Receivable': EXPERT, 'Expense Allocations': EXPERT,
+        'GL Journal Entries': EXPERT, 'Month-End Close': EXPERT,
+        'Financial Statement Preparation': EXPERT, 'Audit Support': EXPERT,
+        'Investor Portal Management': SENIOR,
+      }),
+      preferredPmSoftware: 'Investran',
+      technologySkills: JSON.stringify({
+        'Investran': EXPERT, 'Allvue / AltaReturn': EXPERT, 'Geneva / SS&C': SENIOR,
+        'Excel': EXPERT, 'Power BI / Tableau': SENIOR, 'Salesforce': MID,
+        'Juniper Square (Platform)': SENIOR, 'DocuSign / Contract Tools': SENIOR,
+        'Python / SQL': JUNIOR,
+      }),
+      submittedAt: new Date('2018-02-01'),
     }}),
-    prisma.internalUser.create({ data: {
-      employeeId: 'EMP-004', firstName: 'Jason', lastName: 'Cooper', email: 'jason.cooper@lighthouse.io',
-      phone: '+1-617-555-0401',
-      title: 'VP, Investor Services', role: 'VP', department: 'Investor Services', division: 'Operations', team: 'LP Relations', podId: 'POD-C',
-      seniorityLevel: 'Mid', employmentType: 'Full-Time', employmentStatus: 'Active',
-      hireDate: new Date('2020-01-15'), yearsAtCompany: 6.2, yearsInIndustry: 11,
-      officeLocation: 'Boston', city: 'Boston', state: 'Massachusetts', country: 'United States',
-      baseSalary: 210000, bonusTarget: 52500, totalCompensation: 315000,
-      performanceRating: 'Exceeds Expectations', performanceScore: 4.1, utilizationTarget: 80, utilizationActual: 76,
-      billableRate: 350, costRate: 145, clientsManaged: 1, entitiesManaged: 28,
-      primaryExpertise: 'Investor Relations', secondaryExpertise: 'Capital Calls & Distributions',
-      educationLevel: 'Bachelors', university: 'Boston College', degreeType: 'BS', degreeMajor: 'Finance',
-      cpaLicense: false, caiaCharter: true,
-      projectsActive: 2, tasksAssigned: 10, tasksCompleted: 7, tasksOverdue: 1,
-      activeDirectoryId: 'jcooper', mfaEnabled: true, lastLogin: new Date('2026-04-02'),
-      requiredTrainingComplete: true, complianceScore: 96, tags: 'investor-services,lp-relations',
-      dataQualityScore: 85, confidenceScore: 0.82,
+
+    // EMP-004 Jason Cooper — VP Investor Services, 10 yrs
+    prisma.internalUserSurvey.create({ data: {
+      employeeId: users[3].id,
+      college: 'Boston College (Carroll)', graduateDegree: null, hasMba: false, hasCpa: false,
+      otherCerts: 'CAIA Level I',
+      priorFaFirms: JSON.stringify(['IQ-EQ', 'TMF Group']),
+      priorGpFirms: JSON.stringify(['Bain Capital']),
+      priorAuditFirms: JSON.stringify([]),
+      priorConsultingFirms: JSON.stringify([]),
+      csYears: 10, csLevel: EXPERT,
+      complianceSkills: JSON.stringify({
+        'Tax Services': JUNIOR, 'FATCA/CRS Reporting': SENIOR, 'AML/KYC': EXPERT,
+        'SEC Regulatory Reporting': SENIOR, 'State Registration / Blue Sky': MID,
+        'ERISA Compliance': SENIOR, 'SOX Controls': MID, 'Audit Coordination': MID,
+      }),
+      pmYears: 10,
+      pmAssetSkills: JSON.stringify({
+        'Private Equity': EXPERT, 'Venture Capital': SENIOR, 'Real Estate (Equity)': MID,
+        'Real Estate (Debt)': JUNIOR, 'Infrastructure': JUNIOR, 'Private Credit / Direct Lending': SENIOR,
+        'CLOs / Structured Credit': JUNIOR, 'Hedge Funds': MID, 'Fund of Funds': SENIOR,
+        'Co-Investments': SENIOR, 'Secondaries': MID, 'GP-Led Secondaries': JUNIOR,
+        'Continuation Vehicles': JUNIOR, 'Distressed / Special Situations': JUNIOR,
+        'Growth Equity': SENIOR, 'Buyouts (Large-Cap)': SENIOR, 'Buyouts (Mid-Market)': EXPERT,
+        'Buyouts (Small-Cap)': SENIOR, 'SPAC / Public Equity': JUNIOR,
+        'Natural Resources / Commodities': NONE, 'Digital Assets / Crypto': NONE,
+      }),
+      allocationSkills: JSON.stringify({
+        'Management Fee Calculations': SENIOR, 'Capital Call Processing': EXPERT,
+        'Distribution Calculations': SENIOR, 'Waterfall Calculations': MID,
+        'Carried Interest Calculations': JUNIOR, 'Preferred Return Calculations': SENIOR,
+        'Hurdle Rate Calculations': MID, 'Clawback Provisions': JUNIOR,
+        'Equalization / Catch-Up': JUNIOR, 'Capital Account Statements': SENIOR,
+        'PFIC Calculations': ENTRY, 'ECI / UBTI Tracking': JUNIOR,
+        'Section 754 Adjustments': NONE, 'Income Allocation Methods': SENIOR,
+        'Side Pocket Accounting': NONE, 'In-Kind Distributions': SENIOR,
+        'Tax Distribution Policy': JUNIOR, 'Multi-Class Structures': MID,
+      }),
+      otherOpSkills: JSON.stringify({
+        'Wire Transfers': SENIOR, 'Cash Reconciliation': SENIOR, 'Bank Reconciliation': SENIOR,
+        'Accounts Payable': JUNIOR, 'Accounts Receivable': JUNIOR, 'Expense Allocations': MID,
+        'GL Journal Entries': MID, 'Month-End Close': SENIOR,
+        'Financial Statement Preparation': SENIOR, 'Audit Support': SENIOR,
+        'Investor Portal Management': EXPERT,
+      }),
+      preferredPmSoftware: 'Juniper Square',
+      technologySkills: JSON.stringify({
+        'Investran': MID, 'Allvue / AltaReturn': JUNIOR, 'Geneva / SS&C': ENTRY,
+        'Excel': EXPERT, 'Power BI / Tableau': MID, 'Salesforce': EXPERT,
+        'Juniper Square (Platform)': EXPERT, 'DocuSign / Contract Tools': EXPERT,
+        'Python / SQL': ENTRY,
+      }),
+      submittedAt: new Date('2021-05-01'),
     }}),
-    prisma.internalUser.create({ data: {
-      employeeId: 'EMP-005', firstName: 'Steven', lastName: 'Wright', email: 'steven.wright@lighthouse.io',
-      phone: '+1-214-555-0501',
-      title: 'VP, Fund Accounting', role: 'VP', department: 'Fund Accounting', division: 'Operations', team: 'NAV Team',
-      seniorityLevel: 'Mid', employmentType: 'Full-Time', employmentStatus: 'Active',
-      hireDate: new Date('2021-06-01'), yearsAtCompany: 4.8, yearsInIndustry: 9,
-      officeLocation: 'Dallas HQ', city: 'Dallas', state: 'Texas', country: 'United States',
-      baseSalary: 185000, bonusTarget: 37000, totalCompensation: 259000,
-      performanceRating: 'Meets Expectations', performanceScore: 3.6, utilizationTarget: 85, utilizationActual: 91,
-      billableRate: 325, costRate: 130, entitiesManaged: 35,
-      primaryExpertise: 'Fund Accounting', secondaryExpertise: 'Waterfall Calculations',
-      educationLevel: 'Bachelors', university: 'UT Dallas', degreeType: 'BBA', degreeMajor: 'Accounting',
-      cpaLicense: true, cpaState: 'Texas',
-      projectsActive: 3, tasksAssigned: 18, tasksCompleted: 13, tasksOverdue: 3,
-      activeDirectoryId: 'swright', mfaEnabled: true, lastLogin: new Date('2026-04-02'),
-      requiredTrainingComplete: true, complianceScore: 90, tags: 'fund-accounting,waterfall',
-      dataQualityScore: 83, confidenceScore: 0.80,
+
+    // EMP-005 Steven Wright — VP Fund Accounting, 9 yrs
+    prisma.internalUserSurvey.create({ data: {
+      employeeId: users[4].id,
+      college: 'Southern Methodist University (Cox)', graduateDegree: null, hasMba: false, hasCpa: true,
+      otherCerts: null,
+      priorFaFirms: JSON.stringify(['Alter Domus', 'Vistra']),
+      priorGpFirms: JSON.stringify([]),
+      priorAuditFirms: JSON.stringify(['Deloitte']),
+      priorConsultingFirms: JSON.stringify([]),
+      csYears: 9, csLevel: SENIOR,
+      complianceSkills: JSON.stringify({
+        'Tax Services': SENIOR, 'FATCA/CRS Reporting': MID, 'AML/KYC': JUNIOR,
+        'SEC Regulatory Reporting': SENIOR, 'State Registration / Blue Sky': JUNIOR,
+        'ERISA Compliance': MID, 'SOX Controls': SENIOR, 'Audit Coordination': SENIOR,
+      }),
+      pmYears: 9,
+      pmAssetSkills: JSON.stringify({
+        'Private Equity': SENIOR, 'Venture Capital': MID, 'Real Estate (Equity)': JUNIOR,
+        'Real Estate (Debt)': JUNIOR, 'Infrastructure': ENTRY, 'Private Credit / Direct Lending': SENIOR,
+        'CLOs / Structured Credit': MID, 'Hedge Funds': SENIOR, 'Fund of Funds': MID,
+        'Co-Investments': SENIOR, 'Secondaries': MID, 'GP-Led Secondaries': JUNIOR,
+        'Continuation Vehicles': JUNIOR, 'Distressed / Special Situations': JUNIOR,
+        'Growth Equity': MID, 'Buyouts (Large-Cap)': SENIOR, 'Buyouts (Mid-Market)': SENIOR,
+        'Buyouts (Small-Cap)': SENIOR, 'SPAC / Public Equity': ENTRY,
+        'Natural Resources / Commodities': ENTRY, 'Digital Assets / Crypto': NONE,
+      }),
+      allocationSkills: JSON.stringify({
+        'Management Fee Calculations': SENIOR, 'Capital Call Processing': EXPERT,
+        'Distribution Calculations': SENIOR, 'Waterfall Calculations': SENIOR,
+        'Carried Interest Calculations': SENIOR, 'Preferred Return Calculations': SENIOR,
+        'Hurdle Rate Calculations': SENIOR, 'Clawback Provisions': MID,
+        'Equalization / Catch-Up': MID, 'Capital Account Statements': SENIOR,
+        'PFIC Calculations': MID, 'ECI / UBTI Tracking': MID,
+        'Section 754 Adjustments': JUNIOR, 'Income Allocation Methods': SENIOR,
+        'Side Pocket Accounting': JUNIOR, 'In-Kind Distributions': MID,
+        'Tax Distribution Policy': SENIOR, 'Multi-Class Structures': SENIOR,
+      }),
+      otherOpSkills: JSON.stringify({
+        'Wire Transfers': EXPERT, 'Cash Reconciliation': EXPERT, 'Bank Reconciliation': EXPERT,
+        'Accounts Payable': SENIOR, 'Accounts Receivable': SENIOR, 'Expense Allocations': EXPERT,
+        'GL Journal Entries': EXPERT, 'Month-End Close': EXPERT,
+        'Financial Statement Preparation': SENIOR, 'Audit Support': SENIOR,
+        'Investor Portal Management': MID,
+      }),
+      preferredPmSoftware: 'Investran',
+      technologySkills: JSON.stringify({
+        'Investran': SENIOR, 'Allvue / AltaReturn': MID, 'Geneva / SS&C': JUNIOR,
+        'Excel': EXPERT, 'Power BI / Tableau': MID, 'Salesforce': ENTRY,
+        'Juniper Square (Platform)': MID, 'DocuSign / Contract Tools': MID,
+        'Python / SQL': ENTRY,
+      }),
+      submittedAt: new Date('2022-02-15'),
     }}),
-    prisma.internalUser.create({ data: {
-      employeeId: 'EMP-006', firstName: 'Michael', lastName: 'Collins', email: 'michael.collins@lighthouse.io',
-      phone: '+1-212-555-0601',
-      title: 'Associate, Operations', role: 'Associate', department: 'Operations', division: 'Operations', team: 'Process Improvement',
-      seniorityLevel: 'Junior', employmentType: 'Full-Time', employmentStatus: 'Active',
-      hireDate: new Date('2023-03-01'), yearsAtCompany: 3.1, yearsInIndustry: 5,
-      officeLocation: 'New York', city: 'New York', state: 'New York', country: 'United States',
-      baseSalary: 120000, bonusTarget: 18000, totalCompensation: 156000,
-      performanceRating: 'Meets Expectations', performanceScore: 3.4, utilizationTarget: 90, utilizationActual: 85,
-      billableRate: 225, costRate: 85, entitiesManaged: 15,
-      primaryExpertise: 'Operations', secondaryExpertise: 'Process Automation',
-      educationLevel: 'Bachelors', university: 'Cornell University', degreeType: 'BS', degreeMajor: 'Operations Research',
-      projectsActive: 2, tasksAssigned: 14, tasksCompleted: 10, tasksOverdue: 2,
-      activeDirectoryId: 'mcollins', mfaEnabled: true, lastLogin: new Date('2026-04-01'),
-      requiredTrainingComplete: true, complianceScore: 88, tags: 'operations,automation',
-      dataQualityScore: 80, confidenceScore: 0.78,
+
+    // EMP-006 Michael Collins — Associate Operations, 4 yrs
+    prisma.internalUserSurvey.create({ data: {
+      employeeId: users[5].id,
+      college: 'New York University', graduateDegree: null, hasMba: false, hasCpa: false,
+      otherCerts: null,
+      priorFaFirms: JSON.stringify(['Sanne Group']),
+      priorGpFirms: JSON.stringify([]),
+      priorAuditFirms: JSON.stringify([]),
+      priorConsultingFirms: JSON.stringify(['Accenture']),
+      csYears: 4, csLevel: JUNIOR,
+      complianceSkills: JSON.stringify({
+        'Tax Services': ENTRY, 'FATCA/CRS Reporting': JUNIOR, 'AML/KYC': MID,
+        'SEC Regulatory Reporting': JUNIOR, 'State Registration / Blue Sky': NONE,
+        'ERISA Compliance': ENTRY, 'SOX Controls': JUNIOR, 'Audit Coordination': JUNIOR,
+      }),
+      pmYears: 4,
+      pmAssetSkills: JSON.stringify({
+        'Private Equity': MID, 'Venture Capital': JUNIOR, 'Real Estate (Equity)': ENTRY,
+        'Real Estate (Debt)': ENTRY, 'Infrastructure': NONE, 'Private Credit / Direct Lending': JUNIOR,
+        'CLOs / Structured Credit': NONE, 'Hedge Funds': JUNIOR, 'Fund of Funds': JUNIOR,
+        'Co-Investments': JUNIOR, 'Secondaries': ENTRY, 'GP-Led Secondaries': NONE,
+        'Continuation Vehicles': NONE, 'Distressed / Special Situations': NONE,
+        'Growth Equity': JUNIOR, 'Buyouts (Large-Cap)': JUNIOR, 'Buyouts (Mid-Market)': MID,
+        'Buyouts (Small-Cap)': JUNIOR, 'SPAC / Public Equity': NONE,
+        'Natural Resources / Commodities': NONE, 'Digital Assets / Crypto': ENTRY,
+      }),
+      allocationSkills: JSON.stringify({
+        'Management Fee Calculations': MID, 'Capital Call Processing': MID,
+        'Distribution Calculations': JUNIOR, 'Waterfall Calculations': ENTRY,
+        'Carried Interest Calculations': ENTRY, 'Preferred Return Calculations': JUNIOR,
+        'Hurdle Rate Calculations': ENTRY, 'Clawback Provisions': NONE,
+        'Equalization / Catch-Up': NONE, 'Capital Account Statements': JUNIOR,
+        'PFIC Calculations': NONE, 'ECI / UBTI Tracking': NONE,
+        'Section 754 Adjustments': NONE, 'Income Allocation Methods': JUNIOR,
+        'Side Pocket Accounting': NONE, 'In-Kind Distributions': NONE,
+        'Tax Distribution Policy': NONE, 'Multi-Class Structures': ENTRY,
+      }),
+      otherOpSkills: JSON.stringify({
+        'Wire Transfers': JUNIOR, 'Cash Reconciliation': MID, 'Bank Reconciliation': MID,
+        'Accounts Payable': MID, 'Accounts Receivable': JUNIOR, 'Expense Allocations': MID,
+        'GL Journal Entries': MID, 'Month-End Close': MID,
+        'Financial Statement Preparation': JUNIOR, 'Audit Support': JUNIOR,
+        'Investor Portal Management': JUNIOR,
+      }),
+      preferredPmSoftware: 'Allvue / AltaReturn',
+      technologySkills: JSON.stringify({
+        'Investran': JUNIOR, 'Allvue / AltaReturn': MID, 'Geneva / SS&C': NONE,
+        'Excel': SENIOR, 'Power BI / Tableau': JUNIOR, 'Salesforce': MID,
+        'Juniper Square (Platform)': MID, 'DocuSign / Contract Tools': MID,
+        'Python / SQL': JUNIOR,
+      }),
+      submittedAt: new Date('2022-09-01'),
     }}),
-    prisma.internalUser.create({ data: {
-      employeeId: 'EMP-007', firstName: 'Sarah', lastName: 'Garcia', email: 'sarah.garcia@lighthouse.io',
-      phone: '+1-617-555-0701',
-      title: 'Associate, Compliance', role: 'Associate', department: 'Compliance', division: 'Risk & Compliance', team: 'KYC/AML',
-      seniorityLevel: 'Junior', employmentType: 'Full-Time', employmentStatus: 'Active',
-      hireDate: new Date('2022-09-15'), yearsAtCompany: 3.6, yearsInIndustry: 6,
-      officeLocation: 'Boston', city: 'Boston', state: 'Massachusetts', country: 'United States',
-      baseSalary: 110000, bonusTarget: 16500, totalCompensation: 143000,
-      performanceRating: 'Exceeds Expectations', performanceScore: 4.0, utilizationTarget: 85, utilizationActual: 82,
-      billableRate: 200, costRate: 75, entitiesManaged: 20,
-      primaryExpertise: 'Compliance', secondaryExpertise: 'KYC/AML Screening',
-      regulatoryExpertise: 'FATCA, CRS, AML',
-      educationLevel: 'Masters', university: 'Georgetown University', degreeType: 'JD', degreeMajor: 'Law',
-      projectsActive: 1, tasksAssigned: 8, tasksCompleted: 7, tasksOverdue: 0,
-      activeDirectoryId: 'sgarcia', mfaEnabled: true, lastLogin: new Date('2026-04-02'),
-      requiredTrainingComplete: true, complianceScore: 99, tags: 'compliance,kyc-aml,legal',
-      dataQualityScore: 92, confidenceScore: 0.90,
+
+    // EMP-007 Sarah Garcia — Associate Compliance, 4 yrs
+    prisma.internalUserSurvey.create({ data: {
+      employeeId: users[6].id,
+      college: 'Boston University', graduateDegree: null, hasMba: false, hasCpa: false,
+      otherCerts: 'CAMS (Certified Anti-Money Laundering Specialist)',
+      priorFaFirms: JSON.stringify(['IQ-EQ']),
+      priorGpFirms: JSON.stringify([]),
+      priorAuditFirms: JSON.stringify([]),
+      priorConsultingFirms: JSON.stringify([]),
+      csYears: 4, csLevel: JUNIOR,
+      complianceSkills: JSON.stringify({
+        'Tax Services': ENTRY, 'FATCA/CRS Reporting': MID, 'AML/KYC': SENIOR,
+        'SEC Regulatory Reporting': JUNIOR, 'State Registration / Blue Sky': JUNIOR,
+        'ERISA Compliance': JUNIOR, 'SOX Controls': MID, 'Audit Coordination': MID,
+      }),
+      pmYears: 4,
+      pmAssetSkills: JSON.stringify({
+        'Private Equity': MID, 'Venture Capital': JUNIOR, 'Real Estate (Equity)': NONE,
+        'Real Estate (Debt)': NONE, 'Infrastructure': NONE, 'Private Credit / Direct Lending': JUNIOR,
+        'CLOs / Structured Credit': NONE, 'Hedge Funds': JUNIOR, 'Fund of Funds': MID,
+        'Co-Investments': JUNIOR, 'Secondaries': NONE, 'GP-Led Secondaries': NONE,
+        'Continuation Vehicles': NONE, 'Distressed / Special Situations': NONE,
+        'Growth Equity': JUNIOR, 'Buyouts (Large-Cap)': JUNIOR, 'Buyouts (Mid-Market)': MID,
+        'Buyouts (Small-Cap)': JUNIOR, 'SPAC / Public Equity': NONE,
+        'Natural Resources / Commodities': NONE, 'Digital Assets / Crypto': ENTRY,
+      }),
+      allocationSkills: JSON.stringify({
+        'Management Fee Calculations': ENTRY, 'Capital Call Processing': JUNIOR,
+        'Distribution Calculations': ENTRY, 'Waterfall Calculations': NONE,
+        'Carried Interest Calculations': NONE, 'Preferred Return Calculations': ENTRY,
+        'Hurdle Rate Calculations': NONE, 'Clawback Provisions': NONE,
+        'Equalization / Catch-Up': NONE, 'Capital Account Statements': JUNIOR,
+        'PFIC Calculations': NONE, 'ECI / UBTI Tracking': ENTRY,
+        'Section 754 Adjustments': NONE, 'Income Allocation Methods': ENTRY,
+        'Side Pocket Accounting': NONE, 'In-Kind Distributions': NONE,
+        'Tax Distribution Policy': NONE, 'Multi-Class Structures': NONE,
+      }),
+      otherOpSkills: JSON.stringify({
+        'Wire Transfers': ENTRY, 'Cash Reconciliation': JUNIOR, 'Bank Reconciliation': JUNIOR,
+        'Accounts Payable': NONE, 'Accounts Receivable': NONE, 'Expense Allocations': ENTRY,
+        'GL Journal Entries': ENTRY, 'Month-End Close': ENTRY,
+        'Financial Statement Preparation': JUNIOR, 'Audit Support': MID,
+        'Investor Portal Management': MID,
+      }),
+      preferredPmSoftware: 'Juniper Square',
+      technologySkills: JSON.stringify({
+        'Investran': ENTRY, 'Allvue / AltaReturn': NONE, 'Geneva / SS&C': NONE,
+        'Excel': SENIOR, 'Power BI / Tableau': MID, 'Salesforce': MID,
+        'Juniper Square (Platform)': SENIOR, 'DocuSign / Contract Tools': SENIOR,
+        'Python / SQL': ENTRY,
+      }),
+      submittedAt: new Date('2022-07-01'),
     }}),
-    prisma.internalUser.create({ data: {
-      employeeId: 'EMP-008', firstName: 'Brandon', lastName: 'Cohen', email: 'brandon.cohen@lighthouse.io',
-      phone: '+1-214-555-0801',
-      title: 'Analyst, Tax', role: 'Analyst', department: 'Tax', division: 'Operations', team: 'Tax Reporting',
-      seniorityLevel: 'Entry', employmentType: 'Full-Time', employmentStatus: 'Active',
-      hireDate: new Date('2024-06-15'), yearsAtCompany: 1.8, yearsInIndustry: 2,
-      officeLocation: 'Dallas HQ', city: 'Dallas', state: 'Texas', country: 'United States',
-      baseSalary: 85000, bonusTarget: 8500, totalCompensation: 102000,
-      performanceRating: 'Meets Expectations', performanceScore: 3.2, utilizationTarget: 90, utilizationActual: 88,
-      billableRate: 175, costRate: 55,
-      primaryExpertise: 'Tax Reporting', secondaryExpertise: 'K-1 Preparation', taxExpertise: 'Partnership Tax, PFIC, ECI',
-      educationLevel: 'Bachelors', university: 'Texas A&M', degreeType: 'BBA', degreeMajor: 'Accounting',
-      cpaLicense: false,
-      projectsActive: 1, tasksAssigned: 6, tasksCompleted: 4, tasksOverdue: 1,
-      activeDirectoryId: 'bcohen', mfaEnabled: true, lastLogin: new Date('2026-04-01'),
-      requiredTrainingComplete: true, complianceScore: 86, tags: 'tax,k1,analyst',
-      dataQualityScore: 78, confidenceScore: 0.75,
+
+    // EMP-008 Brandon Cohen — Analyst Tax, 2.5 yrs
+    prisma.internalUserSurvey.create({ data: {
+      employeeId: users[7].id,
+      college: 'University of Texas at Dallas', graduateDegree: 'MS Accounting', hasMba: false, hasCpa: false,
+      otherCerts: 'CPA Candidate (1 section passed)',
+      priorFaFirms: JSON.stringify([]),
+      priorGpFirms: JSON.stringify([]),
+      priorAuditFirms: JSON.stringify(['Grant Thornton']),
+      priorConsultingFirms: JSON.stringify([]),
+      csYears: 2.5, csLevel: JUNIOR,
+      complianceSkills: JSON.stringify({
+        'Tax Services': MID, 'FATCA/CRS Reporting': JUNIOR, 'AML/KYC': ENTRY,
+        'SEC Regulatory Reporting': ENTRY, 'State Registration / Blue Sky': NONE,
+        'ERISA Compliance': NONE, 'SOX Controls': JUNIOR, 'Audit Coordination': JUNIOR,
+      }),
+      pmYears: 2.5,
+      pmAssetSkills: JSON.stringify({
+        'Private Equity': MID, 'Venture Capital': ENTRY, 'Real Estate (Equity)': JUNIOR,
+        'Real Estate (Debt)': ENTRY, 'Infrastructure': NONE, 'Private Credit / Direct Lending': JUNIOR,
+        'CLOs / Structured Credit': NONE, 'Hedge Funds': ENTRY, 'Fund of Funds': ENTRY,
+        'Co-Investments': ENTRY, 'Secondaries': NONE, 'GP-Led Secondaries': NONE,
+        'Continuation Vehicles': NONE, 'Distressed / Special Situations': NONE,
+        'Growth Equity': ENTRY, 'Buyouts (Large-Cap)': JUNIOR, 'Buyouts (Mid-Market)': MID,
+        'Buyouts (Small-Cap)': JUNIOR, 'SPAC / Public Equity': NONE,
+        'Natural Resources / Commodities': NONE, 'Digital Assets / Crypto': NONE,
+      }),
+      allocationSkills: JSON.stringify({
+        'Management Fee Calculations': JUNIOR, 'Capital Call Processing': JUNIOR,
+        'Distribution Calculations': JUNIOR, 'Waterfall Calculations': ENTRY,
+        'Carried Interest Calculations': ENTRY, 'Preferred Return Calculations': JUNIOR,
+        'Hurdle Rate Calculations': ENTRY, 'Clawback Provisions': NONE,
+        'Equalization / Catch-Up': NONE, 'Capital Account Statements': MID,
+        'PFIC Calculations': MID, 'ECI / UBTI Tracking': MID,
+        'Section 754 Adjustments': MID, 'Income Allocation Methods': JUNIOR,
+        'Side Pocket Accounting': ENTRY, 'In-Kind Distributions': ENTRY,
+        'Tax Distribution Policy': MID, 'Multi-Class Structures': ENTRY,
+      }),
+      otherOpSkills: JSON.stringify({
+        'Wire Transfers': ENTRY, 'Cash Reconciliation': JUNIOR, 'Bank Reconciliation': JUNIOR,
+        'Accounts Payable': JUNIOR, 'Accounts Receivable': JUNIOR, 'Expense Allocations': JUNIOR,
+        'GL Journal Entries': MID, 'Month-End Close': JUNIOR,
+        'Financial Statement Preparation': MID, 'Audit Support': MID,
+        'Investor Portal Management': ENTRY,
+      }),
+      preferredPmSoftware: 'Investran',
+      technologySkills: JSON.stringify({
+        'Investran': JUNIOR, 'Allvue / AltaReturn': NONE, 'Geneva / SS&C': NONE,
+        'Excel': EXPERT, 'Power BI / Tableau': MID, 'Salesforce': NONE,
+        'Juniper Square (Platform)': ENTRY, 'DocuSign / Contract Tools': JUNIOR,
+        'Python / SQL': MID,
+      }),
+      submittedAt: new Date('2023-09-15'),
     }}),
-    prisma.internalUser.create({ data: {
-      employeeId: 'EMP-009', firstName: 'Tyler', lastName: 'White', email: 'tyler.white@lighthouse.io',
-      phone: '+1-512-555-0901',
-      title: 'Analyst, Technology', role: 'Analyst', department: 'Technology', division: 'Technology', team: 'Platform Engineering',
-      seniorityLevel: 'Entry', employmentType: 'Full-Time', employmentStatus: 'Active',
-      hireDate: new Date('2024-01-08'), yearsAtCompany: 2.2, yearsInIndustry: 3,
-      officeLocation: 'Austin (Remote)', city: 'Austin', state: 'Texas', country: 'United States',
-      remoteStatus: 'Remote', homeOfficeApproved: true, coworkingStipend: true,
-      baseSalary: 95000, bonusTarget: 9500, totalCompensation: 114000,
-      performanceRating: 'Exceeds Expectations', performanceScore: 4.2, utilizationTarget: 80, utilizationActual: 75,
-      billableRate: 200, costRate: 65,
-      primaryExpertise: 'Software Engineering', secondaryExpertise: 'Data Engineering', technologyExpertise: 'Python, TypeScript, React, SQL, dbt, Airflow',
-      educationLevel: 'Bachelors', university: 'UT Austin', degreeType: 'BS', degreeMajor: 'Computer Science',
-      githubAccess: true, githubUsername: 'twhite-lh',
-      projectsActive: 3, tasksAssigned: 11, tasksCompleted: 9, tasksOverdue: 0,
-      activeDirectoryId: 'twhite', mfaEnabled: true, lastLogin: new Date('2026-04-02'),
-      requiredTrainingComplete: true, complianceScore: 91, tags: 'engineering,data,platform',
-      dataQualityScore: 85, confidenceScore: 0.82,
+
+    // EMP-009 Tyler White — Analyst Technology, 2.2 yrs
+    prisma.internalUserSurvey.create({ data: {
+      employeeId: users[8].id,
+      college: 'University of Texas at Austin (McCombs / CS)', graduateDegree: null, hasMba: false, hasCpa: false,
+      otherCerts: null,
+      priorFaFirms: JSON.stringify([]),
+      priorGpFirms: JSON.stringify([]),
+      priorAuditFirms: JSON.stringify([]),
+      priorConsultingFirms: JSON.stringify(['Ernst & Young (EY Advisory)']),
+      csYears: 2.2, csLevel: ENTRY,
+      complianceSkills: JSON.stringify({
+        'Tax Services': NONE, 'FATCA/CRS Reporting': NONE, 'AML/KYC': ENTRY,
+        'SEC Regulatory Reporting': NONE, 'State Registration / Blue Sky': NONE,
+        'ERISA Compliance': NONE, 'SOX Controls': ENTRY, 'Audit Coordination': ENTRY,
+      }),
+      pmYears: 2.2,
+      pmAssetSkills: JSON.stringify({
+        'Private Equity': JUNIOR, 'Venture Capital': JUNIOR, 'Real Estate (Equity)': NONE,
+        'Real Estate (Debt)': NONE, 'Infrastructure': NONE, 'Private Credit / Direct Lending': ENTRY,
+        'CLOs / Structured Credit': NONE, 'Hedge Funds': ENTRY, 'Fund of Funds': ENTRY,
+        'Co-Investments': NONE, 'Secondaries': NONE, 'GP-Led Secondaries': NONE,
+        'Continuation Vehicles': NONE, 'Distressed / Special Situations': NONE,
+        'Growth Equity': ENTRY, 'Buyouts (Large-Cap)': ENTRY, 'Buyouts (Mid-Market)': JUNIOR,
+        'Buyouts (Small-Cap)': ENTRY, 'SPAC / Public Equity': NONE,
+        'Natural Resources / Commodities': NONE, 'Digital Assets / Crypto': MID,
+      }),
+      allocationSkills: JSON.stringify({
+        'Management Fee Calculations': ENTRY, 'Capital Call Processing': ENTRY,
+        'Distribution Calculations': NONE, 'Waterfall Calculations': NONE,
+        'Carried Interest Calculations': NONE, 'Preferred Return Calculations': NONE,
+        'Hurdle Rate Calculations': NONE, 'Clawback Provisions': NONE,
+        'Equalization / Catch-Up': NONE, 'Capital Account Statements': ENTRY,
+        'PFIC Calculations': NONE, 'ECI / UBTI Tracking': NONE,
+        'Section 754 Adjustments': NONE, 'Income Allocation Methods': NONE,
+        'Side Pocket Accounting': NONE, 'In-Kind Distributions': NONE,
+        'Tax Distribution Policy': NONE, 'Multi-Class Structures': NONE,
+      }),
+      otherOpSkills: JSON.stringify({
+        'Wire Transfers': NONE, 'Cash Reconciliation': ENTRY, 'Bank Reconciliation': ENTRY,
+        'Accounts Payable': NONE, 'Accounts Receivable': NONE, 'Expense Allocations': ENTRY,
+        'GL Journal Entries': ENTRY, 'Month-End Close': ENTRY,
+        'Financial Statement Preparation': ENTRY, 'Audit Support': ENTRY,
+        'Investor Portal Management': MID,
+      }),
+      preferredPmSoftware: 'Geneva / SS&C',
+      technologySkills: JSON.stringify({
+        'Investran': ENTRY, 'Allvue / AltaReturn': ENTRY, 'Geneva / SS&C': MID,
+        'Excel': EXPERT, 'Power BI / Tableau': SENIOR, 'Salesforce': MID,
+        'Juniper Square (Platform)': MID, 'DocuSign / Contract Tools': MID,
+        'Python / SQL': EXPERT,
+      }),
+      submittedAt: new Date('2024-01-20'),
     }}),
-    prisma.internalUser.create({ data: {
-      employeeId: 'EMP-010', firstName: 'Rebecca', lastName: 'Sanders', email: 'rebecca.sanders@lighthouse.io',
-      phone: '+1-214-555-1001',
-      title: 'Administrator, Operations', role: 'Administrator', department: 'Operations', division: 'Operations', team: 'Office Management',
-      seniorityLevel: 'Entry', employmentType: 'Full-Time', employmentStatus: 'Active',
-      hireDate: new Date('2023-11-01'), yearsAtCompany: 2.4, yearsInIndustry: 4,
-      officeLocation: 'Dallas HQ', city: 'Dallas', state: 'Texas', country: 'United States',
-      baseSalary: 72000, bonusTarget: 5400, totalCompensation: 84600,
-      performanceRating: 'Meets Expectations', performanceScore: 3.3, utilizationTarget: 70, utilizationActual: 68,
-      billableRate: 125, costRate: 45,
-      primaryExpertise: 'Office Administration', secondaryExpertise: 'Event Coordination',
-      educationLevel: 'Bachelors', university: 'SMU', degreeType: 'BA', degreeMajor: 'Communications',
-      projectsActive: 1, tasksAssigned: 5, tasksCompleted: 4, tasksOverdue: 0,
-      activeDirectoryId: 'rsanders', mfaEnabled: true, lastLogin: new Date('2026-04-01'),
-      requiredTrainingComplete: true, complianceScore: 85, tags: 'admin,office-mgmt',
-      dataQualityScore: 75, confidenceScore: 0.72,
+
+    // EMP-010 Rebecca Sanders — Administrator Operations, 2.4 yrs
+    prisma.internalUserSurvey.create({ data: {
+      employeeId: users[9].id,
+      college: 'Southern Methodist University', graduateDegree: null, hasMba: false, hasCpa: false,
+      otherCerts: null,
+      priorFaFirms: JSON.stringify([]),
+      priorGpFirms: JSON.stringify([]),
+      priorAuditFirms: JSON.stringify([]),
+      priorConsultingFirms: JSON.stringify([]),
+      csYears: 2.4, csLevel: JUNIOR,
+      complianceSkills: JSON.stringify({
+        'Tax Services': NONE, 'FATCA/CRS Reporting': NONE, 'AML/KYC': ENTRY,
+        'SEC Regulatory Reporting': NONE, 'State Registration / Blue Sky': NONE,
+        'ERISA Compliance': NONE, 'SOX Controls': ENTRY, 'Audit Coordination': ENTRY,
+      }),
+      pmYears: 2.4,
+      pmAssetSkills: JSON.stringify({
+        'Private Equity': ENTRY, 'Venture Capital': NONE, 'Real Estate (Equity)': NONE,
+        'Real Estate (Debt)': NONE, 'Infrastructure': NONE, 'Private Credit / Direct Lending': NONE,
+        'CLOs / Structured Credit': NONE, 'Hedge Funds': NONE, 'Fund of Funds': NONE,
+        'Co-Investments': NONE, 'Secondaries': NONE, 'GP-Led Secondaries': NONE,
+        'Continuation Vehicles': NONE, 'Distressed / Special Situations': NONE,
+        'Growth Equity': NONE, 'Buyouts (Large-Cap)': NONE, 'Buyouts (Mid-Market)': ENTRY,
+        'Buyouts (Small-Cap)': NONE, 'SPAC / Public Equity': NONE,
+        'Natural Resources / Commodities': NONE, 'Digital Assets / Crypto': NONE,
+      }),
+      allocationSkills: JSON.stringify({
+        'Management Fee Calculations': NONE, 'Capital Call Processing': ENTRY,
+        'Distribution Calculations': NONE, 'Waterfall Calculations': NONE,
+        'Carried Interest Calculations': NONE, 'Preferred Return Calculations': NONE,
+        'Hurdle Rate Calculations': NONE, 'Clawback Provisions': NONE,
+        'Equalization / Catch-Up': NONE, 'Capital Account Statements': ENTRY,
+        'PFIC Calculations': NONE, 'ECI / UBTI Tracking': NONE,
+        'Section 754 Adjustments': NONE, 'Income Allocation Methods': NONE,
+        'Side Pocket Accounting': NONE, 'In-Kind Distributions': NONE,
+        'Tax Distribution Policy': NONE, 'Multi-Class Structures': NONE,
+      }),
+      otherOpSkills: JSON.stringify({
+        'Wire Transfers': ENTRY, 'Cash Reconciliation': ENTRY, 'Bank Reconciliation': ENTRY,
+        'Accounts Payable': MID, 'Accounts Receivable': MID, 'Expense Allocations': JUNIOR,
+        'GL Journal Entries': ENTRY, 'Month-End Close': ENTRY,
+        'Financial Statement Preparation': NONE, 'Audit Support': ENTRY,
+        'Investor Portal Management': JUNIOR,
+      }),
+      preferredPmSoftware: 'Juniper Square',
+      technologySkills: JSON.stringify({
+        'Investran': NONE, 'Allvue / AltaReturn': NONE, 'Geneva / SS&C': NONE,
+        'Excel': SENIOR, 'Power BI / Tableau': ENTRY, 'Salesforce': MID,
+        'Juniper Square (Platform)': MID, 'DocuSign / Contract Tools': SENIOR,
+        'Python / SQL': NONE,
+      }),
+      submittedAt: new Date('2023-11-15'),
     }}),
   ]);
-  console.log(`Created ${users.length} internal users`);
+  console.log('Created 10 internal user surveys');
 
   // ═══════════════════════════════════════════════
   // TASK ASSIGNMENTS (25)
   // ═══════════════════════════════════════════════
   const now = new Date();
   const d = (days: number) => new Date(now.getTime() + days * 86400000);
+  const iso = (days: number) => new Date(now.getTime() + days * 86400000).toISOString();
+  const sc = (completedDays: number | null) => ({ completedAt: completedDays !== null ? iso(completedDays) : null });
 
+  // stepCompletions: array of {completedAt: ISO|null}, index matches task step index
   await Promise.all([
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[0].id, entityName: 'Walker Enterprise Fund III LP', assignedToId: users[2].id, status: 'Complete', dueDate: d(-5), completedDate: d(-6), periodEnd: 'March 2026', priority: 'Critical' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[0].id, entityName: 'Sullivan Global Alpha Fund', assignedToId: users[4].id, status: 'In Progress', dueDate: d(3), periodEnd: 'March 2026', priority: 'Critical' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[0].id, entityName: 'White Senior Credit Fund V', assignedToId: users[2].id, status: 'Not Started', dueDate: d(10), periodEnd: 'March 2026', priority: 'Critical' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[1].id, entityName: 'Walker Enterprise Fund III LP', assignedToId: users[3].id, status: 'Under Review', dueDate: d(7), periodEnd: 'Q1 2026', priority: 'High' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[1].id, entityName: 'Campbell Growth Fund IV LP', assignedToId: users[3].id, status: 'In Progress', dueDate: d(14), periodEnd: 'Q1 2026', priority: 'High' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[2].id, entityName: 'Walker Enterprise Fund III LP', assignedToId: users[7].id, status: 'In Progress', dueDate: d(45), periodEnd: 'FY 2025', priority: 'Critical', notes: 'Waiting on external tax advisor review' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[2].id, entityName: 'Cruz Ventures Fund II LP', assignedToId: users[7].id, status: 'Not Started', dueDate: d(60), periodEnd: 'FY 2025', priority: 'High' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[3].id, entityName: 'Campbell Growth Fund IV LP', assignedToId: users[4].id, status: 'Complete', dueDate: d(-10), completedDate: d(-12), periodEnd: 'March 2026', priority: 'High' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[4].id, entityName: 'Walker Enterprise Fund I LP', assignedToId: users[4].id, status: 'Under Review', dueDate: d(5), periodEnd: 'Q1 2026', priority: 'High', notes: 'Final wind-down distribution' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[5].id, entityName: 'Walker Enterprise Fund III LP', assignedToId: users[2].id, status: 'In Progress', dueDate: d(30), periodEnd: 'FY 2025', priority: 'Critical', notes: 'PBC list received from PwC' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[5].id, entityName: 'Sullivan Global Alpha Fund', assignedToId: users[5].id, status: 'Not Started', dueDate: d(45), periodEnd: 'FY 2025', priority: 'Critical' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[6].id, entityName: 'WFM Global Opportunities FoF', assignedToId: users[6].id, status: 'Overdue', dueDate: d(-7), periodEnd: 'FY 2025', priority: 'High', notes: 'Awaiting self-certification from 3 investors' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[7].id, entityName: 'Rodriguez Emerging Markets FoF I', assignedToId: users[6].id, status: 'In Progress', dueDate: d(14), periodEnd: 'Q1 2026', priority: 'High', notes: 'KYC pending for Koch Industries FO' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[8].id, entityName: 'Walker Enterprise Fund III LP', assignedToId: users[5].id, status: 'Complete', dueDate: d(-2), completedDate: d(-3), periodEnd: 'March 2026', priority: 'Medium' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[8].id, entityName: 'White Senior Credit Fund V', assignedToId: users[5].id, status: 'Overdue', dueDate: d(-3), periodEnd: 'March 2026', priority: 'Medium', notes: 'Custodian statement delayed' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[9].id, entityName: 'Walker Enterprise Fund III LP', assignedToId: users[0].id, status: 'Under Review', dueDate: d(12), periodEnd: 'Q1 2026', priority: 'High' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[9].id, entityName: 'Lopez Real Estate Opportunities III', assignedToId: users[3].id, status: 'Not Started', dueDate: d(20), periodEnd: 'Q1 2026', priority: 'High' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[10].id, entityName: 'Walker Enterprise Fund III LP', assignedToId: users[4].id, status: 'Complete', dueDate: d(-8), completedDate: d(-10), periodEnd: 'Q1 2026', priority: 'High' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[10].id, entityName: 'Sullivan Global Alpha Fund', assignedToId: users[4].id, status: 'In Progress', dueDate: d(5), periodEnd: 'Q1 2026', priority: 'High' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[11].id, entityName: 'Walker Enterprise Fund III LP', assignedToId: users[4].id, status: 'Under Review', dueDate: d(8), periodEnd: 'Q1 2026', priority: 'Critical' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[11].id, entityName: 'White Senior Credit Fund V', assignedToId: users[2].id, status: 'Blocked', dueDate: d(8), periodEnd: 'Q1 2026', priority: 'Critical', notes: 'Pending valuation from Houlihan Lokey' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[0].id, entityName: 'Lopez Real Estate Opportunities III', assignedToId: users[5].id, status: 'Overdue', dueDate: d(-4), periodEnd: 'March 2026', priority: 'Critical', notes: 'Property valuations delayed by 2 weeks' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[0].id, entityName: 'WFM Global Opportunities FoF', assignedToId: users[2].id, status: 'In Progress', dueDate: d(5), periodEnd: 'March 2026', priority: 'Critical' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[6].id, entityName: 'Walker III Offshore Feeder Ltd', assignedToId: users[6].id, status: 'Overdue', dueDate: d(-14), periodEnd: 'FY 2025', priority: 'High', notes: 'Cayman filing deadline missed — remediation in progress' }}),
-    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[8].id, entityName: 'Campbell Growth Fund IV LP', assignedToId: users[5].id, status: 'Under Review', dueDate: d(1), periodEnd: 'March 2026', priority: 'Medium' }}),
+    // SOP-001 (7 steps): Walker, Complete d(-5) — all on-time
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[0].id, entityName: 'Walker Enterprise Fund III LP', assignedToId: users[2].id, status: 'Complete', dueDate: d(-5), completedDate: d(-6), periodEnd: 'March 2026', priority: 'Critical', stepCompletions: JSON.stringify([sc(-7),sc(-7),sc(-6),sc(-6),sc(-6),sc(-5),sc(-5)]) }}),
+    // SOP-001 (7 steps): Sullivan, In Progress d(3) — steps 0-3 done (deadlines future)
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[0].id, entityName: 'Sullivan Global Alpha Fund', assignedToId: users[4].id, status: 'In Progress', dueDate: d(3), periodEnd: 'March 2026', priority: 'Critical', stepCompletions: JSON.stringify([sc(-1),sc(-1),sc(0),sc(0),sc(null),sc(null),sc(null)]) }}),
+    // SOP-001 (7 steps): White Senior Credit, Not Started d(10)
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[0].id, entityName: 'White Senior Credit Fund V', assignedToId: users[2].id, status: 'Not Started', dueDate: d(10), periodEnd: 'March 2026', priority: 'Critical', stepCompletions: JSON.stringify([sc(null),sc(null),sc(null),sc(null),sc(null),sc(null),sc(null)]) }}),
+    // SOP-002 (6 steps): Walker, Under Review d(7) — steps 0-4 done (deadlines future)
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[1].id, entityName: 'Walker Enterprise Fund III LP', assignedToId: users[3].id, status: 'Under Review', dueDate: d(7), periodEnd: 'Q1 2026', priority: 'High', stepCompletions: JSON.stringify([sc(2),sc(3),sc(5),sc(6),sc(6),sc(null)]) }}),
+    // SOP-002 (6 steps): Campbell, In Progress d(14) — steps 0-2 done
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[1].id, entityName: 'Campbell Growth Fund IV LP', assignedToId: users[3].id, status: 'In Progress', dueDate: d(14), periodEnd: 'Q1 2026', priority: 'High', stepCompletions: JSON.stringify([sc(6),sc(7),sc(10),sc(null),sc(null),sc(null)]) }}),
+    // SOP-003 (7 steps): Walker, In Progress d(45) — steps 0-2 done (deadlines future)
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[2].id, entityName: 'Walker Enterprise Fund III LP', assignedToId: users[7].id, status: 'In Progress', dueDate: d(45), periodEnd: 'FY 2025', priority: 'Critical', notes: 'Waiting on external tax advisor review', stepCompletions: JSON.stringify([sc(15),sc(25),sc(30),sc(null),sc(null),sc(null),sc(null)]) }}),
+    // SOP-003 (7 steps): Cruz, Not Started d(60)
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[2].id, entityName: 'Cruz Ventures Fund II LP', assignedToId: users[7].id, status: 'Not Started', dueDate: d(60), periodEnd: 'FY 2025', priority: 'High', stepCompletions: JSON.stringify([sc(null),sc(null),sc(null),sc(null),sc(null),sc(null),sc(null)]) }}),
+    // SOP-004 (6 steps): Campbell, Complete d(-10) — all on-time
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[3].id, entityName: 'Campbell Growth Fund IV LP', assignedToId: users[4].id, status: 'Complete', dueDate: d(-10), completedDate: d(-12), periodEnd: 'March 2026', priority: 'High', stepCompletions: JSON.stringify([sc(-12),sc(-12),sc(-12),sc(-8),sc(-8),sc(-8)]) }}),
+    // SOP-005 (7 steps): Walker I, Under Review d(5) — steps 0-4 done (deadlines future)
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[4].id, entityName: 'Walker Enterprise Fund I LP', assignedToId: users[4].id, status: 'Under Review', dueDate: d(5), periodEnd: 'Q1 2026', priority: 'High', notes: 'Final wind-down distribution', stepCompletions: JSON.stringify([sc(1),sc(1),sc(2),sc(2),sc(3),sc(null),sc(null)]) }}),
+    // SOP-006 (7 steps): Walker III, In Progress d(30) — steps 0-2 done (step 0+1 deadlines past)
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[5].id, entityName: 'Walker Enterprise Fund III LP', assignedToId: users[2].id, status: 'In Progress', dueDate: d(30), periodEnd: 'FY 2025', priority: 'Critical', notes: 'PBC list received from PwC', stepCompletions: JSON.stringify([sc(-35),sc(-30),sc(-1),sc(null),sc(null),sc(null),sc(null)]) }}),
+    // SOP-006 (7 steps): Sullivan, Not Started d(45) — steps 0-1 deadlines past, null (missed)
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[5].id, entityName: 'Sullivan Global Alpha Fund', assignedToId: users[5].id, status: 'Not Started', dueDate: d(45), periodEnd: 'FY 2025', priority: 'Critical', stepCompletions: JSON.stringify([sc(null),sc(null),sc(null),sc(null),sc(null),sc(null),sc(null)]) }}),
+    // SOP-007 (6 steps): WFM Global, Overdue d(-7) — steps 0-1 on-time, 2-5 null
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[6].id, entityName: 'WFM Global Opportunities FoF', assignedToId: users[6].id, status: 'Overdue', dueDate: d(-7), periodEnd: 'FY 2025', priority: 'High', notes: 'Awaiting self-certification from 3 investors', stepCompletions: JSON.stringify([sc(-40),sc(-30),sc(null),sc(null),sc(null),sc(null)]) }}),
+    // SOP-008 (7 steps): Rodriguez, In Progress d(14) — steps 0-2 done (deadlines future)
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[7].id, entityName: 'Rodriguez Emerging Markets FoF I', assignedToId: users[6].id, status: 'In Progress', dueDate: d(14), periodEnd: 'Q1 2026', priority: 'High', notes: 'KYC pending for Koch Industries FO', stepCompletions: JSON.stringify([sc(6),sc(7),sc(9),sc(null),sc(null),sc(null),sc(null)]) }}),
+    // SOP-009 (5 steps): Walker III, Complete d(-2) — all on-time
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[8].id, entityName: 'Walker Enterprise Fund III LP', assignedToId: users[5].id, status: 'Complete', dueDate: d(-2), completedDate: d(-3), periodEnd: 'March 2026', priority: 'Medium', stepCompletions: JSON.stringify([sc(-4),sc(-4),sc(-3),sc(-3),sc(-2)]) }}),
+    // SOP-009 (5 steps): White Senior Credit, Overdue d(-3) — steps 0-2 late, 3-4 null
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[8].id, entityName: 'White Senior Credit Fund V', assignedToId: users[5].id, status: 'Overdue', dueDate: d(-3), periodEnd: 'March 2026', priority: 'Medium', notes: 'Custodian statement delayed', stepCompletions: JSON.stringify([sc(-1),sc(-1),sc(-1),sc(null),sc(null)]) }}),
+    // SOP-010 (6 steps): Walker III, Under Review d(12) — steps 0-4 done (deadlines future)
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[9].id, entityName: 'Walker Enterprise Fund III LP', assignedToId: users[0].id, status: 'Under Review', dueDate: d(12), periodEnd: 'Q1 2026', priority: 'High', stepCompletions: JSON.stringify([sc(3),sc(4),sc(5),sc(6),sc(7),sc(null)]) }}),
+    // SOP-010 (6 steps): Lopez, Not Started d(20)
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[9].id, entityName: 'Lopez Real Estate Opportunities III', assignedToId: users[3].id, status: 'Not Started', dueDate: d(20), periodEnd: 'Q1 2026', priority: 'High', stepCompletions: JSON.stringify([sc(null),sc(null),sc(null),sc(null),sc(null),sc(null)]) }}),
+    // SOP-011 (6 steps): Walker III, Complete d(-8) — all on-time
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[10].id, entityName: 'Walker Enterprise Fund III LP', assignedToId: users[4].id, status: 'Complete', dueDate: d(-8), completedDate: d(-10), periodEnd: 'Q1 2026', priority: 'High', stepCompletions: JSON.stringify([sc(-10),sc(-10),sc(-9),sc(-9),sc(-8),sc(-8)]) }}),
+    // SOP-011 (6 steps): Sullivan, In Progress d(5) — steps 0-3 done (deadlines future)
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[10].id, entityName: 'Sullivan Global Alpha Fund', assignedToId: users[4].id, status: 'In Progress', dueDate: d(5), periodEnd: 'Q1 2026', priority: 'High', stepCompletions: JSON.stringify([sc(1),sc(1),sc(2),sc(2),sc(null),sc(null)]) }}),
+    // SOP-012 (7 steps): Walker III, Under Review d(8) — steps 0-5 done (deadlines future)
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[11].id, entityName: 'Walker Enterprise Fund III LP', assignedToId: users[4].id, status: 'Under Review', dueDate: d(8), periodEnd: 'Q1 2026', priority: 'Critical', stepCompletions: JSON.stringify([sc(3),sc(3),sc(4),sc(4),sc(5),sc(5),sc(null)]) }}),
+    // SOP-012 (7 steps): White Senior Credit, Blocked d(8)
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[11].id, entityName: 'White Senior Credit Fund V', assignedToId: users[2].id, status: 'Blocked', dueDate: d(8), periodEnd: 'Q1 2026', priority: 'Critical', notes: 'Pending valuation from Houlihan Lokey', stepCompletions: JSON.stringify([sc(3),sc(3),sc(null),sc(null),sc(null),sc(null),sc(null)]) }}),
+    // SOP-001 (7 steps): Lopez Real Estate, Overdue d(-4) — steps 0-3 on-time, 4-6 null/missed
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[0].id, entityName: 'Lopez Real Estate Opportunities III', assignedToId: users[5].id, status: 'Overdue', dueDate: d(-4), periodEnd: 'March 2026', priority: 'Critical', notes: 'Property valuations delayed by 2 weeks', stepCompletions: JSON.stringify([sc(-6),sc(-6),sc(-5),sc(-5),sc(null),sc(null),sc(null)]) }}),
+    // SOP-001 (7 steps): WFM Global, In Progress d(5) — steps 0-2 done (deadlines future)
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[0].id, entityName: 'WFM Global Opportunities FoF', assignedToId: users[2].id, status: 'In Progress', dueDate: d(5), periodEnd: 'March 2026', priority: 'Critical', stepCompletions: JSON.stringify([sc(1),sc(1),sc(2),sc(null),sc(null),sc(null),sc(null)]) }}),
+    // SOP-007 (6 steps): Walker III Offshore, Overdue d(-14) — steps 0-2 late, 3-5 null
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[6].id, entityName: 'Walker III Offshore Feeder Ltd', assignedToId: users[6].id, status: 'Overdue', dueDate: d(-14), periodEnd: 'FY 2025', priority: 'High', notes: 'Cayman filing deadline missed — remediation in progress', stepCompletions: JSON.stringify([sc(-35),sc(-25),sc(-10),sc(null),sc(null),sc(null)]) }}),
+    // SOP-009 (5 steps): Campbell Growth, Under Review d(1) — steps 0-3 done (deadlines future)
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[8].id, entityName: 'Campbell Growth Fund IV LP', assignedToId: users[5].id, status: 'Under Review', dueDate: d(1), periodEnd: 'March 2026', priority: 'Medium', stepCompletions: JSON.stringify([sc(-2),sc(-2),sc(-1),sc(-1),sc(null)]) }}),
   ]);
-  console.log('Created 25 task assignments');
+
+  // ═══════════════════════════════════════════════
+  // HISTORICAL TASK ASSIGNMENTS FOR KPI SCORING
+  // ═══════════════════════════════════════════════
+  await Promise.all([
+    // KPI 1: NAV Calculation — historical (target ~85% on-time)
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[0].id, entityName: 'Walker Enterprise Fund III LP', assignedToId: users[2].id, status: 'Complete', dueDate: d(-30), completedDate: d(-32), periodEnd: 'Feb 2026', priority: 'Critical', stepCompletions: JSON.stringify([sc(-32),sc(-32),sc(-31),sc(-31),sc(-31),sc(-30),sc(-30)]) }}),
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[0].id, entityName: 'Sullivan Global Alpha Fund', assignedToId: users[4].id, status: 'Complete', dueDate: d(-60), completedDate: d(-62), periodEnd: 'Jan 2026', priority: 'Critical', stepCompletions: JSON.stringify([sc(-62),sc(-62),sc(-61),sc(-61),sc(-61),sc(-60),sc(-60)]) }}),
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[0].id, entityName: 'Campbell Growth Fund IV LP', assignedToId: users[4].id, status: 'Complete', dueDate: d(-90), completedDate: d(-92), periodEnd: 'Dec 2025', priority: 'Critical', stepCompletions: JSON.stringify([sc(-92),sc(-92),sc(-91),sc(-91),sc(-91),sc(-90),sc(-90)]) }}),
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[0].id, entityName: 'White Senior Credit Fund V', assignedToId: users[2].id, status: 'Complete', dueDate: d(-150), completedDate: d(-152), periodEnd: 'Oct 2025', priority: 'Critical', stepCompletions: JSON.stringify([sc(-152),sc(-152),sc(-151),sc(-151),sc(-151),sc(-150),sc(-150)]) }}),
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[0].id, entityName: 'Lopez Real Estate Opportunities III', assignedToId: users[5].id, status: 'Complete', dueDate: d(-180), completedDate: d(-182), periodEnd: 'Sep 2025', priority: 'Critical', stepCompletions: JSON.stringify([sc(-182),sc(-182),sc(-181),sc(-181),sc(-181),sc(-180),sc(-180)]) }}),
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[0].id, entityName: 'WFM Global Opportunities FoF', assignedToId: users[2].id, status: 'Overdue', dueDate: d(-120), periodEnd: 'Nov 2025', priority: 'Critical', stepCompletions: JSON.stringify([sc(-122),sc(-122),sc(-121),sc(-121),sc(null),sc(null),sc(null)]) }}),
+    // KPI 2: Capital Statements — historical (target ~89% on-time)
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[1].id, entityName: 'Walker Enterprise Fund III LP', assignedToId: users[3].id, status: 'Complete', dueDate: d(-30), completedDate: d(-32), periodEnd: 'Q4 2025', priority: 'High', stepCompletions: JSON.stringify([sc(-32),sc(-31),sc(-29),sc(-27),sc(-27),sc(-24)]) }}),
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[1].id, entityName: 'Campbell Growth Fund IV LP', assignedToId: users[3].id, status: 'Complete', dueDate: d(-60), completedDate: d(-62), periodEnd: 'Q3 2025', priority: 'High', stepCompletions: JSON.stringify([sc(-62),sc(-61),sc(-59),sc(-57),sc(-57),sc(-54)]) }}),
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[1].id, entityName: 'Sullivan Global Alpha Fund', assignedToId: users[3].id, status: 'Complete', dueDate: d(-90), completedDate: d(-92), periodEnd: 'Q2 2025', priority: 'High', stepCompletions: JSON.stringify([sc(-92),sc(-91),sc(-89),sc(-87),sc(-87),sc(-84)]) }}),
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[1].id, entityName: 'Cruz Ventures Fund II LP', assignedToId: users[3].id, status: 'Complete', dueDate: d(-120), completedDate: d(-122), periodEnd: 'Q1 2025', priority: 'High', stepCompletions: JSON.stringify([sc(-122),sc(-121),sc(-119),sc(-117),sc(-117),sc(-114)]) }}),
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[1].id, entityName: 'White Senior Credit Fund V', assignedToId: users[3].id, status: 'Overdue', dueDate: d(-150), periodEnd: 'Q4 2024', priority: 'High', stepCompletions: JSON.stringify([sc(-150),sc(-149),sc(-147),sc(-146),sc(null),sc(null)]) }}),
+    // KPI 3: K-1 Preparation — historical (target ~79% on-time)
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[2].id, entityName: 'Walker Enterprise Fund III LP', assignedToId: users[7].id, status: 'Complete', dueDate: d(-90), completedDate: d(-92), periodEnd: 'FY 2024', priority: 'Critical', stepCompletions: JSON.stringify([sc(-106),sc(-99),sc(-95),sc(-94),sc(-92),sc(-91),sc(-90)]) }}),
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[2].id, entityName: 'Campbell Growth Fund IV LP', assignedToId: users[7].id, status: 'Complete', dueDate: d(-150), completedDate: d(-152), periodEnd: 'FY 2023', priority: 'Critical', stepCompletions: JSON.stringify([sc(-166),sc(-159),sc(-155),sc(-154),sc(-152),sc(-151),sc(-150)]) }}),
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[2].id, entityName: 'Sullivan Global Alpha Fund', assignedToId: users[7].id, status: 'Complete', dueDate: d(-200), completedDate: d(-202), periodEnd: 'FY 2022', priority: 'Critical', stepCompletions: JSON.stringify([sc(-216),sc(-209),sc(-205),sc(-204),sc(-202),sc(-201),sc(-200)]) }}),
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[2].id, entityName: 'Cruz Ventures Fund II LP', assignedToId: users[7].id, status: 'Overdue', dueDate: d(-250), periodEnd: 'FY 2021', priority: 'High', stepCompletions: JSON.stringify([sc(-266),sc(-258),sc(-252),sc(null),sc(null),sc(null),sc(null)]) }}),
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[2].id, entityName: 'White Senior Credit Fund V', assignedToId: users[7].id, status: 'Overdue', dueDate: d(-300), periodEnd: 'FY 2020', priority: 'High', stepCompletions: JSON.stringify([sc(-315),sc(-308),sc(-303),sc(-302),sc(null),sc(null),sc(null)]) }}),
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[2].id, entityName: 'Lopez Real Estate Opportunities III', assignedToId: users[7].id, status: 'Complete', dueDate: d(-350), completedDate: d(-352), periodEnd: 'FY 2019', priority: 'Critical', stepCompletions: JSON.stringify([sc(-366),sc(-359),sc(-355),sc(-354),sc(-352),sc(-351),sc(-350)]) }}),
+    // KPI 4: Capital Calls (Fund Accounting SOP-004/005) — historical (target ~95% on-time)
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[3].id, entityName: 'Sullivan Global Alpha Fund', assignedToId: users[4].id, status: 'Complete', dueDate: d(-30), completedDate: d(-32), periodEnd: 'Mar 2026', priority: 'High', stepCompletions: JSON.stringify([sc(-32),sc(-32),sc(-32),sc(-29),sc(-28),sc(-28)]) }}),
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[4].id, entityName: 'Walker Enterprise Fund III LP', assignedToId: users[4].id, status: 'Complete', dueDate: d(-60), completedDate: d(-62), periodEnd: 'Jan 2026', priority: 'High', stepCompletions: JSON.stringify([sc(-62),sc(-62),sc(-61),sc(-61),sc(-60),sc(-60),sc(-59)]) }}),
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[4].id, entityName: 'Campbell Growth Fund IV LP', assignedToId: users[4].id, status: 'Complete', dueDate: d(-120), completedDate: d(-122), periodEnd: 'Oct 2025', priority: 'High', stepCompletions: JSON.stringify([sc(-122),sc(-122),sc(-121),sc(-121),sc(-120),sc(-120),sc(-119)]) }}),
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[3].id, entityName: 'WFM Global Opportunities FoF', assignedToId: users[4].id, status: 'Overdue', dueDate: d(-180), periodEnd: 'Aug 2025', priority: 'High', stepCompletions: JSON.stringify([sc(-182),sc(-182),sc(-182),sc(-176),sc(-175),sc(null)]) }}),
+    // KPI 5: Reconciliation — historical (target ~73% on-time)
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[8].id, entityName: 'Walker Enterprise Fund III LP', assignedToId: users[5].id, status: 'Complete', dueDate: d(-30), completedDate: d(-32), periodEnd: 'Feb 2026', priority: 'Medium', stepCompletions: JSON.stringify([sc(-32),sc(-32),sc(-31),sc(-31),sc(-30)]) }}),
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[8].id, entityName: 'Sullivan Global Alpha Fund', assignedToId: users[5].id, status: 'Complete', dueDate: d(-60), completedDate: d(-62), periodEnd: 'Jan 2026', priority: 'Medium', stepCompletions: JSON.stringify([sc(-62),sc(-62),sc(-61),sc(-61),sc(-60)]) }}),
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[8].id, entityName: 'Campbell Growth Fund IV LP', assignedToId: users[5].id, status: 'Overdue', dueDate: d(-90), periodEnd: 'Dec 2025', priority: 'Medium', stepCompletions: JSON.stringify([sc(-88),sc(-88),sc(null),sc(null),sc(null)]) }}),
+    prisma.taskAssignment.create({ data: { taskDefinitionId: taskDefs[8].id, entityName: 'White Senior Credit Fund V', assignedToId: users[5].id, status: 'Complete', dueDate: d(-120), completedDate: d(-122), periodEnd: 'Nov 2025', priority: 'Medium', stepCompletions: JSON.stringify([sc(-122),sc(-122),sc(-121),sc(-121),sc(-120)]) }}),
+  ]);
+  console.log('Created 50 task assignments (25 current + 25 historical KPI)');
+
+  // ═══════════════════════════════════════════════
+  // EMPLOYEE ENTITY ASSIGNMENTS
+  // Drives capacity planning & auto-assignment logic
+  // ═══════════════════════════════════════════════
+  await Promise.all([
+    // Diana Smith — Fund Accounting Primary for Walker and White Senior Credit
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[2].id, entityName: 'Walker Enterprise Fund III LP', clientName: 'Walker Asset Management', department: 'Fund Accounting', serviceLine: 'NAV Calculation', role: 'Primary', coveragePct: 100, startDate: new Date('2024-01-01'), status: 'Active' }}),
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[2].id, entityName: 'White Senior Credit Fund V', clientName: 'White Fund Management', department: 'Fund Accounting', serviceLine: 'NAV Calculation', role: 'Primary', coveragePct: 100, startDate: new Date('2024-06-01'), status: 'Active' }}),
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[2].id, entityName: 'Walker Enterprise Fund III LP', clientName: 'Walker Asset Management', department: 'Fund Accounting', serviceLine: 'Annual Audit Coordination', role: 'Primary', coveragePct: 100, startDate: new Date('2024-01-01'), status: 'Active' }}),
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[2].id, entityName: 'Walker Enterprise Fund II LP', clientName: 'Walker Asset Management', department: 'Fund Accounting', serviceLine: 'Management Fee Calculation', role: 'Primary', coveragePct: 75, startDate: new Date('2024-01-01'), status: 'Active' }}),
+    // Steven Wright — Fund Accounting Primary for Sullivan, Campbell, Cruz, Walker I (heavy load → overloaded)
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[4].id, entityName: 'Sullivan Global Alpha Fund', clientName: 'Sullivan Investments', department: 'Fund Accounting', serviceLine: 'NAV Calculation', role: 'Primary', coveragePct: 100, startDate: new Date('2024-03-01'), status: 'Active' }}),
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[4].id, entityName: 'Campbell Growth Fund IV LP', clientName: 'Campbell Capital Partners', department: 'Fund Accounting', serviceLine: 'Capital Call Processing', role: 'Primary', coveragePct: 100, startDate: new Date('2024-09-15'), status: 'Active' }}),
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[4].id, entityName: 'Cruz Ventures Fund II LP', clientName: 'Cruz Ventures', department: 'Fund Accounting', serviceLine: 'Distribution Processing', role: 'Primary', coveragePct: 100, startDate: new Date('2024-09-15'), status: 'Active' }}),
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[4].id, entityName: 'Walker Enterprise Fund I LP', clientName: 'Walker Asset Management', department: 'Fund Accounting', serviceLine: 'Distribution Processing', role: 'Primary', coveragePct: 80, startDate: new Date('2024-06-01'), status: 'Active' }}),
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[4].id, entityName: 'Walker Enterprise Fund III LP', clientName: 'Walker Asset Management', department: 'Fund Accounting', serviceLine: 'Carried Interest Waterfall', role: 'Secondary', coveragePct: 40, startDate: new Date('2025-01-01'), status: 'Active' }}),
+    // Jason Cooper — Investor Services Primary for Walker and Campbell
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[3].id, entityName: 'Walker Enterprise Fund III LP', clientName: 'Walker Asset Management', department: 'Investor Services', serviceLine: 'Investor Capital Statements', role: 'Primary', coveragePct: 100, startDate: new Date('2024-07-01'), status: 'Active' }}),
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[3].id, entityName: 'Campbell Growth Fund IV LP', clientName: 'Campbell Capital Partners', department: 'Investor Services', serviceLine: 'Investor Capital Statements', role: 'Primary', coveragePct: 100, startDate: new Date('2024-07-01'), status: 'Active' }}),
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[3].id, entityName: 'Walker Enterprise Fund III LP', clientName: 'Walker Asset Management', department: 'Investor Services', serviceLine: 'LP Communications', role: 'Primary', coveragePct: 60, startDate: new Date('2024-10-01'), status: 'Active' }}),
+    // Brandon Cohen — Tax Primary for Walker and Cruz
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[7].id, entityName: 'Walker Enterprise Fund III LP', clientName: 'Walker Asset Management', department: 'Tax', serviceLine: 'K-1 Preparation', role: 'Primary', coveragePct: 100, startDate: new Date('2025-01-15'), status: 'Active' }}),
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[7].id, entityName: 'Cruz Ventures Fund II LP', clientName: 'Cruz Ventures', department: 'Tax', serviceLine: 'K-1 Preparation', role: 'Primary', coveragePct: 100, startDate: new Date('2025-01-15'), status: 'Active' }}),
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[7].id, entityName: 'White Senior Credit Fund V', clientName: 'White Fund Management', department: 'Tax', serviceLine: 'Tax Compliance', role: 'Secondary', coveragePct: 50, startDate: new Date('2025-03-01'), status: 'Active' }}),
+    // Sarah Garcia — Compliance Primary for WFM and Rodriguez
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[6].id, entityName: 'WFM Global Opportunities FoF', clientName: 'White Fund Management', department: 'Compliance', serviceLine: 'FATCA/CRS Reporting', role: 'Primary', coveragePct: 100, startDate: new Date('2024-08-01'), status: 'Active' }}),
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[6].id, entityName: 'Rodriguez Emerging Markets FoF I', clientName: 'Rodriguez Capital', department: 'Compliance', serviceLine: 'Investor Onboarding / KYC', role: 'Primary', coveragePct: 100, startDate: new Date('2025-01-10'), status: 'Active' }}),
+    // Rebecca Sanders — Operations / Reconciliation backup for Walker
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[9].id, entityName: 'Walker Enterprise Fund III LP', clientName: 'Walker Asset Management', department: 'Fund Accounting', serviceLine: 'Bank Reconciliation', role: 'Primary', coveragePct: 100, startDate: new Date('2024-06-01'), status: 'Active' }}),
+    // Michael Collins — Operations backup for Sullivan Audit
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[5].id, entityName: 'Sullivan Global Alpha Fund', clientName: 'Sullivan Investments', department: 'Fund Accounting', serviceLine: 'Annual Audit Coordination', role: 'Secondary', coveragePct: 50, startDate: new Date('2025-04-01'), status: 'Active' }}),
+    // Megan Moore — Client Services Primary for Walker
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[0].id, entityName: 'Walker Enterprise Fund III LP', clientName: 'Walker Asset Management', department: 'Client Services', serviceLine: 'Quarterly Board Package', role: 'Primary', coveragePct: 100, startDate: new Date('2024-06-01'), status: 'Active' }}),
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[0].id, entityName: 'Walker Enterprise Fund II LP', clientName: 'Walker Asset Management', department: 'Client Services', serviceLine: 'Quarterly Board Package', role: 'Primary', coveragePct: 75, startDate: new Date('2024-06-01'), status: 'Active' }}),
+    // Jessica Cruz — Client Services for Rodriguez and Cruz Ventures
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[1].id, entityName: 'Rodriguez Emerging Markets FoF I', clientName: 'Rodriguez Capital', department: 'Client Services', serviceLine: 'New Fund Setup', role: 'Primary', coveragePct: 100, startDate: new Date('2025-06-01'), status: 'Active' }}),
+    prisma.employeeEntityAssignment.create({ data: { employeeId: users[1].id, entityName: 'Cruz Ventures Fund II LP', clientName: 'Cruz Ventures', department: 'Client Services', serviceLine: 'Quarterly Board Package', role: 'Primary', coveragePct: 80, startDate: new Date('2025-06-01'), status: 'Active' }}),
+  ]);
+  console.log('Created 23 employee entity assignments');
 
   // ═══════════════════════════════════════════════
   // EXTERNAL CONTACTS (8)
@@ -1210,8 +1898,76 @@ async function main() {
     prisma.relationship.create({ data: { relationshipId: 'REL-018', sourceType: 'investor', sourceId: 'INV-009', sourceName: 'Norges Bank Investment Management', targetType: 'entity', targetId: entities[11].id, targetName: 'WFM Global Opportunities FoF', relationshipType: 'invests_in', status: 'Active', effectiveDate: new Date('2017-01-15') }}),
     prisma.relationship.create({ data: { relationshipId: 'REL-019', sourceType: 'contact', sourceId: 'EXC-006', sourceName: 'Daniel Foster (Houlihan Lokey)', targetType: 'entity', targetId: entities[10].id, targetName: 'White Senior Credit Fund V', relationshipType: 'values', status: 'Active', effectiveDate: new Date('2020-10-01') }}),
     prisma.relationship.create({ data: { relationshipId: 'REL-020', sourceType: 'entity', sourceId: entities[11].id, sourceName: 'WFM Global Opportunities FoF', targetType: 'entity', targetId: entities[1].id, targetName: 'Walker Enterprise Fund III LP', relationshipType: 'invests_in', status: 'Active', effectiveDate: new Date('2021-06-15'), notes: 'FoF allocation to Walker III via co-investment commitment' }}),
+    // ── Walker deeper structure relationships ──
+    prisma.relationship.create({ data: { relationshipId: 'REL-021', sourceType: 'entity', sourceId: entities[2].id, sourceName: 'Walker Enterprise III Master Fund LP', targetType: 'entity', targetId: entities[15].id, targetName: 'Walker III UBTI Blocker Corp', relationshipType: 'blocks_for', status: 'Active', effectiveDate: new Date('2021-04-15'), notes: 'Blocker corp shields tax-exempt LPs from UBTI on debt-financed income' }}),
+    prisma.relationship.create({ data: { relationshipId: 'REL-022', sourceType: 'entity', sourceId: entities[2].id, sourceName: 'Walker Enterprise III Master Fund LP', targetType: 'entity', targetId: entities[16].id, targetName: 'Walker III Holdings LLC', relationshipType: 'holds_assets_for', status: 'Active', effectiveDate: new Date('2021-05-01'), notes: 'Holding company is legal owner of portfolio investments' }}),
+    prisma.relationship.create({ data: { relationshipId: 'REL-023', sourceType: 'entity', sourceId: entities[16].id, sourceName: 'Walker III Holdings LLC', targetType: 'entity', targetId: entities[17].id, targetName: 'Apex Manufacturing Inc', relationshipType: 'portfolio_investment', status: 'Active', effectiveDate: new Date('2022-03-15'), notes: 'Platform acquisition — industrials sector' }}),
+    prisma.relationship.create({ data: { relationshipId: 'REL-024', sourceType: 'entity', sourceId: entities[16].id, sourceName: 'Walker III Holdings LLC', targetType: 'entity', targetId: entities[18].id, targetName: 'Vanguard Logistics LP', relationshipType: 'portfolio_investment', status: 'Active', effectiveDate: new Date('2023-01-10'), notes: 'Add-on acquisition — logistics sector' }}),
   ]);
-  console.log('Created 20 relationships');
+  console.log('Created 24 relationships');
+
+  // ── Ownership percentages on key relationships ──
+  const ownershipUpdates: Array<[string, number]> = [
+    ['REL-001', 100],   // Walker AM → ManCo: 100% ownership
+    ['REL-003', 60],    // Onshore Feeder → Master: 60% of capital
+    ['REL-004', 40],    // Offshore Feeder → Master: 40% of capital
+    ['REL-006', 1],     // GP LLC → Fund III: 1% GP commitment
+    ['REL-008', 15],    // CalPERS → Fund III: 15%
+    ['REL-009', 12],    // ADIA → Fund III: 12%
+    ['REL-010', 8],     // Yale → Fund III: 8%
+    ['REL-016', 100],   // Campbell → Campbell IV: 100% sponsor
+    ['REL-021', 100],   // Master → Blocker: 100% ownership
+    ['REL-022', 100],   // Master → Holdings: 100% ownership
+    ['REL-023', 85],    // Holdings → Apex Mfg: 85% equity
+    ['REL-024', 70],    // Holdings → Vanguard Logistics: 70% equity
+  ];
+  for (const [relId, pct] of ownershipUpdates) {
+    await prisma.relationship.updateMany({ where: { relationshipId: relId }, data: { ownershipPct: pct } });
+  }
+
+  // ── Fund Family tags on entities ──
+  const tagMap: Record<string, string[]> = {
+    'ENT-000001': ['#WalkerComplex'],
+    'ENT-000002': ['#WalkerComplex'],
+    'ENT-000003': ['#WalkerComplex'],
+    'ENT-000004': ['#WalkerComplex'],
+    'ENT-000005': ['#WalkerComplex'],
+    'ENT-000006': ['#WalkerComplex', '#SPVs'],
+    'ENT-000007': ['#CampbellFunds'],
+    'ENT-000008': ['#SullivanHF'],
+    'ENT-000009': ['#CruzVC'],
+    'ENT-000010': ['#LopezRE'],
+    'ENT-000011': ['#WhiteCredit'],
+    'ENT-000012': ['#WFMFoF'],
+    'ENT-000013': ['#WalkerComplex', '#Legacy'],
+    'ENT-000014': ['#WalkerComplex', '#SPVs'],
+    'ENT-000015': ['#RodriguezEM'],
+    'ENT-000016': ['#WalkerComplex', '#SPVs'],
+    'ENT-000017': ['#WalkerComplex'],
+    'ENT-000018': ['#WalkerComplex'],
+    'ENT-000019': ['#WalkerComplex'],
+  };
+  for (const [eid, tags] of Object.entries(tagMap)) {
+    await prisma.entity.updateMany({ where: { entityId: eid }, data: { fundFamilyTags: JSON.stringify(tags) } });
+  }
+
+  // ── Fund Family Tag managed list ──
+  await prisma.fundFamilyTag.deleteMany();
+  await prisma.fundFamilyTag.createMany({
+    data: [
+      { tag: '#WalkerComplex', description: 'Walker Enterprise fund family', color: '#1B3A4B' },
+      { tag: '#CampbellFunds', description: 'Campbell Capital fund family', color: '#7c3aed' },
+      { tag: '#SullivanHF',    description: 'Sullivan hedge fund complex',  color: '#0d9488' },
+      { tag: '#CruzVC',        description: 'Cruz Ventures family',         color: '#00C97B' },
+      { tag: '#LopezRE',       description: 'Lopez Real Estate family',     color: '#f59e0b' },
+      { tag: '#WhiteCredit',   description: 'White Senior Credit family',   color: '#3b82f6' },
+      { tag: '#WFMFoF',        description: 'White Fund Mgmt FoF family',   color: '#6366f1' },
+      { tag: '#RodriguezEM',   description: 'Rodriguez Emerging Markets',   color: '#dc2626' },
+      { tag: '#Legacy',        description: 'Legacy / winding-down vehicles', color: '#6b7280' },
+      { tag: '#SPVs',          description: 'Special purpose vehicles',     color: '#92400e' },
+    ],
+  });
+  console.log('Enriched relationships with ownership %, entity fund family tags, and managed tag list');
 
   // ═══════════════════════════════════════════════
   // REPORTS — query-logic library
@@ -1359,7 +2115,743 @@ async function main() {
   }
   console.log(`Created ${tsCounter} timesheets with daily entries`);
 
+  // ═══════════════════════════════════════════════
+  // TRANSACTION PARAMETERS — ILPA-aligned config
+  // Sept 2025 CC&D Template + Jan 2025 RT v2.0
+  // ═══════════════════════════════════════════════
+  await prisma.fundTransactionOverride.deleteMany();
+  await prisma.transactionParameter.deleteMany();
+
+  const tpRef = 'ILPA CC&D Template Sept 2025 / Reporting Template v2.0 Jan 2025';
+
+  await prisma.transactionParameter.createMany({ data: [
+    // ── CAPITAL CALLS ─────────────────────────────────────────────────
+    {
+      code: 'CC-INV', sortOrder: 10,
+      name: 'Capital Call: Investments',
+      ilpaCategory: 'Capital Call', ilpaSubtype: 'CC — Investments', ilpaTemplateRef: tpRef,
+      direction: 'Inflow', insideFund: true, recallable: false,
+      navImpact: 'Increase NAV',
+      glDebit: 'Cash & Cash Equivalents', glCredit: 'Capital Contributions — LP', journalType: 'JE-CC-INV',
+      perfTemplateClass: 'Contribution', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'Return of Capital',
+      commitmentImpact: 'Reduces Unfunded',
+      settlementDays: 'T+3', autoReconcile: true, approvalRequired: true,
+      taxReporting: 'Schedule K-1 — Item L',
+      notes: 'Primary capital call for investment funding. Reduces LP unfunded commitment dollar-for-dollar.',
+    },
+    {
+      code: 'CC-MGMT', sortOrder: 11,
+      name: 'Capital Call: Management Fee',
+      ilpaCategory: 'Capital Call', ilpaSubtype: 'CC — Management Fee', ilpaTemplateRef: tpRef,
+      direction: 'Inflow', insideFund: true, recallable: false,
+      navImpact: 'No NAV Impact',
+      glDebit: 'Cash & Cash Equivalents', glCredit: 'Management Fee Payable', journalType: 'JE-CC-MGMT',
+      perfTemplateClass: 'Fee', perfTemplateMethod: 'Both',
+      feeOffset: true, feeOffsetType: 'Management Fee Base',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'Reduces Unfunded',
+      settlementDays: 'T+3', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item F',
+      notes: 'Capital called to fund management fee. Reduces unfunded per fund documents. Fee offset credits apply per LPA.',
+    },
+    {
+      code: 'CC-EXP', sortOrder: 12,
+      name: 'Capital Call: Partnership Expenses',
+      ilpaCategory: 'Capital Call', ilpaSubtype: 'CC — Partnership Expenses', ilpaTemplateRef: tpRef,
+      direction: 'Inflow', insideFund: true, recallable: false,
+      navImpact: 'No NAV Impact',
+      glDebit: 'Cash & Cash Equivalents', glCredit: 'Partnership Expense Payable', journalType: 'JE-CC-EXP',
+      perfTemplateClass: 'Fee', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'Reduces Unfunded',
+      settlementDays: 'T+3', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item F',
+      notes: 'Capital called for fund operating expenses (legal, audit, admin). Itemized per ILPA v2.0 22-category framework.',
+    },
+    {
+      code: 'CC-WC', sortOrder: 13,
+      name: 'Capital Call: Working Capital / Unallocated',
+      ilpaCategory: 'Capital Call', ilpaSubtype: 'CC — Working Capital', ilpaTemplateRef: tpRef,
+      direction: 'Inflow', insideFund: true, recallable: false,
+      navImpact: 'Increase NAV',
+      glDebit: 'Cash & Cash Equivalents', glCredit: 'Working Capital Reserve', journalType: 'JE-CC-WC',
+      perfTemplateClass: 'Contribution', perfTemplateMethod: 'Gross Up',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'Return of Capital',
+      commitmentImpact: 'Reduces Unfunded',
+      settlementDays: 'T+3', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item L',
+      notes: 'Used where GP has not itemized the specific utilization at time of call. Gross Up methodology applies.',
+    },
+    {
+      code: 'CC-OF', sortOrder: 14,
+      name: 'Capital Call: Outside Fund',
+      ilpaCategory: 'Capital Call', ilpaSubtype: 'CC — Outside Fund', ilpaTemplateRef: tpRef,
+      direction: 'Inflow', insideFund: false, recallable: false,
+      navImpact: 'No NAV Impact',
+      glDebit: 'Cash & Cash Equivalents', glCredit: 'Transfer Payable — LP', journalType: 'JE-CC-OF',
+      perfTemplateClass: 'N/A', perfTemplateMethod: 'N/A',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+3', autoReconcile: false, approvalRequired: true,
+      taxReporting: 'None',
+      notes: 'Fund acts as conduit/intermediary — e.g., subsequent close interest transfers between LPs. Outside Fund per ILPA Sept 2025.',
+    },
+    // ── DISTRIBUTIONS ─────────────────────────────────────────────────
+    {
+      code: 'DIST-RG', sortOrder: 20,
+      name: 'Distribution: Realized Gains',
+      ilpaCategory: 'Distribution', ilpaSubtype: 'Dist — Realized Gains', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: false,
+      navImpact: 'Decrease NAV',
+      glDebit: 'Capital Account — LP', glCredit: 'Cash & Cash Equivalents', journalType: 'JE-DIST-RG',
+      perfTemplateClass: 'Distribution', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'Carried Interest',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+5', autoReconcile: true, approvalRequired: true,
+      taxReporting: 'Schedule K-1 — Item 9a',
+      notes: 'Cash and in-kind distributions of realized gains. Includes stock distributions at fair value. ILPA Sept 2025 combines cash and stock.',
+    },
+    {
+      code: 'DIST-ROC', sortOrder: 21,
+      name: 'Distribution: Return of Capital',
+      ilpaCategory: 'Distribution', ilpaSubtype: 'Dist — Return of Capital', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: false,
+      navImpact: 'Decrease NAV',
+      glDebit: 'Capital Contributions — LP', glCredit: 'Cash & Cash Equivalents', journalType: 'JE-DIST-ROC',
+      perfTemplateClass: 'Distribution', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'Return of Capital',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+5', autoReconcile: true, approvalRequired: true,
+      taxReporting: 'Schedule K-1 — Item L',
+      notes: 'Return of previously contributed capital. Reduces LP capital account balance. Non-taxable return of basis.',
+    },
+    {
+      code: 'DIST-ROC-R', sortOrder: 22,
+      name: 'Distribution: Return of Capital (Recallable)',
+      ilpaCategory: 'Distribution', ilpaSubtype: 'Dist — Return of Capital (Recallable)', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: true,
+      navImpact: 'Decrease NAV',
+      glDebit: 'Capital Contributions — LP', glCredit: 'Cash & Cash Equivalents', journalType: 'JE-DIST-ROC-R',
+      perfTemplateClass: 'Distribution', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'Return of Capital',
+      commitmentImpact: 'Restores Unfunded',
+      settlementDays: 'T+5', autoReconcile: true, approvalRequired: true,
+      taxReporting: 'Schedule K-1 — Item L',
+      notes: 'Recallable ROC — restores LP unfunded commitment upon distribution. Can be recalled per LPA. ILPA Sept 2025: inferred from unfunded commitment impact field.',
+    },
+    {
+      code: 'DIST-RL', sortOrder: 23,
+      name: 'Distribution: Realized Losses',
+      ilpaCategory: 'Distribution', ilpaSubtype: 'Dist — Realized Losses', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: false,
+      navImpact: 'Decrease NAV',
+      glDebit: 'Realized Loss — Investment', glCredit: 'Cash & Cash Equivalents', journalType: 'JE-DIST-RL',
+      perfTemplateClass: 'Distribution', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'Return of Capital',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+5', autoReconcile: true, approvalRequired: true,
+      taxReporting: 'Schedule K-1 — Item 9c',
+      notes: 'Distributions representing a return below cost basis — realized losses recognized on disposal. ILPA Sept 2025 separates RG and RL.',
+    },
+    {
+      code: 'DIST-IK', sortOrder: 24,
+      name: 'Distribution: In-Kind (Unrealized / Stock)',
+      ilpaCategory: 'Distribution', ilpaSubtype: 'Dist — In-Kind / Unrealized', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: false,
+      navImpact: 'Decrease NAV',
+      glDebit: 'Investment Portfolio — FV', glCredit: 'In-Kind Distribution Payable — LP', journalType: 'JE-DIST-IK',
+      perfTemplateClass: 'Distribution', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'Carried Interest',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+5', autoReconcile: false, approvalRequired: true,
+      taxReporting: 'Schedule K-1 — Item 9a',
+      notes: 'In-kind distribution of securities at fair value. Requires securities transfer agent coordination. FMV determination required.',
+    },
+    {
+      code: 'DIST-MFO', sortOrder: 25,
+      name: 'Distribution: Management Fee Offset',
+      ilpaCategory: 'Distribution', ilpaSubtype: 'Dist — Mgmt Fee Offset', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: false,
+      navImpact: 'Decrease NAV',
+      glDebit: 'Management Fee Payable', glCredit: 'Cash & Cash Equivalents', journalType: 'JE-DIST-MFO',
+      perfTemplateClass: 'Fee', perfTemplateMethod: 'Both',
+      feeOffset: true, feeOffsetType: 'Management Fee Base',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+0', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item F',
+      notes: 'Portfolio company fee income credited against management fee. ILPA v2.0 requires gross disclosure; offset shown separately.',
+    },
+    {
+      code: 'DIST-CARRY-PAID', sortOrder: 26,
+      name: 'Distribution: Carried Interest Paid',
+      ilpaCategory: 'Distribution', ilpaSubtype: 'Dist — Carried Interest Paid', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: false,
+      navImpact: 'GP Allocation',
+      glDebit: 'Carried Interest Payable — GP', glCredit: 'Cash & Cash Equivalents', journalType: 'JE-DIST-CARRY',
+      perfTemplateClass: 'Carried Interest', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'Carry Basis',
+      waterfallTier: 'Carried Interest',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+5', autoReconcile: false, approvalRequired: true,
+      taxReporting: 'Schedule K-1 — Item 1',
+      notes: 'Cash payment of accrued carried interest to GP. Requires final waterfall calculation sign-off. Clawback provisions apply per LPA.',
+    },
+    {
+      code: 'DIST-OF', sortOrder: 27,
+      name: 'Distribution: Outside Fund',
+      ilpaCategory: 'Distribution', ilpaSubtype: 'Dist — Outside Fund', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: false, recallable: false,
+      navImpact: 'No NAV Impact',
+      glDebit: 'Transfer Payable — LP', glCredit: 'Cash & Cash Equivalents', journalType: 'JE-DIST-OF',
+      perfTemplateClass: 'N/A', perfTemplateMethod: 'N/A',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+5', autoReconcile: false, approvalRequired: true,
+      taxReporting: 'None',
+      notes: 'Fund acts as conduit for LP-to-LP transfers — e.g., secondary transfers. Outside Fund classification per ILPA Sept 2025.',
+    },
+    // ── FEES & EXPENSES ───────────────────────────────────────────────
+    {
+      code: 'FEE-MGMT', sortOrder: 30,
+      name: 'Management Fee (Gross)',
+      ilpaCategory: 'Fee & Expense', ilpaSubtype: 'Fee — Management Fee (Gross)', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: false,
+      navImpact: 'Decrease NAV',
+      glDebit: 'Management Fee Expense', glCredit: 'Cash & Cash Equivalents', journalType: 'JE-FEE-MGMT',
+      perfTemplateClass: 'Fee', perfTemplateMethod: 'Both',
+      feeOffset: true, feeOffsetType: 'Management Fee Base',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+0', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item F',
+      notes: 'Gross management fee per LPA. ILPA RT v2.0 requires gross disclosure before offsets. Net fee = gross less applicable offsets.',
+    },
+    {
+      code: 'FEE-MFO', sortOrder: 31,
+      name: 'Management Fee Offset',
+      ilpaCategory: 'Fee & Expense', ilpaSubtype: 'Fee — Management Fee Offset', ilpaTemplateRef: tpRef,
+      direction: 'Inflow', insideFund: true, recallable: false,
+      navImpact: 'Increase NAV',
+      glDebit: 'Management Fee Payable', glCredit: 'Management Fee Offset Income', journalType: 'JE-FEE-MFO',
+      perfTemplateClass: 'Fee', perfTemplateMethod: 'Both',
+      feeOffset: true, feeOffsetType: 'Management Fee Base',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+0', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item F',
+      notes: 'Portfolio company monitoring/transaction/director fees credited against gross management fee. Disclosed separately per ILPA RT v2.0.',
+    },
+    {
+      code: 'EXP-IC', sortOrder: 32,
+      name: 'Internal Chargeback (GP/Related Party)',
+      ilpaCategory: 'Fee & Expense', ilpaSubtype: 'Expense — Internal Chargeback', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: false,
+      navImpact: 'Decrease NAV',
+      glDebit: 'Partnership Expense — Internal', glCredit: 'Due to GP / Related Person', journalType: 'JE-EXP-IC',
+      perfTemplateClass: 'Fee', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+0', autoReconcile: true, approvalRequired: true,
+      taxReporting: 'Schedule K-1 — Item F',
+      notes: 'NEW in ILPA RT v2.0 — separate category for expenses charged by GP or related persons. Requires disclosure of related-party nature.',
+    },
+    {
+      code: 'EXP-OFFER', sortOrder: 33,
+      name: 'Offering & Syndication Costs',
+      ilpaCategory: 'Fee & Expense', ilpaSubtype: 'Expense — Offering & Syndication', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: false,
+      navImpact: 'Decrease NAV',
+      glDebit: 'Offering & Syndication Expense', glCredit: 'Cash & Cash Equivalents', journalType: 'JE-EXP-OFFER',
+      perfTemplateClass: 'Fee', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+0', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item F',
+      notes: 'Costs of offering interests in fund — registration, marketing materials, road show costs. ILPA RT v2.0 separate line item.',
+    },
+    {
+      code: 'EXP-PLACE', sortOrder: 34,
+      name: 'Placement Fees',
+      ilpaCategory: 'Fee & Expense', ilpaSubtype: 'Expense — Placement Fees', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: false,
+      navImpact: 'Decrease NAV',
+      glDebit: 'Placement Fee Expense', glCredit: 'Cash & Cash Equivalents', journalType: 'JE-EXP-PLACE',
+      perfTemplateClass: 'Fee', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+0', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item F',
+      notes: 'Fees paid to placement agents for capital raising. Must be grossed up in ILPA RT v2.0 — often partially or fully offset against management fee.',
+    },
+    {
+      code: 'EXP-PTRANS', sortOrder: 35,
+      name: 'Partner Transfer Costs',
+      ilpaCategory: 'Fee & Expense', ilpaSubtype: 'Expense — Partner Transfer', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: false,
+      navImpact: 'Decrease NAV',
+      glDebit: 'Partnership Expense — Transfer', glCredit: 'Cash & Cash Equivalents', journalType: 'JE-EXP-PTRANS',
+      perfTemplateClass: 'Fee', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+0', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item F',
+      notes: 'Legal and administrative costs associated with LP interest transfers on the secondary market. NEW category in ILPA RT v2.0.',
+    },
+    {
+      code: 'EXP-PROF', sortOrder: 36,
+      name: 'Professional Fees (Legal, Accounting, Consulting)',
+      ilpaCategory: 'Fee & Expense', ilpaSubtype: 'Expense — Professional Fees', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: false,
+      navImpact: 'Decrease NAV',
+      glDebit: 'Professional Fee Expense', glCredit: 'Accounts Payable', journalType: 'JE-EXP-PROF',
+      perfTemplateClass: 'Fee', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+30', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item F',
+      notes: 'External counsel, audit/tax, and consulting fees charged at fund level. ILPA RT v2.0 requires external vs. internal distinction.',
+    },
+    {
+      code: 'EXP-VAL', sortOrder: 37,
+      name: 'Third-Party Valuation Fees',
+      ilpaCategory: 'Fee & Expense', ilpaSubtype: 'Expense — Third-Party Valuations', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: false,
+      navImpact: 'Decrease NAV',
+      glDebit: 'Valuation Fee Expense', glCredit: 'Accounts Payable', journalType: 'JE-EXP-VAL',
+      perfTemplateClass: 'Fee', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+30', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item F',
+      notes: 'Independent valuation agent fees. ILPA RT v2.0 requires separate disclosure. Often quarterly engagement for Level 3 assets.',
+    },
+    {
+      code: 'EXP-SUB', sortOrder: 38,
+      name: 'Subscription Facility Fees & Interest',
+      ilpaCategory: 'Fee & Expense', ilpaSubtype: 'Expense — Subscription Facility', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: false,
+      navImpact: 'Decrease NAV',
+      glDebit: 'Subscription Facility Interest Expense', glCredit: 'Cash & Cash Equivalents', journalType: 'JE-EXP-SUB',
+      perfTemplateClass: 'Fee', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+0', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item F',
+      notes: 'Commitment fees, drawn interest, and facility fees on subscription credit lines. ILPA RT v2.0 requires IRR with/without sub-line disclosure.',
+    },
+    {
+      code: 'EXP-PORTCO', sortOrder: 39,
+      name: 'Portfolio Company Fees',
+      ilpaCategory: 'Fee & Expense', ilpaSubtype: 'Expense — Portfolio Company Fees', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: false,
+      navImpact: 'Decrease NAV',
+      glDebit: 'Portfolio Company Fee Expense', glCredit: 'Cash & Cash Equivalents', journalType: 'JE-EXP-PORTCO',
+      perfTemplateClass: 'Fee', perfTemplateMethod: 'Both',
+      feeOffset: true, feeOffsetType: 'Management Fee Base',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+0', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item F',
+      notes: 'Management, monitoring, transaction, and director fees charged at portfolio company level that flow to fund. Often offset against management fee per LPA.',
+    },
+    {
+      code: 'EXP-INS', sortOrder: 40,
+      name: 'Insurance Fees',
+      ilpaCategory: 'Fee & Expense', ilpaSubtype: 'Expense — Insurance', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: false,
+      navImpact: 'Decrease NAV',
+      glDebit: 'Insurance Expense', glCredit: 'Cash & Cash Equivalents', journalType: 'JE-EXP-INS',
+      perfTemplateClass: 'Fee', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+0', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item F',
+      notes: 'D&O, E&O, and other insurance premiums charged at fund level. NEW explicit category in ILPA RT v2.0.',
+    },
+    {
+      code: 'EXP-FORM', sortOrder: 41,
+      name: 'Formation & Organization Costs',
+      ilpaCategory: 'Fee & Expense', ilpaSubtype: 'Expense — Formation & Organization', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: false,
+      navImpact: 'Decrease NAV',
+      glDebit: 'Formation & Organization Expense', glCredit: 'Cash & Cash Equivalents', journalType: 'JE-EXP-FORM',
+      perfTemplateClass: 'Fee', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+0', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item F',
+      notes: 'Legal, filing, and structuring costs to establish the fund entity. Often amortized over fund life. Note: ILPA RT v2.0 eliminated Capitalized Expense disclosure.',
+    },
+    {
+      code: 'EXP-OTHER', sortOrder: 42,
+      name: 'Other Third-Party Expenses',
+      ilpaCategory: 'Fee & Expense', ilpaSubtype: 'Expense — Other Third-Party', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: false,
+      navImpact: 'Decrease NAV',
+      glDebit: 'Other Partnership Expense', glCredit: 'Cash & Cash Equivalents', journalType: 'JE-EXP-OTHER',
+      perfTemplateClass: 'Fee', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+30', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item F',
+      notes: 'Catch-all for third-party expenses not covered in other categories. Should be minimized; GP should use specific categories where possible.',
+    },
+    // ── CARRIED INTEREST ──────────────────────────────────────────────
+    {
+      code: 'CARRY-ACC', sortOrder: 50,
+      name: 'Carried Interest: Accrued',
+      ilpaCategory: 'Carried Interest', ilpaSubtype: 'Carry — Accrued', ilpaTemplateRef: tpRef,
+      direction: 'N/A', insideFund: true, recallable: false,
+      navImpact: 'GP Allocation',
+      glDebit: 'Unrealized Carried Interest Expense', glCredit: 'Carried Interest Payable — GP (Accrued)', journalType: 'JE-CARRY-ACC',
+      perfTemplateClass: 'Carried Interest', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'Carry Basis',
+      waterfallTier: 'Carried Interest',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+0', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item 1',
+      notes: 'Quarterly accrual of carried interest per waterfall. Gross-of-carry NAV reduced; shown separately in ILPA RT v2.0 Ending NAV rollforward.',
+    },
+    {
+      code: 'CARRY-REAL', sortOrder: 51,
+      name: 'Carried Interest: Realized',
+      ilpaCategory: 'Carried Interest', ilpaSubtype: 'Carry — Realized', ilpaTemplateRef: tpRef,
+      direction: 'N/A', insideFund: true, recallable: false,
+      navImpact: 'GP Allocation',
+      glDebit: 'Realized Carried Interest Expense', glCredit: 'Carried Interest Payable — GP (Realized)', journalType: 'JE-CARRY-REAL',
+      perfTemplateClass: 'Carried Interest', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'Carry Basis',
+      waterfallTier: 'Carried Interest',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+0', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item 1',
+      notes: 'Crystallized carry on realized investments. Triggers clawback calculations. ILPA RT v2.0 requires roll-forward: Opening + Accrued + Realized - Paid = Closing.',
+    },
+    {
+      code: 'CARRY-UNREAL', sortOrder: 52,
+      name: 'Carried Interest: Unrealized',
+      ilpaCategory: 'Carried Interest', ilpaSubtype: 'Carry — Unrealized', ilpaTemplateRef: tpRef,
+      direction: 'N/A', insideFund: true, recallable: false,
+      navImpact: 'GP Allocation',
+      glDebit: 'Unrealized Carry Mark-to-Market', glCredit: 'Carried Interest Payable — GP (Unrealized)', journalType: 'JE-CARRY-UNREAL',
+      perfTemplateClass: 'Carried Interest', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'Carry Basis',
+      waterfallTier: 'Carried Interest',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+0', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item 1',
+      notes: 'Mark-to-market carry on unrealized portfolio. Not cash-settled; reverses on realization. ILPA RT v2.0: gross-of-carry vs. net-of-carry NAV both reported.',
+    },
+    {
+      code: 'CARRY-PAID', sortOrder: 53,
+      name: 'Carried Interest: Paid (Cash Settlement)',
+      ilpaCategory: 'Carried Interest', ilpaSubtype: 'Carry — Paid', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: false,
+      navImpact: 'Decrease NAV',
+      glDebit: 'Carried Interest Payable — GP', glCredit: 'Cash & Cash Equivalents', journalType: 'JE-CARRY-PAID',
+      perfTemplateClass: 'Carried Interest', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'Carry Basis',
+      waterfallTier: 'Carried Interest',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+5', autoReconcile: false, approvalRequired: true,
+      taxReporting: 'Schedule K-1 — Item 1',
+      notes: 'Cash settlement of accrued/realized carried interest. Corresponds to DIST-CARRY-PAID on LP side. Clawback escrow provisions apply.',
+    },
+    // ── SUBSCRIPTION FACILITY / DEBT ──────────────────────────────────
+    {
+      code: 'FACIL-DRAW', sortOrder: 60,
+      name: 'Subscription Facility: Draw',
+      ilpaCategory: 'Facility / Debt', ilpaSubtype: 'Facility — Draw', ilpaTemplateRef: tpRef,
+      direction: 'Inflow', insideFund: true, recallable: false,
+      navImpact: 'No NAV Impact',
+      glDebit: 'Cash & Cash Equivalents', glCredit: 'Subscription Facility Payable', journalType: 'JE-FACIL-DRAW',
+      perfTemplateClass: 'N/A', perfTemplateMethod: 'N/A',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+0', autoReconcile: true, approvalRequired: true,
+      taxReporting: 'None',
+      notes: 'Draw on subscription/capital call credit facility. Defers LP capital calls. ILPA requires dual IRR reporting (with/without facility impact).',
+    },
+    {
+      code: 'FACIL-REPAY', sortOrder: 61,
+      name: 'Subscription Facility: Repayment',
+      ilpaCategory: 'Facility / Debt', ilpaSubtype: 'Facility — Repayment', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: false,
+      navImpact: 'No NAV Impact',
+      glDebit: 'Subscription Facility Payable', glCredit: 'Cash & Cash Equivalents', journalType: 'JE-FACIL-REPAY',
+      perfTemplateClass: 'N/A', perfTemplateMethod: 'N/A',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+0', autoReconcile: true, approvalRequired: true,
+      taxReporting: 'None',
+      notes: 'Principal repayment of subscription credit facility. Triggers LP capital call to fund repayment. Part of unfunded commitment reduction.',
+    },
+    {
+      code: 'FACIL-INT', sortOrder: 62,
+      name: 'Subscription Facility: Interest Payment',
+      ilpaCategory: 'Facility / Debt', ilpaSubtype: 'Facility — Interest', ilpaTemplateRef: tpRef,
+      direction: 'Outflow', insideFund: true, recallable: false,
+      navImpact: 'Decrease NAV',
+      glDebit: 'Interest Expense — Facility', glCredit: 'Cash & Cash Equivalents', journalType: 'JE-FACIL-INT',
+      perfTemplateClass: 'Fee', perfTemplateMethod: 'Both',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+0', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item F',
+      notes: 'Cash interest paid on outstanding subscription facility balance. Separate from EXP-SUB (accrued fees). Charged to fund as operating expense.',
+    },
+    // ── OTHER INCOME & ADJUSTMENTS ────────────────────────────────────
+    {
+      code: 'INC-DIV', sortOrder: 70,
+      name: 'Dividend Income',
+      ilpaCategory: 'Other', ilpaSubtype: 'Income — Dividend', ilpaTemplateRef: tpRef,
+      direction: 'Inflow', insideFund: true, recallable: false,
+      navImpact: 'Increase NAV',
+      glDebit: 'Cash & Cash Equivalents', glCredit: 'Dividend Income', journalType: 'JE-INC-DIV',
+      perfTemplateClass: 'N/A', perfTemplateMethod: 'N/A',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'Preferred Return',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+1', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item 6a',
+      notes: 'Cash dividends received from portfolio company holdings or securities. Gross of withholding tax; net withholding reported separately.',
+    },
+    {
+      code: 'INC-INT', sortOrder: 71,
+      name: 'Interest Income',
+      ilpaCategory: 'Other', ilpaSubtype: 'Income — Interest', ilpaTemplateRef: tpRef,
+      direction: 'Inflow', insideFund: true, recallable: false,
+      navImpact: 'Increase NAV',
+      glDebit: 'Cash & Cash Equivalents', glCredit: 'Interest Income', journalType: 'JE-INC-INT',
+      perfTemplateClass: 'N/A', perfTemplateMethod: 'N/A',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'Preferred Return',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+1', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item 5',
+      notes: 'Interest income from cash balances, money market, promissory notes, or portfolio company debt instruments.',
+    },
+    {
+      code: 'INC-FX', sortOrder: 72,
+      name: 'Foreign Exchange Gain / Loss',
+      ilpaCategory: 'Other', ilpaSubtype: 'Income — FX Gain/Loss', ilpaTemplateRef: tpRef,
+      direction: 'Bilateral', insideFund: true, recallable: false,
+      navImpact: 'Increase NAV',
+      glDebit: 'FX Gain/Loss — Unrealized', glCredit: 'Unrealized FX Adjustment', journalType: 'JE-FX',
+      perfTemplateClass: 'N/A', perfTemplateMethod: 'N/A',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+0', autoReconcile: true, approvalRequired: false,
+      taxReporting: 'Schedule K-1 — Item 11 (Sec 988)',
+      notes: 'Realized and unrealized FX gains/losses on non-base-currency assets and liabilities. Section 988 ordinary income treatment may apply.',
+    },
+    {
+      code: 'ADJ-RECL', sortOrder: 80,
+      name: 'Adjustment / Reclassification',
+      ilpaCategory: 'Other', ilpaSubtype: 'Adjustment — Reclassification', ilpaTemplateRef: tpRef,
+      direction: 'Bilateral', insideFund: true, recallable: false,
+      navImpact: 'No NAV Impact',
+      glDebit: 'Prior Period Adjustment Account', glCredit: 'Reclassification Contra Account', journalType: 'JE-ADJ',
+      perfTemplateClass: 'N/A', perfTemplateMethod: 'N/A',
+      feeOffset: false, feeOffsetType: 'None',
+      waterfallTier: 'N/A',
+      commitmentImpact: 'No Impact',
+      settlementDays: 'T+0', autoReconcile: false, approvalRequired: true,
+      taxReporting: 'None',
+      notes: 'Correction entries, period reclassifications, and balance sheet adjustments. Requires director approval and audit trail documentation.',
+    },
+  ]});
+
+  console.log('Created ILPA transaction parameters');
+
+  // ── Waterfall Engine ─────────────────────────────────────────────────────
+  // Clear existing Wf* data in FK-safe order
+  await prisma.wfDiuBatchLine.deleteMany();
+  await prisma.wfDiuBatch.deleteMany();
+  await prisma.wfRecommendedAction.deleteMany();
+  await prisma.wfException.deleteMany();
+  await prisma.wfFundInvestor.deleteMany();
+  await prisma.wfNavSnapshot.deleteMany();
+  await prisma.wfWaterfallStep.deleteMany();
+  await prisma.wfFundTerm.deleteMany();
+  await prisma.wfFund.deleteMany();
+  await prisma.wfAuditLog.deleteMany();
+
+  // Look up entity IDs by their hardcoded business IDs
+  const walkerEntity   = await prisma.entity.findFirst({ where: { entityId: 'ENT-000002' } });
+  const campbellEntity = await prisma.entity.findFirst({ where: { entityId: 'ENT-000007' } });
+  const sullivanEntity = await prisma.entity.findFirst({ where: { entityId: 'ENT-000008' } });
+
+  const WF_FUNDS = [
+    {
+      name: 'Walker Enterprise Fund III LP',
+      shortName: 'WEF-III',
+      strategy: 'Buyout',
+      waterfallType: 'european',
+      status: 'active',
+      vintage: 2021,
+      totalCommitment: 850_000_000,
+      totalNav: 920_000_000,
+      totalDistributed: 110_000_000,
+      totalUnrealized: 810_000_000,
+      exceptionCount: 2,
+      validationStatus: 'warning',
+      complexityScore: 72,
+      entityId: walkerEntity?.id ?? null,
+      terms: { hurdleRate: 0.08, carryPct: 0.20, catchupType: 'full', mgmtFeeRate: 0.02, mgmtFeeBasis: 'committed', fundLife: 10, investmentPeriod: 5, preferredReturn: 0.08 },
+      steps: [
+        { stepOrder: 1, stepName: 'Return of Capital',     lpSplit: 1.00, gpSplit: 0.00, description: 'Return LP capital contributions' },
+        { stepOrder: 2, stepName: 'Preferred Return (8%)', lpSplit: 1.00, gpSplit: 0.00, description: 'Compound 8% preferred return on contributed capital' },
+        { stepOrder: 3, stepName: 'GP Catch-Up',           lpSplit: 0.00, gpSplit: 1.00, description: 'GP catches up to 20% of preferred return' },
+        { stepOrder: 4, stepName: 'Carried Interest Split',lpSplit: 0.80, gpSplit: 0.20, description: '80/20 split of remaining distributions' },
+      ],
+      investors: [
+        { investorName: 'Stanford Endowment',    investorType: 'endowment',    investorClass: 'A', commitment: 150_000_000, contributed: 120_000_000, distributed: 20_000_000, nav: 140_000_000 },
+        { investorName: 'CalPERS',               investorType: 'pension',       investorClass: 'A', commitment: 200_000_000, contributed: 160_000_000, distributed: 25_000_000, nav: 185_000_000 },
+        { investorName: 'Blackstone Credit',     investorType: 'institutional', investorClass: 'B', commitment: 100_000_000, contributed:  80_000_000, distributed: 15_000_000, nav:  90_000_000 },
+        { investorName: 'CPPIB',                 investorType: 'pension',       investorClass: 'A', commitment: 250_000_000, contributed: 200_000_000, distributed: 30_000_000, nav: 240_000_000 },
+        { investorName: 'Rockefeller Family Office', investorType: 'family_office', investorClass: 'B', commitment: 50_000_000, contributed: 40_000_000, distributed: 8_000_000, nav: 45_000_000 },
+        { investorName: 'Harvard Management',   investorType: 'endowment',    investorClass: 'A', commitment: 100_000_000, contributed:  80_000_000, distributed: 12_000_000, nav: 220_000_000 },
+      ],
+      exceptions: [
+        { exceptionType: 'side_letter_not_applied', severity: 'critical', title: 'CPPIB Side Letter Carry Override Not Applied', description: 'CPPIB negotiated a 15% carry rate in side letter executed 2022-03-15. Current waterfall uses default 20%, resulting in an overcharge of ~$4.2M on Q4 2025 distributions.', impactAmount: 4_200_000, recommendedFix: 'Update FundInvestor.overrideCarryPct to 0.15 for CPPIB and regenerate Q4 2025 distribution calculation.', confidence: 0.96, status: 'open' },
+        { exceptionType: 'missing_equalization',    severity: 'high',     title: 'Rockefeller Family Office Equalization Shortfall', description: 'Rockefeller Family Office joined Q2 2022 closing. Equalization interest of $2.1M was not recorded, causing allocation discrepancy vs Class A investors.', impactAmount: 2_100_000, recommendedFix: 'Book equalization entry of $2.1M and update hasEqualization flag.', confidence: 0.89, status: 'open' },
+      ],
+    },
+    {
+      name: 'Campbell Growth Fund IV LP',
+      shortName: 'CGF-IV',
+      strategy: 'Growth Equity',
+      waterfallType: 'american',
+      status: 'active',
+      vintage: 2023,
+      totalCommitment: 500_000_000,
+      totalNav: 610_000_000,
+      totalDistributed: 85_000_000,
+      totalUnrealized: 525_000_000,
+      exceptionCount: 1,
+      validationStatus: 'ok',
+      complexityScore: 48,
+      entityId: campbellEntity?.id ?? null,
+      terms: { hurdleRate: 0.07, carryPct: 0.20, catchupType: 'partial', mgmtFeeRate: 0.0175, mgmtFeeBasis: 'invested', fundLife: 10, investmentPeriod: 5, preferredReturn: 0.07 },
+      steps: [
+        { stepOrder: 1, stepName: 'Return of Capital',    lpSplit: 1.00, gpSplit: 0.00, description: 'Return LP capital contributions' },
+        { stepOrder: 2, stepName: 'Preferred Return (7%)',lpSplit: 1.00, gpSplit: 0.00, description: '7% preferred return on contributed capital' },
+        { stepOrder: 3, stepName: 'Carried Interest',     lpSplit: 0.80, gpSplit: 0.20, description: '80/20 split — no full catch-up' },
+      ],
+      investors: [
+        { investorName: 'Ontario Teachers',        investorType: 'pension',        investorClass: 'A', commitment: 100_000_000, contributed:  90_000_000, distributed: 20_000_000, nav: 115_000_000 },
+        { investorName: 'Andreessen Horowitz',     investorType: 'institutional',  investorClass: 'A', commitment:  75_000_000, contributed:  68_000_000, distributed: 12_000_000, nav:  88_000_000 },
+        { investorName: 'Yale Endowment',          investorType: 'endowment',      investorClass: 'A', commitment: 150_000_000, contributed: 135_000_000, distributed: 30_000_000, nav: 190_000_000 },
+        { investorName: 'Pacific Investment Group',investorType: 'institutional',  investorClass: 'B', commitment:  80_000_000, contributed:  72_000_000, distributed: 14_000_000, nav:  94_000_000 },
+        { investorName: 'Morgan Creek Capital',    investorType: 'fund_of_funds',  investorClass: 'A', commitment:  95_000_000, contributed:  85_000_000, distributed:  9_000_000, nav: 123_000_000 },
+      ],
+      exceptions: [
+        { exceptionType: 'fee_calculation_discrepancy', severity: 'medium', title: 'Management Fee Basis Discrepancy — Q3 2025', description: 'Q3 2025 fees calculated on committed capital ($500M) rather than invested capital. LPA specifies invested-capital basis post investment period (ended 2025-01-01). Overcharge ~$875K.', impactAmount: 875_000, recommendedFix: 'Reverse Q3 2025 management fee entries and rebook on invested capital basis ($395M).', confidence: 0.94, status: 'open' },
+      ],
+    },
+    {
+      name: 'Sullivan Global Alpha Fund',
+      shortName: 'SGA',
+      strategy: 'Hedge Fund',
+      waterfallType: 'american',
+      status: 'active',
+      vintage: 2017,
+      totalCommitment: 350_000_000,
+      totalNav: 180_000_000,
+      totalDistributed: 420_000_000,
+      totalUnrealized: 180_000_000,
+      exceptionCount: 0,
+      validationStatus: 'ok',
+      complexityScore: 35,
+      entityId: sullivanEntity?.id ?? null,
+      terms: { hurdleRate: 0.09, carryPct: 0.15, catchupType: 'none', mgmtFeeRate: 0.015, mgmtFeeBasis: 'nav', fundLife: 12, investmentPeriod: 5, preferredReturn: 0.09 },
+      steps: [
+        { stepOrder: 1, stepName: 'Return of Capital',        lpSplit: 1.00, gpSplit: 0.00, description: 'Return LP capital contributions' },
+        { stepOrder: 2, stepName: 'Preferred Return (9%)',    lpSplit: 1.00, gpSplit: 0.00, description: '9% compound preferred return' },
+        { stepOrder: 3, stepName: 'Carried Interest (15%)',   lpSplit: 0.85, gpSplit: 0.15, description: '85/15 split — no catch-up' },
+      ],
+      investors: [
+        { investorName: 'GIC Singapore',         investorType: 'sovereign_wealth', investorClass: 'A', commitment:  80_000_000, contributed:  80_000_000, distributed: 100_000_000, nav:  42_000_000 },
+        { investorName: 'Dutch Pension APG',      investorType: 'pension',          investorClass: 'A', commitment: 120_000_000, contributed: 120_000_000, distributed: 150_000_000, nav:  63_000_000 },
+        { investorName: 'Vanguard Infrastructure',investorType: 'institutional',    investorClass: 'B', commitment:  70_000_000, contributed:  70_000_000, distributed:  85_000_000, nav:  37_000_000 },
+        { investorName: 'Brookfield Secondaries', investorType: 'institutional',    investorClass: 'B', commitment:  80_000_000, contributed:  80_000_000, distributed:  85_000_000, nav:  38_000_000 },
+      ],
+      exceptions: [],
+    },
+  ];
+
+  const wfFundIds: string[] = [];
+  for (const f of WF_FUNDS) {
+    const { terms, steps, investors, exceptions, entityId, ...fundData } = f;
+    const fund = await prisma.wfFund.create({
+      data: {
+        ...fundData,
+        ...(entityId ? { entityId } : {}),
+        terms: { create: terms },
+        waterfallSteps: { create: steps },
+        investors: {
+          create: investors.map((inv) => ({
+            ...inv,
+            closingDate: new Date(`${fundData.vintage}-03-15`),
+          })),
+        },
+        navSnapshots: {
+          create: [
+            { snapshotDate: new Date('2025-09-30'), totalNav: fundData.totalNav * 0.92, unrealized: fundData.totalUnrealized * 0.9 },
+            { snapshotDate: new Date('2025-12-31'), totalNav: fundData.totalNav,         unrealized: fundData.totalUnrealized },
+          ],
+        },
+      },
+    });
+    wfFundIds.push(fund.id);
+    for (const exc of exceptions) {
+      await prisma.wfException.create({ data: { ...exc, fundId: fund.id } });
+    }
+  }
+
+  await prisma.wfAuditLog.createMany({
+    data: [
+      { entityType: 'fund', entityId: wfFundIds[0], action: 'validated', note: 'WEF-III waterfall validation completed — 2 exceptions detected',         createdAt: new Date(Date.now() - 1_800_000) },
+      { entityType: 'fund', entityId: wfFundIds[1], action: 'validated', note: 'CGF-IV fee calculation discrepancy flagged',                             createdAt: new Date(Date.now() - 7_200_000) },
+      { entityType: 'fund', entityId: wfFundIds[2], action: 'refreshed', note: 'SGA distribution model refreshed — no exceptions',                       createdAt: new Date(Date.now() - 14_400_000) },
+    ],
+  });
+
+  console.log(`Created ${WF_FUNDS.length} waterfall funds linked to Canopy entities`);
+  // ─────────────────────────────────────────────────────────────────────────
+
   console.log('\n✅ Seed complete!');
+
+  // RevOps — quote-to-cash pipeline data
+  await seedRevOps(prisma);
+  console.log('✅ RevOps seed complete!');
 }
 
 main()

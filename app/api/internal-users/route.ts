@@ -12,7 +12,7 @@ export async function GET() {
       utilizationActual: u.utilizationActual ? toNum(u.utilizationActual) : null,
       utilizationTarget: u.utilizationTarget ? toNum(u.utilizationTarget) : null,
       clientsManaged: u.clientsManaged, tasksAssigned: u.tasksAssigned, tasksOverdue: u.tasksOverdue,
-      performanceRating: u.performanceRating,
+      segment: u.segment, serviceGroup: u.serviceGroup, licenseType: u.licenseType, podId: u.podId,
     })),
   });
 }

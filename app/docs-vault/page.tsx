@@ -15,7 +15,7 @@ const confidentialityStyles: Record<string, string> = {
 };
 
 const columns: Column[] = [
-  { key: 'documentId', label: 'Doc ID', render: (v: string) => <span className="font-mono text-sm">{v}</span> },
+  { key: 'documentId', label: 'Doc ID', render: (v: string) => <span>{v}</span> },
   { key: 'name', label: 'Name', sortable: true, render: (v: string) => <span className="font-medium text-gray-900">{v}</span> },
   { key: 'documentType', label: 'Type', sortable: true },
   { key: 'entityName', label: 'Entity / Client', render: (_v: any, row: any) => <span>{row.entityName || row.clientName || '—'}</span> },
@@ -38,11 +38,11 @@ export default function DocsVaultPage() {
   const underReview = items.filter((d) => d.status === 'Under Review').length;
   const draft = items.filter((d) => d.status === 'Draft').length;
 
-  if (loading) return <div className="flex items-center justify-center h-96"><div className="animate-pulse text-gray-400">Loading Docs Vault...</div></div>;
+  if (loading) return <div className="flex items-center justify-center h-96"><div className="animate-pulse text-gray-400">Loading Document Library...</div></div>;
 
   return (
     <div className="space-y-3">
-      <PageHeader title="Docs Vault" subtitle="Document management and storage" />
+      <PageHeader title="Document Library" subtitle="Document management and storage" />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-3">
         <MetricCard title="Total Documents" value={items.length} color="teal" />
         <MetricCard title="Executed" value={executed} color="green" />

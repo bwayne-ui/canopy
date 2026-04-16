@@ -144,7 +144,7 @@ export default function ReportDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Definition */}
         <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-4 space-y-3">
-          <h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Definition</h3>
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Definition</h3>
 
           {!editing ? (
             <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-xs">
@@ -158,7 +158,7 @@ export default function ReportDetail() {
                 <dt className="text-gray-400 text-[10px] uppercase">Entitlement</dt>
                 <dd>
                   {report.minGrade ? (
-                    <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold ${report.minGrade.startsWith('M') ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>{report.minGrade}+</span>
+                    <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${report.minGrade.startsWith('M') ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>{report.minGrade}+</span>
                   ) : '—'}
                 </dd>
               </div>
@@ -167,7 +167,7 @@ export default function ReportDetail() {
               <div className="col-span-2"><dt className="text-gray-400 text-[10px] uppercase">Recipients</dt><dd>{report.recipients}</dd></div>
               <div className="col-span-2">
                 <dt className="text-gray-400 text-[10px] uppercase">Export Formats</dt>
-                <dd className="font-mono text-[10px] text-gray-600">{report.exportFormats.join(' · ')}</dd>
+                <dd className="text-[10px] text-gray-600">{report.exportFormats.join(' · ')}</dd>
               </div>
             </dl>
           ) : (
@@ -187,7 +187,7 @@ export default function ReportDetail() {
                 <div className="text-[10px] font-semibold text-gray-400 uppercase mb-1">Allowed export formats</div>
                 <div className="flex flex-wrap gap-2">
                   {FORMAT_OPTIONS.map((f) => (
-                    <label key={f} className="flex items-center gap-1 text-[11px] font-mono">
+                    <label key={f} className="flex items-center gap-1 text-xs">
                       <input type="checkbox" checked={editFormats.includes(f)} onChange={(e) => setEditFormats(e.target.checked ? [...editFormats, f] : editFormats.filter((x) => x !== f))} />
                       {f}
                     </label>
@@ -198,33 +198,33 @@ export default function ReportDetail() {
           )}
 
           <div className="pt-3 border-t border-gray-100">
-            <div className="text-[10px] font-semibold text-gray-400 uppercase mb-1">Query Logic <span className="font-mono">({report.querySource})</span></div>
+            <div className="text-[10px] font-semibold text-gray-400 uppercase mb-1">Query Logic <span className="">({report.querySource})</span></div>
             {!editing ? (
-              <pre className="bg-gray-50 rounded p-2 text-[10px] font-mono overflow-x-auto text-gray-700 max-h-48">{report.queryLogic}</pre>
+              <pre className="bg-gray-50 rounded p-2 text-[10px] overflow-x-auto text-gray-700 max-h-48">{report.queryLogic}</pre>
             ) : (
-              <textarea value={editQueryLogic} onChange={(e) => setEditQueryLogic(e.target.value)} rows={6} className="w-full px-2 py-1.5 text-[10px] font-mono border border-gray-200 rounded" />
+              <textarea value={editQueryLogic} onChange={(e) => setEditQueryLogic(e.target.value)} rows={6} className="w-full px-2 py-1.5 text-[10px] border border-gray-200 rounded" />
             )}
           </div>
 
           <div className="pt-3 border-t border-gray-100">
             <div className="text-[10px] font-semibold text-gray-400 uppercase mb-1">Parameter Schema</div>
             {!editing ? (
-              <pre className="bg-gray-50 rounded p-2 text-[10px] font-mono overflow-x-auto text-gray-700 max-h-48">{JSON.stringify(report.parametersSchema, null, 2)}</pre>
+              <pre className="bg-gray-50 rounded p-2 text-[10px] overflow-x-auto text-gray-700 max-h-48">{JSON.stringify(report.parametersSchema, null, 2)}</pre>
             ) : (
-              <textarea value={editParamsJson} onChange={(e) => setEditParamsJson(e.target.value)} rows={8} className="w-full px-2 py-1.5 text-[10px] font-mono border border-gray-200 rounded" />
+              <textarea value={editParamsJson} onChange={(e) => setEditParamsJson(e.target.value)} rows={8} className="w-full px-2 py-1.5 text-[10px] border border-gray-200 rounded" />
             )}
           </div>
         </div>
 
         {/* Run + Export panel */}
         <div className="bg-white rounded-lg shadow-sm p-4 space-y-3">
-          <h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Run / View / Export</h3>
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Run / View / Export</h3>
 
           <div className="space-y-2">
             <label className="block text-[10px] font-semibold text-gray-400 uppercase">Run as</label>
             <div className="flex gap-1">
               <input value={user.name} onChange={(e) => setUser({ ...user, name: e.target.value })} className="flex-1 px-2 py-1 text-xs border rounded" placeholder="Name" />
-              <select value={user.grade} onChange={(e) => setUser({ ...user, grade: e.target.value })} className="px-2 py-1 text-xs border rounded font-mono">
+              <select value={user.grade} onChange={(e) => setUser({ ...user, grade: e.target.value })} className="px-2 py-1 text-xs border rounded">
                 {ALL_GRADES.map((g) => <option key={g} value={g}>{g}</option>)}
               </select>
             </div>
@@ -242,7 +242,7 @@ export default function ReportDetail() {
                   type={p.type === 'number' ? 'number' : p.type === 'date' ? 'date' : 'text'}
                   value={paramValues[p.name] ?? ''}
                   onChange={(e) => setParamValues({ ...paramValues, [p.name]: e.target.value })}
-                  className="w-full px-2 py-1 text-xs border rounded font-mono"
+                  className="w-full px-2 py-1 text-xs border rounded"
                 />
               )}
             </div>
@@ -259,20 +259,20 @@ export default function ReportDetail() {
                 <Eye className="w-3 h-3" />View HTML
               </button>
               {report.exportFormats.filter((f) => f !== 'html').map((f) => (
-                <button key={f} onClick={() => exportTo(f)} className="text-xs px-2 py-1.5 border border-gray-200 rounded hover:bg-gray-50 flex items-center justify-center gap-1 font-mono">
+                <button key={f} onClick={() => exportTo(f)} className="text-xs px-2 py-1.5 border border-gray-200 rounded hover:bg-gray-50 flex items-center justify-center gap-1">
                   <Download className="w-3 h-3" />{f.toUpperCase()}
                 </button>
               ))}
             </div>
-            <div className="mt-2 text-[9px] text-gray-400">
-              Endpoint: <span className="font-mono">/api/reports/{report.reportId}/export</span>
+            <div className="mt-2 text-[10px] text-gray-400">
+              Endpoint: <span className="">/api/reports/{report.reportId}/export</span>
             </div>
           </div>
 
           {runResult != null && (
             <div className="pt-2 border-t border-gray-100">
               <div className="text-[10px] font-semibold text-gray-400 uppercase mb-1">Result</div>
-              <pre className="bg-gray-50 rounded p-2 text-[10px] font-mono overflow-x-auto max-h-48 text-gray-700">{JSON.stringify(runResult, null, 2)}</pre>
+              <pre className="bg-gray-50 rounded p-2 text-[10px] overflow-x-auto max-h-48 text-gray-700">{JSON.stringify(runResult, null, 2)}</pre>
             </div>
           )}
         </div>
@@ -280,7 +280,7 @@ export default function ReportDetail() {
 
       {/* Run history */}
       <div className="bg-white rounded-lg shadow-sm p-4">
-        <h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-3">Run History ({report.runs.length})</h3>
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Run History ({report.runs.length})</h3>
         <table className="w-full text-xs">
           <thead className="bg-gray-50/80 border-b border-gray-200">
             <tr>
@@ -296,13 +296,13 @@ export default function ReportDetail() {
           <tbody>
             {report.runs.map((r) => (
               <tr key={r.runId} className="border-b border-gray-50">
-                <td className="px-3 py-2 font-mono text-[11px]">{r.runId}</td>
+                <td className="px-3 py-2 text-xs">{r.runId}</td>
                 <td className="px-3 py-2">{r.triggeredBy}</td>
                 <td className="px-3 py-2">{fmtDate(r.startedAt)}</td>
-                <td className="px-3 py-2 text-right font-mono text-[11px]">{r.rowCount ?? '—'}</td>
-                <td className="px-3 py-2 text-right font-mono text-[11px]">{r.durationMs ? `${r.durationMs}ms` : '—'}</td>
+                <td className="px-3 py-2 text-right text-xs">{r.rowCount ?? '—'}</td>
+                <td className="px-3 py-2 text-right text-xs">{r.durationMs ? `${r.durationMs}ms` : '—'}</td>
                 <td className="px-3 py-2"><StatusBadge status={r.status} /></td>
-                <td className="px-3 py-2 text-[10px] font-mono text-gray-500 truncate max-w-xs">{r.error ?? r.outputRef ?? '—'}</td>
+                <td className="px-3 py-2 text-[10px] text-gray-500 truncate max-w-xs">{r.error ?? r.outputRef ?? '—'}</td>
               </tr>
             ))}
             {report.runs.length === 0 && (

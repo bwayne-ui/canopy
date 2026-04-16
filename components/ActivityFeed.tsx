@@ -21,7 +21,7 @@ interface Props {
 export default function ActivityFeed({ items }: Props) {
   return (
     <div className="bg-white rounded-lg shadow-sm p-4">
-      <h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-3">Recent Activity</h3>
+      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Recent Activity</h3>
       <div className="space-y-0">
         {items.map((item) => (
           <div key={item.id} className="flex items-start gap-2.5 py-1.5 border-b border-gray-50/80 last:border-0">

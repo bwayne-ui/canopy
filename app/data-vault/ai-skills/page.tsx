@@ -7,6 +7,7 @@ import DataTable, { Column } from '@/components/DataTable';
 import StatusBadge from '@/components/StatusBadge';
 import { fmtPct } from '@/lib/utils';
 import { Brain, Activity, Target, Play } from 'lucide-react';
+import Link from 'next/link';
 
 interface AISkillRow {
   id: number;
@@ -28,18 +29,23 @@ const accuracyBar = (accuracy: number | null) => {
       <div className="w-20 bg-gray-200 rounded-full h-2">
         <div className={`${color} h-2 rounded-full`} style={{ width: `${Math.min(accuracy, 100)}%` }} />
       </div>
-      <span className="text-xs font-mono text-gray-600">{fmtPct(accuracy)}</span>
+      <span className="text-xs text-gray-600">{fmtPct(accuracy)}</span>
     </div>
   );
 };
 
 const columns: Column[] = [
-  { key: 'name', label: 'Name', sortable: true, render: (v) => <span className="font-medium text-gray-900">{v}</span> },
+  { key: 'name', label: 'Name', sortable: true, render: (v: string, row: any) => (
+    <Link href={`/data-vault/ai-skills/${row.id}`} className="block group">
+      <div className="font-semibold text-gray-900 group-hover:text-[#00C97B] transition-colors">{v}</div>
+      <div className="text-[10px] text-gray-400">{row.category}</div>
+    </Link>
+  ) },
   { key: 'category', label: 'Category', sortable: true },
   { key: 'model', label: 'Model', sortable: true },
   { key: 'accuracy', label: 'Accuracy', sortable: true, align: 'right', render: (v) => accuracyBar(v) },
   { key: 'status', label: 'Status', sortable: true, render: (v) => <StatusBadge status={v} /> },
-  { key: 'runCount', label: 'Run Count', sortable: true, align: 'right', render: (v) => <span className="font-mono">{Number(v).toLocaleString()}</span> },
+  { key: 'runCount', label: 'Run Count', sortable: true, align: 'right', render: (v) => <span className="">{Number(v).toLocaleString()}</span> },
   { key: 'lastRun', label: 'Last Run', sortable: true, render: (v) => v || '—' },
 ];
 

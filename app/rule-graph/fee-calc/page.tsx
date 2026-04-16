@@ -32,7 +32,7 @@ export default function FeeCalcPage() {
 
       {/* Fee Chain Visualization */}
       <div className="bg-white rounded-lg shadow-sm p-5">
-        <h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-4">Calculation Pipeline</h3>
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Calculation Pipeline</h3>
         <div className="flex items-stretch gap-0 overflow-x-auto pb-2">
           {feeChain.map((fee, i) => {
             const isNegative = fee.amount < 0;
@@ -49,7 +49,7 @@ export default function FeeCalcPage() {
                   <div className="text-[10px] text-gray-500 mb-2">{fee.basis}</div>
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] text-gray-400">{fee.rate}</span>
-                    <span className={`font-mono text-xs font-bold ${isNegative ? 'text-red-500' : 'text-emerald-600'}`}>
+                    <span className={`text-xs font-bold ${isNegative ? 'text-red-500' : 'text-emerald-600'}`}>
                       {isNegative ? '-' : '+'}{fmtK(fee.amount)}
                     </span>
                   </div>
@@ -67,7 +67,7 @@ export default function FeeCalcPage() {
             <div className="flex items-center px-1.5"><span className="text-gray-300 text-lg">=</span></div>
             <div className="w-36 rounded-lg border-2 border-[#00C97B] bg-[#E6F9F0]/50 p-3 flex flex-col justify-center">
               <div className="text-[10px] font-semibold text-gray-500 uppercase mb-1">Net Fees</div>
-              <div className="font-mono text-lg font-bold text-[#00C97B]">{fmtM(netFees)}</div>
+              <div className="text-lg font-bold text-[#00C97B]">{fmtM(netFees)}</div>
             </div>
           </div>
         </div>
@@ -78,24 +78,24 @@ export default function FeeCalcPage() {
         <table className="w-full text-xs">
           <thead>
             <tr className="bg-gray-50/80 border-b border-gray-200">
-              <th className="px-3 py-2 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Step</th>
-              <th className="px-3 py-2 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Fee Type</th>
-              <th className="px-3 py-2 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Basis</th>
-              <th className="px-3 py-2 text-center text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Rate</th>
-              <th className="px-3 py-2 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Period</th>
-              <th className="px-3 py-2 text-right text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-              <th className="px-3 py-2 text-center text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Step</th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Fee Type</th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Basis</th>
+              <th className="px-3 py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Rate</th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Period</th>
+              <th className="px-3 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
+              <th className="px-3 py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
             </tr>
           </thead>
           <tbody>
             {feeChain.map((f) => (
               <tr key={f.step} className="border-b border-gray-50 hover:bg-gray-50/50">
-                <td className="px-3 py-2 font-mono text-[10px] text-gray-400">{f.step}</td>
+                <td className="px-3 py-2 text-[10px] text-gray-400">{f.step}</td>
                 <td className="px-3 py-2 font-medium text-gray-900">{f.name}</td>
                 <td className="px-3 py-2 text-gray-500">{f.basis}</td>
-                <td className="px-3 py-2 text-center font-mono text-[11px]">{f.rate}</td>
+                <td className="px-3 py-2 text-center text-xs">{f.rate}</td>
                 <td className="px-3 py-2 text-gray-500">{f.period}</td>
-                <td className={`px-3 py-2 text-right font-mono text-[11px] ${f.amount < 0 ? 'text-red-500' : 'text-emerald-600'}`}>{f.amount < 0 ? '-' : '+'}{fmtK(f.amount)}</td>
+                <td className={`px-3 py-2 text-right text-xs ${f.amount < 0 ? 'text-red-500' : 'text-emerald-600'}`}>{f.amount < 0 ? '-' : '+'}{fmtK(f.amount)}</td>
                 <td className="px-3 py-2 text-center"><StatusBadge status={f.status} /></td>
               </tr>
             ))}

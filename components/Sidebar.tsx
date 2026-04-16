@@ -7,11 +7,11 @@ import {
   LayoutDashboard, Database, FileText, Bot, FolderKanban, GitBranch,
   Network, ChevronDown, ChevronRight, Calendar, MessageSquare, Landmark,
   Wrench, Users, Building2, UserCheck, Shield, ClipboardList, ClipboardCheck,
-  Brain, Contact, BookOpen, FileBarChart, Settings2, ArrowLeftRight,
+  Brain, Contact, BookOpen, FileBarChart, Settings2, ArrowLeftRight, Zap,
   PieChart, Banknote, ListChecks, BookOpenCheck, Wallet, BarChart3,
   Activity, ShieldCheck, Target, Clock, TrendingUp, Eye, Briefcase,
   Receipt, Scale, UserCog, LineChart, Gauge, AlertCircle, BadgeDollarSign,
-  Layers, CircleDollarSign
+  Layers, CircleDollarSign, ShieldAlert,
 } from 'lucide-react';
 
 interface NavItem {
@@ -42,17 +42,26 @@ const docsVaultItems: NavItem[] = [
 ];
 
 const ruleGraphItems: NavItem[] = [
-  { label: 'Deterministic Rules', href: '/rule-graph', icon: GitBranch },
+  { label: 'Calculation Rule Builder', href: '/rule-graph', icon: GitBranch },
   { label: 'Waterfall Tree', href: '/rule-graph/waterfall', icon: Layers },
   { label: 'Fee Calculation', href: '/rule-graph/fee-calc', icon: Receipt },
   { label: 'NAV Calculation', href: '/rule-graph/nav-calc', icon: CircleDollarSign },
   { label: 'Partner Allocation', href: '/rule-graph/allocation', icon: Users },
 ];
 
+const opportunitiesItems: NavItem[] = [
+  { label: 'Pipeline',    href: '/revops',              icon: TrendingUp   },
+  { label: 'Accounts',   href: '/revops/accounts',      icon: Building2    },
+  { label: 'Contacts',   href: '/revops/contacts',      icon: Users        },
+  { label: 'Leads',      href: '/revops/leads',         icon: Target       },
+  { label: 'Contracts',  href: '/revops/contracts',     icon: BookOpenCheck },
+];
+
 const relationshipItems: NavItem[] = [
   { label: 'Entity Map', href: '/relationships', icon: Network },
   { label: 'Task Assignments', href: '/data-vault/task-assignments', icon: ClipboardCheck },
   { label: 'Employee Assignments', href: '/relationships/employee-assignments', icon: UserCog },
+  { label: 'Org Chart', href: '/org-chart', icon: Users },
 ];
 
 const dashboardItems: NavItem[] = [
@@ -77,6 +86,15 @@ const dashboardItems: NavItem[] = [
   { label: 'Fee Reconciliation', href: '/dashboards/fee-reconciliation', icon: BadgeDollarSign },
   { label: 'Investor Relations', href: '/dashboards/investor-relations', icon: Users },
   { label: 'Fund Performance', href: '/dashboards/fund-performance', icon: Gauge },
+  { label: 'KPI Scorecard', href: '/dashboards/client-scorecard', icon: Target },
+];
+
+const agentToolsItems: NavItem[] = [
+  { label: 'Toolbox',               href: '/toolbox',        icon: Wrench },
+  { label: 'Marketplace',           href: '/marketplace',    icon: Bot },
+  { label: 'AI Overview & Prompts', href: '/agent-console',  icon: Bot },
+  { label: 'AI Skills',             href: '/agent/skills',   icon: Zap },
+  { label: 'AI Memory',             href: '/agent/memory',   icon: Brain },
 ];
 
 const activityItems: NavItem[] = [
@@ -111,8 +129,9 @@ function CollapsibleSection({
   return (
     <div>
       <button
+        type="button"
         onClick={onToggle}
-        className={`w-full flex items-center gap-2.5 px-3 py-1.5 text-[12px] rounded-md transition-all duration-200 ${
+        className={`w-full flex items-center gap-2.5 px-3 py-1.5 text-xs rounded-md transition-all duration-200 ${
           sectionActive
             ? 'bg-[#00C97B]/10 text-[#00C97B] font-semibold'
             : 'text-gray-400 hover:text-white hover:bg-white/5'
@@ -136,7 +155,7 @@ function CollapsibleSection({
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-2 px-2.5 py-[5px] text-[11px] rounded-md transition-all duration-150 ${
+              className={`flex items-center gap-2 px-2.5 py-[5px] text-xs rounded-md transition-all duration-150 ${
                 isActive(item.href)
                   ? 'bg-[#00C97B]/10 text-[#00C97B] font-medium'
                   : 'text-gray-500 hover:text-gray-300 hover:bg-white/[0.04]'
@@ -158,9 +177,11 @@ export default function Sidebar() {
     dataVault: pathname.startsWith('/data-vault') || pathname === '/trans-parameters',
     docsVault: pathname.startsWith('/docs-vault'),
     ruleGraph: pathname.startsWith('/rule-graph'),
-    relationships: pathname.startsWith('/relationships') || pathname.startsWith('/data-vault/task-assignments'),
+    opportunities: pathname.startsWith('/revops'),
+    relationships: pathname.startsWith('/relationships') || pathname.startsWith('/data-vault/task-assignments') || pathname.startsWith('/org-chart'),
     dashboards: pathname.startsWith('/dashboards') || pathname === '/treasury',
     activity: ['/trans', '/projects', '/calendar', '/communications', '/activity'].some((p) => pathname.startsWith(p)),
+    agentTools: ['/marketplace', '/agent-console', '/toolbox'].some((p) => pathname.startsWith(p)),
   });
 
   const toggle = (key: string) =>
@@ -172,7 +193,7 @@ export default function Sidebar() {
   };
 
   const linkClass = (href: string) =>
-    `flex items-center gap-2.5 px-3 py-1.5 text-[12px] rounded-md transition-all duration-200 ${
+    `flex items-center gap-2.5 px-3 py-1.5 text-xs rounded-md transition-all duration-200 ${
       isActive(href)
         ? 'bg-[#00C97B]/10 text-[#00C97B] font-semibold'
         : 'text-gray-400 hover:text-white hover:bg-white/5'
@@ -187,8 +208,8 @@ export default function Sidebar() {
             <BookOpen className="w-4 h-4 text-white" />
           </div>
           <div>
-            <div className="text-white font-black text-[15px] tracking-wide leading-none">CANOPY 2.0</div>
-            <div className="text-[#00C97B]/70 text-[9px] font-medium tracking-[0.12em] uppercase">Internal Fund Admin Platform</div>
+            <div className="text-white font-bold text-sm tracking-wide leading-none">CANOPY 2.0</div>
+            <div className="text-[#00C97B]/70 text-[10px] font-medium tracking-[0.12em] uppercase">Internal Fund Admin Platform</div>
           </div>
         </Link>
       </div>
@@ -201,6 +222,16 @@ export default function Sidebar() {
           <span>Control Tower</span>
         </Link>
 
+        {/* Agentic Center */}
+        <CollapsibleSection
+          label="Agentic Center"
+          icon={Bot}
+          items={agentToolsItems}
+          isOpen={openSections.agentTools}
+          onToggle={() => toggle('agentTools')}
+          isActive={isActive}
+        />
+
         {/* Data Vault */}
         <CollapsibleSection
           label="Data Vault"
@@ -211,9 +242,9 @@ export default function Sidebar() {
           isActive={isActive}
         />
 
-        {/* Docs Vault */}
+        {/* Document Library */}
         <CollapsibleSection
-          label="Docs Vault"
+          label="Document Library"
           icon={FileText}
           items={docsVaultItems}
           isOpen={openSections.docsVault}
@@ -223,7 +254,7 @@ export default function Sidebar() {
 
         {/* Rule Graph */}
         <CollapsibleSection
-          label="Deterministic Rules"
+          label="Calculation Rule Builder"
           icon={GitBranch}
           items={ruleGraphItems}
           isOpen={openSections.ruleGraph}
@@ -233,7 +264,7 @@ export default function Sidebar() {
 
         {/* Relationships */}
         <CollapsibleSection
-          label="System Relationships"
+          label="Org & Assignments"
           icon={Network}
           items={relationshipItems}
           isOpen={openSections.relationships}
@@ -283,28 +314,25 @@ export default function Sidebar() {
           <span>Time Tracking</span>
         </Link>
 
-        {/* Agent Marketplace */}
-        <Link href="/marketplace" className={linkClass('/marketplace')}>
-          <Bot className="w-3.5 h-3.5 flex-shrink-0" />
-          <span>Agent Marketplace</span>
+        {/* Separator */}
+        <div className="pt-2 pb-1 px-3">
+          <div className="h-px bg-white/[0.06]" />
+        </div>
+
+        {/* Settings */}
+        <div className="px-3 pt-1 pb-0.5">
+          <p className="text-[10px] font-semibold text-white/20 uppercase tracking-[0.1em]">Settings</p>
+        </div>
+        <Link href="/settings/security" className={linkClass('/settings/security')}>
+          <ShieldAlert className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>Security &amp; Permissions</span>
         </Link>
 
-        {/* Agent Prompting Layer */}
-        <Link href="/agent-console" className={linkClass('/agent-console')}>
-          <Bot className="w-3.5 h-3.5 flex-shrink-0" />
-          <span>Agent Prompting Layer</span>
-        </Link>
-
-        {/* Toolbox — bottom */}
-        <Link href="/toolbox" className={linkClass('/toolbox')}>
-          <Wrench className="w-3.5 h-3.5 flex-shrink-0" />
-          <span>Toolbox</span>
-        </Link>
       </nav>
 
       {/* Footer */}
       <div className="px-4 py-2.5 border-t border-white/[0.06]">
-        <div className="text-[9px] text-gray-600 tracking-wide">Canopy v2.0 &middot; Juniper Square</div>
+        <div className="text-[10px] text-gray-600 tracking-wide">Canopy v2.0 &middot; Juniper Square</div>
       </div>
     </aside>
   );

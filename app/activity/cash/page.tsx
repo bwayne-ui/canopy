@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import PageHeader from '@/components/PageHeader';
 import MetricCard from '@/components/MetricCard';
 import DataTable, { Column } from '@/components/DataTable';
@@ -26,12 +27,12 @@ const inflows = movements.filter((m) => m.amount > 0).reduce((s, m) => s + m.amo
 const outflows = movements.filter((m) => m.amount < 0).reduce((s, m) => s + Math.abs(m.amount), 0);
 
 const columns: Column[] = [
-  { key: 'date', label: 'Date', sortable: true, render: (v) => <span className="font-mono text-[11px]">{v}</span> },
+  { key: 'date', label: 'Date', sortable: true, render: (v) => <span className="text-xs">{v}</span> },
   { key: 'type', label: 'Type', render: (v) => <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${v === 'Inflow' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>{v}</span> },
   { key: 'description', label: 'Description', sortable: true, render: (v) => <span className="font-medium text-gray-900">{v}</span> },
   { key: 'account', label: 'Account', sortable: true },
-  { key: 'amount', label: 'Amount', align: 'right', sortable: true, render: (v) => <span className={`font-mono text-[11px] ${v >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>{v >= 0 ? '+' : ''}{fmtMoney(Math.abs(v))}</span> },
-  { key: 'counterparty', label: 'Counterparty', sortable: true },
+  { key: 'amount', label: 'Amount', align: 'right', sortable: true, render: (v) => <span className={`text-xs ${v >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>{v >= 0 ? '+' : ''}{fmtMoney(Math.abs(v))}</span> },
+  { key: 'counterparty', label: 'Counterparty', sortable: true, render: (v: string) => v === 'Various' ? <span className="text-gray-500">{v}</span> : <Link href={`/data-vault/external-contacts?search=${encodeURIComponent(v)}`} className="text-[#00C97B] hover:underline hover:text-[#00A866] transition-colors">{v}</Link> },
   { key: 'status', label: 'Status', render: (v) => <StatusBadge status={v} /> },
 ];
 

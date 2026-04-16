@@ -41,7 +41,7 @@ const gradeBadge = (g: string | null) => {
   if (!g) return <span className="text-gray-300 text-[10px]">—</span>;
   const isMgr = g.startsWith('M');
   return (
-    <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold ${
+    <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${
       isMgr ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
     }`}>{g}+</span>
   );
@@ -61,22 +61,22 @@ export default function ReportsPage() {
 
   const columns: Column[] = [
     { key: 'reportId', label: 'Report ID', sortable: true, render: (v: string, row: ReportRow) => (
-      <Link href={`/reports/${row.reportId}`} className="font-mono text-xs text-[#00C97B] hover:underline">{v}</Link>
+      <Link href={`/reports/${row.reportId}`} className="text-xs text-[#00C97B] hover:underline">{v}</Link>
     )},
     { key: 'name', label: 'Name', sortable: true, render: (v: string) => <span className="font-semibold text-gray-900">{v}</span> },
     { key: 'category', label: 'Category', sortable: true, render: (v: string) => (
       <span className="inline-block rounded-full bg-gray-100 text-gray-700 px-2 py-0.5 text-[10px] font-medium">{v}</span>
     )},
     { key: 'department', label: 'Department', sortable: true, render: (v: string) => (
-      <span className="text-[11px] text-gray-700">{v}</span>
+      <span className="text-xs text-gray-700">{v}</span>
     )},
     { key: 'frequency', label: 'Frequency', sortable: true },
     { key: 'minGrade', label: 'Entitlement', sortable: true, render: (v: string | null) => gradeBadge(v) },
     { key: 'visibility', label: 'Visibility', render: (v: string) => (
-      <span className="inline-flex items-center gap-1 text-[11px] text-gray-600">{visibilityIcon(v)}{v}</span>
+      <span className="inline-flex items-center gap-1 text-xs text-gray-600">{visibilityIcon(v)}{v}</span>
     )},
     { key: 'exportFormats', label: 'Formats', render: (v: string[], row: ReportRow) => (
-      <span className="font-mono text-[10px]">
+      <span className="text-[10px]">
         {(v ?? []).map((f, i) => (
           <span key={f}>
             {i > 0 && <span className="text-gray-300"> · </span>}
@@ -93,8 +93,8 @@ export default function ReportsPage() {
         ))}
       </span>
     )},
-    { key: 'ownerName', label: 'Owner', sortable: true, render: (v: string) => <span className="text-[11px]">{v}</span> },
-    { key: 'runCount', label: 'Runs', sortable: true, align: 'right', render: (v: number) => <span className="font-mono text-[11px]">{v}</span> },
+    { key: 'ownerName', label: 'Owner', sortable: true, render: (v: string) => <Link href={`/data-vault/internal-users?search=${encodeURIComponent(v)}`} className="text-[#00C97B] hover:underline hover:text-[#00A866] transition-colors">{v}</Link> },
+    { key: 'runCount', label: 'Runs', sortable: true, align: 'right', render: (v: number) => <span className="text-xs">{v}</span> },
     { key: 'lastRunAt', label: 'Last Run', sortable: true, render: (v: string | null) => v ? fmtDate(v) : '—' },
     { key: 'status', label: 'Status', sortable: true, render: (v: string) => <StatusBadge status={v} /> },
     { key: 'id', label: '', render: (_v, row: ReportRow) => (

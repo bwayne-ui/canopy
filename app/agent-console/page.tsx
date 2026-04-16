@@ -23,7 +23,7 @@ function Panel({
   return (
     <div className="bg-white rounded-lg shadow-sm p-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
           {icon}{title}
         </h3>
         {right}
@@ -73,7 +73,7 @@ function CapBadge({ level }: { level: 'write' | 'read' | 'view' | 'none' }) {
     none:  { cls: 'bg-gray-50 text-gray-400 border-gray-200',          icon: <Lock className="w-3 h-3" />,        label: 'No access' },
   }[level];
   return (
-    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border text-[9px] font-semibold ${map.cls}`}>
+    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border text-[10px] font-semibold ${map.cls}`}>
       {map.icon}{map.label}
     </span>
   );
@@ -366,7 +366,7 @@ export default function ControlTower() {
   return (
     <div className="space-y-5">
       <PageHeader
-        title="Control Tower"
+        title="Agent Prompting Layer"
         subtitle="Persona-aware dashboard · critical items · KPIs · ad-hoc agent prompting"
       />
 
@@ -386,18 +386,6 @@ export default function ControlTower() {
                 <Building2 className="w-2.5 h-2.5" />{persona.department}
               </span>
               <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{persona.seniority}</span>
-            </div>
-            {/* capability chips */}
-            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-              {DOMAINS.map((d) => {
-                const lvl = capLevel(persona, d);
-                return (
-                  <span key={d} className="inline-flex items-center gap-1">
-                    <span className="text-[10px] text-gray-400">{d}</span>
-                    <CapBadge level={lvl} />
-                  </span>
-                );
-              })}
             </div>
           </div>
           {/* picklist */}
@@ -428,7 +416,7 @@ export default function ControlTower() {
           {/* company KPIs — count scaled by persona */}
           {persona.companyKpis.length > 0 && (
             <div>
-              <div className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2">
                 <LineChart className="w-3.5 h-3.5" /> Company KPIs
               </div>
               <div className={`grid gap-3 ${
@@ -462,7 +450,7 @@ export default function ControlTower() {
                   key={key}
                   title={w.title}
                   icon={<Briefcase className="w-3.5 h-3.5" />}
-                  right={<CapBadge level={level} />}
+                  right={level === 'write' ? <PencilLine className="w-3 h-3 text-[#00C97B]" /> : undefined}
                 >
                   {w.render()}
                 </Panel>
@@ -479,7 +467,7 @@ export default function ControlTower() {
           <div className="bg-white rounded-lg shadow-sm">
             <button
               onClick={() => setAuditOpen((v) => !v)}
-              className="w-full flex items-center justify-between p-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider hover:bg-gray-50 rounded-lg"
+              className="w-full flex items-center justify-between p-3 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:bg-gray-50 rounded-lg"
             >
               <span className="flex items-center gap-2">
                 <ScrollText className="w-3.5 h-3.5" />
@@ -495,14 +483,14 @@ export default function ControlTower() {
                     <RefreshCw className="w-3 h-3" />
                   </button>
                 </div>
-                <div className="space-y-1 max-h-60 overflow-y-auto font-mono text-[10px]">
+                <div className="space-y-1 max-h-60 overflow-y-auto text-[10px]">
                   {audit.length === 0 && (
                     <div className="text-gray-400 py-4 text-center">No entries yet today</div>
                   )}
                   {audit.slice().reverse().map((e, i) => (
                     <div key={i} className="flex items-start gap-2 py-1 border-b border-gray-50 last:border-0">
                       <span className="text-gray-400 whitespace-nowrap">{e.ts?.slice(11, 19)}</span>
-                      <span className="px-1.5 rounded bg-gray-50 text-gray-600 text-[9px] font-bold">{e.event ?? '—'}</span>
+                      <span className="px-1.5 rounded bg-gray-50 text-gray-600 text-[10px] font-bold">{e.event ?? '—'}</span>
                       <span className="text-gray-700 truncate flex-1">
                         {e.skill && <span className="font-semibold">{e.skill}</span>}
                         {e.tool  && <span className="text-gray-500"> {e.tool}</span>}
@@ -522,12 +510,7 @@ export default function ControlTower() {
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex items-center gap-2 mb-3">
               <Sparkles className="w-4 h-4 text-[#00C97B]" />
-              <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Agent Prompting</span>
-              {!canWriteAny && (
-                <span className="ml-auto inline-flex items-center gap-1 text-[9px] text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-200">
-                  <Lock className="w-2.5 h-2.5" /> read-only
-                </span>
-              )}
+              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Agent Prompting</span>
             </div>
 
             <form onSubmit={(e) => { e.preventDefault(); submit(); }} className="space-y-2">
@@ -556,7 +539,7 @@ export default function ControlTower() {
                   <button
                     key={s}
                     onClick={() => submit(s)}
-                    className="text-left text-[11px] px-2.5 py-1.5 rounded-md border border-gray-100 hover:border-[#00C97B]/50 hover:bg-[#E6F9F0]/30 text-gray-600 hover:text-[#00C97B] transition-colors"
+                    className="text-left text-xs px-2.5 py-1.5 rounded-md border border-gray-100 hover:border-[#00C97B]/50 hover:bg-[#E6F9F0]/30 text-gray-600 hover:text-[#00C97B] transition-colors"
                   >
                     {s}
                   </button>
@@ -568,7 +551,7 @@ export default function ControlTower() {
           {/* Preview panel */}
           {(running || answer) && (
             <div className="bg-white rounded-lg shadow-sm p-4">
-              <div className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
                 <Sparkles className="w-3.5 h-3.5 text-[#00C97B]" /> Preview
               </div>
 
@@ -581,7 +564,7 @@ export default function ControlTower() {
 
               {!running && answer && (
                 <>
-                  <div className="text-[10px] text-gray-400 mb-1 font-mono truncate">&ldquo;{prompt}&rdquo;</div>
+                  <div className="text-[10px] text-gray-400 mb-1 truncate">&ldquo;{prompt}&rdquo;</div>
                   <div className="text-sm font-semibold text-gray-900 mb-3 leading-snug">{answer.headline}</div>
                   <div className="space-y-0.5">
                     {answer.rows.map((r, i) => (
@@ -590,7 +573,7 @@ export default function ControlTower() {
                           <div className="font-medium text-gray-800">{r.label}</div>
                           {r.hint && <div className="text-[10px] text-gray-400">{r.hint}</div>}
                         </div>
-                        <div className="text-gray-700 font-mono text-[11px] ml-2 whitespace-nowrap">{r.value}</div>
+                        <div className="text-gray-700 text-xs ml-2 whitespace-nowrap">{r.value}</div>
                       </div>
                     ))}
                   </div>

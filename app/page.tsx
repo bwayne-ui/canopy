@@ -4,104 +4,81 @@ import { useEffect, useState } from 'react';
 import PageHeader from '@/components/PageHeader';
 import MetricCard from '@/components/MetricCard';
 import ActivityFeed from '@/components/ActivityFeed';
-import DataTable, { Column } from '@/components/DataTable';
-import AumTrendChart from '@/components/charts/AumTrendChart';
 import StrategyPieChart from '@/components/charts/StrategyPieChart';
 import TaskCompletionChart from '@/components/charts/TaskCompletionChart';
 import EntityTypeChart from '@/components/charts/EntityTypeChart';
 import {
-  DollarSign, Building2, Layers, ClipboardCheck, AlertTriangle, MessageSquare,
-  FolderKanban, Landmark, Users, FileText, Shield, TrendingUp, CircleDollarSign,
-  BarChart3, Clock, CheckCircle2, BadgeDollarSign
+  Building2, ClipboardCheck, AlertTriangle,
+  FolderKanban, FileText, Shield, FileEdit, Send,
 } from 'lucide-react';
 import type { DashboardData } from '@/types';
-import { fmtMoney } from '@/lib/utils';
-
-const clientColumns: Column[] = [
-  { key: 'name', label: 'Client', sortable: true, render: (v) => <span className="font-medium text-gray-900">{v}</span> },
-  { key: 'navMm', label: 'NAV ($MM)', sortable: true, align: 'right', render: (v) => <span className="font-mono text-[11px]">{fmtMoney(v)}</span> },
-  { key: 'entities', label: 'Entities', sortable: true, align: 'right' },
-  { key: 'marginPct', label: 'Margin %', sortable: true, align: 'right', render: (v) => <span className="font-mono text-[11px]">{v.toFixed(1)}%</span> },
-];
 
 export default function ControlTower() {
   const [data, setData] = useState<DashboardData | null>(null);
+  const [timesheets, setTimesheets] = useState<{ draft: number; submitted: number } | null>(null);
 
   useEffect(() => {
     fetch('/api/dashboard').then((r) => r.json()).then(setData);
   }, []);
 
-  if (!data) return <div className="flex items-center justify-center h-96"><div className="animate-pulse text-gray-400 text-xs">Loading Control Tower...</div></div>;
+  useEffect(() => {
+    fetch('/api/timesheets')
+      .then((r) => r.json())
+      .then((d) => {
+        const items: Array<{ status: string }> = d.items ?? [];
+        setTimesheets({
+          draft: items.filter((s) => s.status === 'Draft').length,
+          submitted: items.filter((s) => s.status === 'Submitted').length,
+        });
+      });
+  }, []);
+
+  if (!data) return (
+    <div className="flex items-center justify-center h-96">
+      <div className="animate-pulse text-gray-400 text-xs">Loading Control Tower...</div>
+    </div>
+  );
 
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col gap-3">
       <PageHeader title="Control Tower" subtitle="Canopy Fund Administration Platform" />
 
-      {/* KPI Grid — 4x4 = 16 cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
-        <MetricCard title="Total AUM" value={fmtMoney(data.totalAum)} change="+3.2% vs prior month" changeType="up" icon={<DollarSign className="w-4 h-4" />} color="green" />
-        <MetricCard title="Active GPs" value={String(data.totalClients)} change={`${data.totalEntities} entities`} changeType="neutral" icon={<Building2 className="w-4 h-4" />} color="teal" />
-        <MetricCard title="Total NAV" value={fmtMoney(data.totalAum * 0.94)} change="+2.8% MTD" changeType="up" icon={<CircleDollarSign className="w-4 h-4" />} color="green" />
-        <MetricCard title="Total Commitments" value={fmtMoney(data.totalAum * 1.35)} change="85% called" changeType="neutral" icon={<BarChart3 className="w-4 h-4" />} color="teal" />
+      {/* Two-column body: left (tiles + charts) | right (activity feed) */}
+      <div className="flex gap-3 items-start">
 
-        <MetricCard title="Active Tasks" value={String(data.activeTaskAssignments)} change={`${data.completedTaskCount} completed`} changeType="up" icon={<ClipboardCheck className="w-4 h-4" />} color="signal" />
-        <MetricCard title="Overdue Tasks" value={String(data.overdueTaskCount)} change="Requires attention" changeType="down" icon={<AlertTriangle className="w-4 h-4" />} color="red" />
-        <MetricCard title="Open Tasks" value={String(Math.max(data.activeTaskAssignments - data.completedTaskCount, 0))} change="In progress" changeType="neutral" icon={<Clock className="w-4 h-4" />} color="amber" />
-        <MetricCard title="Pending Approvals" value={String(Math.round(data.activeTaskAssignments * 0.15))} change="Awaiting sign-off" changeType="neutral" icon={<CheckCircle2 className="w-4 h-4" />} color="amber" />
+        {/* Left column */}
+        <div className="flex flex-col gap-2 flex-1 min-w-0">
 
-        <MetricCard title="Fee Revenue" value={fmtMoney(data.totalAum * 0.018)} change="+5.1% YoY" changeType="up" icon={<TrendingUp className="w-4 h-4" />} color="green" />
-        <MetricCard title="Net Margin %" value="42.3%" change="+1.2pp vs prior Q" changeType="up" icon={<Shield className="w-4 h-4" />} color="signal" />
-        <MetricCard title="Entities" value={String(data.totalEntities)} change="15 active" changeType="neutral" icon={<Layers className="w-4 h-4" />} color="teal" />
-        <MetricCard title="Active Investors" value={String(Math.round(data.totalEntities * 3.2))} change="12 institutional" changeType="neutral" icon={<Users className="w-4 h-4" />} color="teal" />
+          {/* KPI tiles — always-visible 6 + conditional timesheet alerts */}
+          <div className={`grid gap-2 ${(timesheets?.draft ?? 0) > 0 || (timesheets?.submitted ?? 0) > 0 ? 'grid-cols-4' : 'grid-cols-3'}`}>
+            <MetricCard title="Active GPs" value={String(data.totalClients)} change={`${data.totalEntities} entities`} changeType="neutral" icon={<Building2 className="w-4 h-4" />} color="teal" />
+            <MetricCard title="Incomplete Tasks" value="27" change={`${data.completedTaskCount} completed`} changeType="up" icon={<ClipboardCheck className="w-4 h-4" />} color="signal" />
+            <MetricCard title="Overdue Tasks" value={String(data.overdueTaskCount)} change="Requires attention" changeType="down" icon={<AlertTriangle className="w-4 h-4" />} color="red" />
+            <MetricCard title="Net Margin %" value="42.3%" change="+1.2pp vs prior Q" changeType="up" icon={<Shield className="w-4 h-4" />} color="signal" />
+            <MetricCard title="Active Projects" value={String(data.totalProjects)} change="3 at risk" changeType="neutral" icon={<FolderKanban className="w-4 h-4" />} color="teal" />
+            <MetricCard title="Documents Pending" value={String(Math.round(data.totalProjects * 1.8))} change="Review required" changeType="neutral" icon={<FileText className="w-4 h-4" />} color="amber" />
+            {timesheets && timesheets.draft > 0 && (
+              <MetricCard title="Missing Timesheets" value={String(timesheets.draft)} change="Submit required" changeType="down" icon={<FileEdit className="w-4 h-4" />} color="amber" />
+            )}
+            {timesheets && timesheets.submitted > 0 && (
+              <MetricCard title="Pending Approvals" value={String(timesheets.submitted)} change="Awaiting manager" changeType="neutral" icon={<Send className="w-4 h-4" />} color="signal" />
+            )}
+          </div>
 
-        <MetricCard title="Communications" value={String(data.totalCommunications)} change="Last 30 days" changeType="neutral" icon={<MessageSquare className="w-4 h-4" />} color="teal" />
-        <MetricCard title="Active Projects" value={String(data.totalProjects)} change="3 at risk" changeType="neutral" icon={<FolderKanban className="w-4 h-4" />} color="teal" />
-        <MetricCard title="Documents Pending" value={String(Math.round(data.totalProjects * 1.8))} change="Review required" changeType="neutral" icon={<FileText className="w-4 h-4" />} color="amber" />
-        <MetricCard title="Treasury Balance" value={fmtMoney(data.totalTreasuryBalance)} change="Across 8 accounts" changeType="neutral" icon={<Landmark className="w-4 h-4" />} color="green" />
-      </div>
+          {/* 3 mini-charts side-by-side */}
+          <div className="grid grid-cols-3 gap-2">
+            <StrategyPieChart data={data.strategyBreakdown} />
+            <TaskCompletionChart data={data.tasksByStatus} />
+            <EntityTypeChart data={data.entityTypeDistribution} />
+          </div>
 
-      {/* Charts Row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
-        <AumTrendChart data={data.aumTrend} />
-        <StrategyPieChart data={data.strategyBreakdown} />
-      </div>
-
-      {/* Charts Row 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
-        <TaskCompletionChart data={data.tasksByStatus} />
-        <EntityTypeChart data={data.entityTypeDistribution} />
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white rounded-lg shadow-sm border p-3 mb-3">
-        <h3 className="text-[12px] font-semibold text-gray-700 mb-2">Quick Actions</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          <button className="flex flex-col items-center gap-1.5 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-            <BadgeDollarSign className="w-5 h-5 text-green-600" />
-            <span className="text-[11px] font-medium text-gray-700">Capital Call</span>
-          </button>
-          <button className="flex flex-col items-center gap-1.5 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-            <FileText className="w-5 h-5 text-blue-600" />
-            <span className="text-[11px] font-medium text-gray-700">Generate Report</span>
-          </button>
-          <button className="flex flex-col items-center gap-1.5 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-            <Users className="w-5 h-5 text-purple-600" />
-            <span className="text-[11px] font-medium text-gray-700">Investor Update</span>
-          </button>
-          <button className="flex flex-col items-center gap-1.5 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-            <Shield className="w-5 h-5 text-red-600" />
-            <span className="text-[11px] font-medium text-gray-700">Compliance Check</span>
-          </button>
         </div>
-      </div>
 
-      {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <div>
-          <h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-2">Top GPs by AUM</h3>
-          <DataTable columns={clientColumns} data={data.topClients} searchable={false} />
+        {/* Right column: Activity Feed — top to bottom */}
+        <div className="w-96 shrink-0">
+          <ActivityFeed items={data.recentActivity} />
         </div>
-        <ActivityFeed items={data.recentActivity} />
+
       </div>
     </div>
   );

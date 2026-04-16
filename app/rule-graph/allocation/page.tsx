@@ -48,7 +48,7 @@ export default function AllocationPage() {
 
       {/* Allocation Tiers */}
       <div className="bg-white rounded-lg shadow-sm p-5">
-        <h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-4">Allocation Tiers</h3>
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Allocation Tiers</h3>
         <div className="space-y-3">
           {allocationTiers.map((tier, i) => (
             <div key={i}>
@@ -57,7 +57,7 @@ export default function AllocationPage() {
                   <span className="text-xs font-semibold text-gray-800">{tier.name}</span>
                   <span className="text-[10px] text-gray-400 ml-2">{tier.description}</span>
                 </div>
-                <span className="text-xs font-mono font-bold text-gray-600">{tier.pct}%</span>
+                <span className="text-xs font-bold text-gray-600">{tier.pct}%</span>
               </div>
               <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
                 <div className={`h-full ${tier.color} rounded-full transition-all duration-700`} style={{ width: `${tier.pct}%` }} />
@@ -70,29 +70,29 @@ export default function AllocationPage() {
       {/* Partner Table */}
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
         <div className="px-3 py-2.5 border-b border-gray-100 bg-gray-50/50">
-          <h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Partner Allocation Detail</h3>
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Partner Allocation Detail</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
               <tr className="bg-gray-50/80 border-b border-gray-200">
-                <th className="px-3 py-2 text-left text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Partner / LP</th>
-                <th className="px-3 py-2 text-right text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Commitment</th>
-                <th className="px-3 py-2 text-right text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Ownership %</th>
-                <th className="px-3 py-2 text-right text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Allocated Gain</th>
-                <th className="px-3 py-2 text-right text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Tax Alloc.</th>
-                <th className="px-3 py-2 text-right text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Net Dist.</th>
+                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Partner / LP</th>
+                <th className="px-3 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Commitment</th>
+                <th className="px-3 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Ownership %</th>
+                <th className="px-3 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Allocated Gain</th>
+                <th className="px-3 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Tax Alloc.</th>
+                <th className="px-3 py-2 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Net Dist.</th>
               </tr>
             </thead>
             <tbody>
               {partners.map((p, i) => (
                 <tr key={i} className="border-b border-gray-50 hover:bg-gray-50/50">
                   <td className="px-3 py-2 font-medium text-gray-900">{p.name}</td>
-                  <td className="px-3 py-2 text-right font-mono text-[11px]">{fmtM(p.commitment)}</td>
-                  <td className="px-3 py-2 text-right font-mono text-[11px]">{p.ownershipPct}%</td>
-                  <td className="px-3 py-2 text-right font-mono text-[11px] text-emerald-600">{fmtM(p.allocatedGain)}</td>
-                  <td className="px-3 py-2 text-right font-mono text-[11px] text-gray-400">{p.taxAllocation > 0 ? fmtM(p.taxAllocation) : '—'}</td>
-                  <td className="px-3 py-2 text-right font-mono text-[11px] font-semibold">{fmtM(p.netDistribution)}</td>
+                  <td className="px-3 py-2 text-right text-xs">{fmtM(p.commitment)}</td>
+                  <td className="px-3 py-2 text-right text-xs">{p.ownershipPct}%</td>
+                  <td className="px-3 py-2 text-right text-xs text-emerald-600">{fmtM(p.allocatedGain)}</td>
+                  <td className="px-3 py-2 text-right text-xs text-gray-400">{p.taxAllocation > 0 ? fmtM(p.taxAllocation) : '—'}</td>
+                  <td className="px-3 py-2 text-right text-xs font-semibold">{fmtM(p.netDistribution)}</td>
                 </tr>
               ))}
             </tbody>

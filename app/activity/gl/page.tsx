@@ -30,12 +30,12 @@ const totalCredits = entries.reduce((s, e) => s + e.credit, 0);
 const unreconciled = entries.filter((e) => e.status !== 'Posted').length;
 
 const columns: Column[] = [
-  { key: 'date', label: 'Date', sortable: true, render: (v) => <span className="font-mono text-[11px]">{v}</span> },
-  { key: 'journalId', label: 'Journal ID', render: (v) => <span className="font-mono text-[10px] text-gray-400">{v}</span> },
+  { key: 'date', label: 'Date', sortable: true, render: (v) => <span className="text-xs">{v}</span> },
+  { key: 'journalId', label: 'Journal ID', render: (v) => <span className="text-xs text-gray-400">{v}</span> },
   { key: 'description', label: 'Description', sortable: true, render: (v) => <span className="font-medium text-gray-900">{v}</span> },
   { key: 'account', label: 'Account', sortable: true },
-  { key: 'debit', label: 'Debit', align: 'right', sortable: true, render: (v) => v > 0 ? <span className="font-mono text-[11px]">{fmtMoney(v)}</span> : <span className="text-gray-300">—</span> },
-  { key: 'credit', label: 'Credit', align: 'right', sortable: true, render: (v) => v > 0 ? <span className="font-mono text-[11px]">{fmtMoney(v)}</span> : <span className="text-gray-300">—</span> },
+  { key: 'debit', label: 'Debit', align: 'right', sortable: true, render: (v) => v > 0 ? <span className="text-xs">{fmtMoney(v)}</span> : <span className="text-gray-300">—</span> },
+  { key: 'credit', label: 'Credit', align: 'right', sortable: true, render: (v) => v > 0 ? <span className="text-xs">{fmtMoney(v)}</span> : <span className="text-gray-300">—</span> },
   { key: 'status', label: 'Status', render: (v) => <StatusBadge status={v} /> },
 ];
 

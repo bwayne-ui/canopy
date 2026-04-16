@@ -43,7 +43,7 @@ export default function NavCalcPage() {
 
       {/* NAV Build Statement */}
       <div className="bg-white rounded-lg shadow-sm p-5">
-        <h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-4">NAV Reconciliation Statement</h3>
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">NAV Reconciliation Statement</h3>
         <div className="space-y-0">
           {steps.map((step, i) => {
             running += step.amount;
@@ -59,12 +59,12 @@ export default function NavCalcPage() {
                     </span>
                   </div>
                   <div className="w-32 text-right">
-                    <span className={`font-mono text-xs ${isBase ? 'font-bold text-gray-900' : isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
+                    <span className={`text-xs ${isBase ? 'font-bold text-gray-900' : isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
                       {isBase ? '' : isPositive ? '+' : '-'}{fmtM(step.amount)}
                     </span>
                   </div>
                   <div className="w-36 text-right">
-                    <span className="font-mono text-[11px] text-gray-400">{fmtB(running)}</span>
+                    <span className="text-xs text-gray-400">{fmtB(running)}</span>
                   </div>
                 </div>
               </div>
@@ -76,16 +76,16 @@ export default function NavCalcPage() {
               <span className="text-xs font-bold text-gray-900">= Ending NAV</span>
             </div>
             <div className="w-32 text-right">
-              <span className="font-mono text-xs font-bold text-[#00C97B]">{fmtB(endingNav)}</span>
+              <span className="text-xs font-bold text-[#00C97B]">{fmtB(endingNav)}</span>
             </div>
             <div className="w-36 text-right">
-              <span className="font-mono text-[11px] font-bold text-[#00C97B]">+{changePct}%</span>
+              <span className="text-xs font-bold text-[#00C97B]">+{changePct}%</span>
             </div>
           </div>
         </div>
 
         {/* Column Labels */}
-        <div className="flex items-center mt-1 px-3 text-[9px] text-gray-400 uppercase tracking-wider">
+        <div className="flex items-center mt-1 px-3 text-[10px] text-gray-400 uppercase tracking-wider">
           <div className="flex-1">Line Item</div>
           <div className="w-32 text-right">Amount</div>
           <div className="w-36 text-right">Running Total</div>

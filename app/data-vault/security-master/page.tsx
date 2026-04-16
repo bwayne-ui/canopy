@@ -6,6 +6,7 @@ import PageHeader from '@/components/PageHeader';
 import MetricCard from '@/components/MetricCard';
 import DataTable, { Column } from '@/components/DataTable';
 import { fmtMoney } from '@/lib/utils';
+import Link from 'next/link';
 
 interface SecurityRow {
   id: string;
@@ -23,6 +24,12 @@ interface SecurityRow {
 export default function SecurityMasterPage() {
   const [data, setData] = useState<SecurityRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchInit, setSearchInit] = useState('');
+
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get('search');
+    if (q) setSearchInit(q);
+  }, []);
 
   useEffect(() => {
     fetch('/api/securities')
@@ -38,7 +45,12 @@ export default function SecurityMasterPage() {
 
   const columns: Column[] = [
     { key: 'securityId', label: 'Security ID', sortable: true },
-    { key: 'name', label: 'Name', sortable: true, render: (v) => <span className="font-semibold">{v}</span> },
+    { key: 'name', label: 'Name', sortable: true, render: (v: string, row: any) => (
+      <Link href={`/data-vault/security-master/${row.securityId}`} className="block group">
+        <div className="font-semibold text-gray-900 group-hover:text-[#00C97B] transition-colors">{v}</div>
+        <div className="text-[10px] text-gray-400">{row.securityId}</div>
+      </Link>
+    ) },
     { key: 'securityType', label: 'Type', sortable: true },
     { key: 'ticker', label: 'Ticker', sortable: true, render: (v) => v || '—' },
     {
@@ -46,14 +58,14 @@ export default function SecurityMasterPage() {
       label: 'Market Value',
       sortable: true,
       align: 'right',
-      render: (v) => <span className="font-mono">{v != null ? fmtMoney(v) : '—'}</span>,
+      render: (v) => <span className="">{v != null ? fmtMoney(v) : '—'}</span>,
     },
     {
       key: 'costBasis',
       label: 'Cost Basis',
       sortable: true,
       align: 'right',
-      render: (v) => <span className="font-mono">{v != null ? fmtMoney(v) : '—'}</span>,
+      render: (v) => <span className="">{v != null ? fmtMoney(v) : '—'}</span>,
     },
     {
       key: 'unrealizedGain',
@@ -62,9 +74,9 @@ export default function SecurityMasterPage() {
       align: 'right',
       render: (v) =>
         v != null ? (
-          <span className={`font-mono ${v >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>{fmtMoney(v)}</span>
+          <span className={`${v >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>{fmtMoney(v)}</span>
         ) : (
-          <span className="font-mono">—</span>
+          <span className="">—</span>
         ),
     },
     { key: 'sector', label: 'Sector', sortable: true },
@@ -92,7 +104,7 @@ export default function SecurityMasterPage() {
       {loading ? (
         <div className="text-center py-12 text-gray-400">Loading securities...</div>
       ) : (
-        <DataTable columns={columns} data={data} searchPlaceholder="Search securities..." />
+        <DataTable columns={columns} data={data} searchPlaceholder="Search securities..." initialSearch={searchInit} />
       )}
     </div>
   );

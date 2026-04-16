@@ -31,7 +31,7 @@ const PIE_COLORS = [C.green, C.blue, C.indigo, C.amber, C.purple, C.teal, C.sky,
 function Panel({ title, children, className = '' }: { title?: string; children: React.ReactNode; className?: string }) {
   return (
     <div className={`bg-white rounded-lg shadow-sm p-4 ${className}`}>
-      {title && <h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-3">{title}</h3>}
+      {title && <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">{title}</h3>}
       {children}
     </div>
   );
@@ -45,7 +45,7 @@ function RankRow({ rank, label, value, bar, max, color = C.green }: { rank: numb
       <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
         <div className="h-full rounded-full transition-all duration-700" style={{ width: `${(bar / max) * 100}%`, backgroundColor: color }} />
       </div>
-      <span className="font-mono text-xs text-gray-600 w-16 text-right">{value}</span>
+      <span className="text-xs text-gray-600 w-16 text-right">{value}</span>
     </div>
   );
 }
@@ -63,7 +63,7 @@ function Heatmap({ items, title }: { items: { label: string; cells: { tip: strin
                 <div key={j} className="group relative">
                   <div className={`w-7 h-7 rounded ${bg[c.s]} transition-transform hover:scale-110`} />
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block z-10">
-                    <div className="bg-gray-900 text-white text-[9px] px-1.5 py-0.5 rounded whitespace-nowrap">{c.tip}</div>
+                    <div className="bg-gray-900 text-white text-[10px] px-1.5 py-0.5 rounded whitespace-nowrap">{c.tip}</div>
                   </div>
                 </div>
               ))}
@@ -73,7 +73,7 @@ function Heatmap({ items, title }: { items: { label: string; cells: { tip: strin
       </div>
       <div className="flex items-center gap-3 mt-3 pt-2 border-t border-gray-100">
         {[['bg-emerald-400', 'On Track'], ['bg-amber-400', 'Attention'], ['bg-red-400', 'Critical']].map(([bg, l]) => (
-          <div key={l} className="flex items-center gap-1"><div className={`w-3 h-3 rounded ${bg}`} /><span className="text-[9px] text-gray-500">{l}</span></div>
+          <div key={l} className="flex items-center gap-1"><div className={`w-3 h-3 rounded ${bg}`} /><span className="text-[10px] text-gray-500">{l}</span></div>
         ))}
       </div>
     </Panel>
@@ -83,11 +83,11 @@ function Heatmap({ items, title }: { items: { label: string; cells: { tip: strin
 function DataRows({ headers, rows, title, className = '' }: { headers: string[]; rows: (string | React.ReactNode)[][]; title: string; className?: string }) {
   return (
     <Panel className={`!p-0 overflow-hidden ${className}`}>
-      <div className="px-3 py-2.5 border-b border-gray-100"><h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">{title}</h3></div>
+      <div className="px-3 py-2.5 border-b border-gray-100"><h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{title}</h3></div>
       <table className="w-full text-xs">
         <thead>
           <tr className="bg-gray-50/80 border-b border-gray-200">
-            {headers.map((h, i) => <th key={i} className={`px-3 py-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wider ${i > 0 ? 'text-right' : 'text-left'}`}>{h}</th>)}
+            {headers.map((h, i) => <th key={i} className={`px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider ${i > 0 ? 'text-right' : 'text-left'}`}>{h}</th>)}
           </tr>
         </thead>
         <tbody>
@@ -110,7 +110,7 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
   return (
     <div className="bg-gray-900 text-white text-[10px] px-2 py-1.5 rounded shadow-lg">
       {label && <div className="font-semibold mb-0.5">{label}</div>}
-      {payload.map((p, i) => <div key={i} className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />{p.name}: <span className="font-mono">{typeof p.value === 'number' ? p.value.toLocaleString() : p.value}</span></div>)}
+      {payload.map((p, i) => <div key={i} className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full" style={{ backgroundColor: p.color }} />{p.name}: <span className="">{typeof p.value === 'number' ? p.value.toLocaleString() : p.value}</span></div>)}
     </div>
   );
 }
@@ -168,9 +168,9 @@ const dashboards: Record<string, DashConfig> = {
             ].map((e, i) => (
               <div key={i} className="flex items-center gap-2 py-2 border-b border-gray-50 last:border-0">
                 <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${e.dir === 'in' ? 'bg-emerald-400' : 'bg-red-400'}`} />
-                <span className="font-mono text-[10px] text-gray-400 w-12 flex-shrink-0">{e.d}</span>
-                <span className="text-[11px] text-gray-700 flex-1 truncate">{e.t}</span>
-                <span className={`font-mono text-[11px] font-semibold ${e.dir === 'in' ? 'text-emerald-600' : 'text-red-500'}`}>{e.a}</span>
+                <span className="text-[10px] text-gray-400 w-12 flex-shrink-0">{e.d}</span>
+                <span className="text-xs text-gray-700 flex-1 truncate">{e.t}</span>
+                <span className={`text-xs font-semibold ${e.dir === 'in' ? 'text-emerald-600' : 'text-red-500'}`}>{e.a}</span>
               </div>
             ))}
           </div>
@@ -345,8 +345,8 @@ const dashboards: Record<string, DashConfig> = {
           ].map((p, i) => (
             <div key={i} className="mb-2.5 last:mb-0">
               <div className="flex justify-between mb-1">
-                <span className="text-[11px] font-medium text-gray-700">{p.label}</span>
-                <span className="font-mono text-[10px] text-gray-500">{p.pct}%</span>
+                <span className="text-xs font-medium text-gray-700">{p.label}</span>
+                <span className="text-[10px] text-gray-500">{p.pct}%</span>
               </div>
               <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                 <div className="h-full rounded-full transition-all duration-700" style={{ width: `${p.pct}%`, backgroundColor: p.pct >= 90 ? C.green : p.pct >= 80 ? C.amber : C.red }} />
@@ -526,7 +526,7 @@ const dashboards: Record<string, DashConfig> = {
               <div className="flex-1 min-w-0">
                 <div className="text-xs font-medium text-gray-900 truncate">{g.gp}</div>
               </div>
-              <span className={`font-mono text-xs font-bold ${g.margin >= 42 ? 'text-emerald-600' : g.margin >= 38 ? 'text-amber-600' : 'text-red-500'}`}>{g.margin}%</span>
+              <span className={`text-xs font-bold ${g.margin >= 42 ? 'text-emerald-600' : g.margin >= 38 ? 'text-amber-600' : 'text-red-500'}`}>{g.margin}%</span>
               <span className={`text-[10px] ${g.trend.startsWith('+') ? 'text-emerald-500' : g.trend.startsWith('-') ? 'text-red-500' : 'text-gray-400'}`}>{g.trend}</span>
             </div>
           ))}
@@ -563,11 +563,11 @@ const dashboards: Record<string, DashConfig> = {
           </ResponsiveContainer>
         </Panel>
         <DataRows title="Pod Performance Detail" headers={['Pod', 'Lead', 'GPs', 'Revenue', 'Margin']} rows={[
-          ['Pod Alpha', 'Megan Moore', '4', '$4.2M', <span key="m" className="font-mono text-emerald-600 font-bold">46.8%</span>],
-          ['Pod Beta', 'Diana Smith', '3', '$3.5M', <span key="m" className="font-mono text-emerald-600 font-bold">44.1%</span>],
-          ['Pod Gamma', 'Jason Cooper', '3', '$3.8M', <span key="m" className="font-mono text-emerald-600 font-bold">42.3%</span>],
-          ['Pod Epsilon', 'Sarah Garcia', '2', '$3.9M', <span key="m" className="font-mono text-amber-600 font-bold">40.5%</span>],
-          ['Pod Delta', 'Steven Wright', '3', '$3.1M', <span key="m" className="font-mono text-red-500 font-bold">35.2%</span>],
+          ['Pod Alpha', 'Megan Moore', '4', '$4.2M', <span key="m" className="text-emerald-600 font-bold">46.8%</span>],
+          ['Pod Beta', 'Diana Smith', '3', '$3.5M', <span key="m" className="text-emerald-600 font-bold">44.1%</span>],
+          ['Pod Gamma', 'Jason Cooper', '3', '$3.8M', <span key="m" className="text-emerald-600 font-bold">42.3%</span>],
+          ['Pod Epsilon', 'Sarah Garcia', '2', '$3.9M', <span key="m" className="text-amber-600 font-bold">40.5%</span>],
+          ['Pod Delta', 'Steven Wright', '3', '$3.1M', <span key="m" className="text-red-500 font-bold">35.2%</span>],
         ]} />
       </div>
     ),
@@ -597,10 +597,10 @@ const dashboards: Record<string, DashConfig> = {
         </Panel>
         <DataRows className="lg:col-span-2" title="Outstanding Detail" headers={['GP', 'Amount', 'Days', 'Status']} rows={[
           [<span key="g" className="font-medium text-gray-900">Walker Asset Management</span>, '$820K', '12', <StatusBadge key="s" status="Current" />],
-          [<span key="g" className="font-medium text-gray-900">Campbell Capital Partners</span>, '$620K', <span key="d" className="font-mono text-amber-600">32</span>, <StatusBadge key="s" status="Follow-up Sent" />],
+          [<span key="g" className="font-medium text-gray-900">Campbell Capital Partners</span>, '$620K', <span key="d" className="text-amber-600">32</span>, <StatusBadge key="s" status="Follow-up Sent" />],
           [<span key="g" className="font-medium text-gray-900">Sullivan Investments</span>, '$480K', '18', <StatusBadge key="s" status="Current" />],
           [<span key="g" className="font-medium text-gray-900">Lopez Asset Partners</span>, '$350K', '8', <StatusBadge key="s" status="Current" />],
-          [<span key="g" className="font-medium text-gray-900">Rodriguez Capital</span>, <span key="a" className="font-mono text-red-500">$280K</span>, <span key="d" className="font-mono text-red-500 font-bold">68</span>, <StatusBadge key="s" status="Overdue" />],
+          [<span key="g" className="font-medium text-gray-900">Rodriguez Capital</span>, <span key="a" className="text-red-500">$280K</span>, <span key="d" className="text-red-500 font-bold">68</span>, <StatusBadge key="s" status="Overdue" />],
         ]} />
       </div>
     ),
@@ -755,7 +755,7 @@ const dashboards: Record<string, DashConfig> = {
                 <StatusBadge status={f.status} />
               </div>
               <div className="flex items-center gap-2 mt-0.5">
-                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${f.severity === 'Med' ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700'}`}>{f.severity}</span>
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${f.severity === 'Med' ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700'}`}>{f.severity}</span>
                 <span className="text-[10px] text-gray-400">{f.fund} — {f.detail}</span>
               </div>
             </div>
@@ -939,13 +939,13 @@ const dashboards: Record<string, DashConfig> = {
               <div className="text-xs font-semibold text-gray-900">{p.fund}</div>
               <div className="flex items-center justify-between mt-1">
                 <span className="text-[10px] text-gray-400">{p.target} · {p.timing}</span>
-                <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700">{p.stage}</span>
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700">{p.stage}</span>
               </div>
             </div>
           ))}
           <div className="mt-3 pt-2 border-t border-gray-100 flex items-center justify-between">
             <span className="text-[10px] font-medium text-gray-500">Total Pipeline</span>
-            <span className="font-mono text-sm font-bold text-gray-900">$1.65B</span>
+            <span className="text-sm font-bold text-gray-900">$1.65B</span>
           </div>
         </Panel>
       </div>
@@ -975,11 +975,11 @@ const dashboards: Record<string, DashConfig> = {
           </ResponsiveContainer>
         </Panel>
         <DataRows className="lg:col-span-2" title="Reconciliation Detail" headers={['Fund', 'Fee Type', 'Calculated', 'Collected', 'Variance']} rows={[
-          [<span key="f" className="font-medium text-gray-900">Walker III</span>, 'Mgmt (2.0%)', '$892K', '$892K', <span key="v" className="font-mono text-emerald-500">$0</span>],
-          [<span key="f" className="font-medium text-gray-900">Campbell IV</span>, 'Mgmt (1.5%)', '$654K', '$654K', <span key="v" className="font-mono text-emerald-500">$0</span>],
-          [<span key="f" className="font-medium text-gray-900">Sullivan Alpha</span>, 'Mgmt (1.75%)', '$382K', '$370K', <span key="v" className="font-mono text-red-500">$12K</span>],
-          [<span key="f" className="font-medium text-gray-900">White Credit V</span>, 'Mgmt (1.5%)', '$445K', '$437K', <span key="v" className="font-mono text-amber-500">$8K</span>],
-          [<span key="f" className="font-medium text-gray-900">Rodriguez EM</span>, 'Admin (flat)', '$52K', '$46.8K', <span key="v" className="font-mono text-amber-500">$5.2K</span>],
+          [<span key="f" className="font-medium text-gray-900">Walker III</span>, 'Mgmt (2.0%)', '$892K', '$892K', <span key="v" className="text-emerald-500">$0</span>],
+          [<span key="f" className="font-medium text-gray-900">Campbell IV</span>, 'Mgmt (1.5%)', '$654K', '$654K', <span key="v" className="text-emerald-500">$0</span>],
+          [<span key="f" className="font-medium text-gray-900">Sullivan Alpha</span>, 'Mgmt (1.75%)', '$382K', '$370K', <span key="v" className="text-red-500">$12K</span>],
+          [<span key="f" className="font-medium text-gray-900">White Credit V</span>, 'Mgmt (1.5%)', '$445K', '$437K', <span key="v" className="text-amber-500">$8K</span>],
+          [<span key="f" className="font-medium text-gray-900">Rodriguez EM</span>, 'Admin (flat)', '$52K', '$46.8K', <span key="v" className="text-amber-500">$5.2K</span>],
         ]} />
       </div>
     ),
@@ -1061,13 +1061,13 @@ const dashboards: Record<string, DashConfig> = {
           </ResponsiveContainer>
         </Panel>
         <DataRows className="lg:col-span-2" title="Performance Summary" headers={['Fund', 'IRR', 'MOIC', 'TVPI', 'DPI', 'Status']} rows={[
-          [<span key="f" className="font-medium text-gray-900">Campbell Growth IV</span>, <span key="i" className="font-mono text-emerald-600 font-bold">24.3%</span>, '2.1x', '1.8x', '1.2x', <StatusBadge key="s" status="Active" />],
-          [<span key="f" className="font-medium text-gray-900">Walker Enterprise III</span>, <span key="i" className="font-mono text-emerald-600 font-bold">19.8%</span>, '1.8x', '1.6x', '1.1x', <StatusBadge key="s" status="Active" />],
-          [<span key="f" className="font-medium text-gray-900">Lopez RE Opps III</span>, <span key="i" className="font-mono text-emerald-600">17.2%</span>, '1.6x', '1.4x', '0.9x', <StatusBadge key="s" status="Active" />],
+          [<span key="f" className="font-medium text-gray-900">Campbell Growth IV</span>, <span key="i" className="text-emerald-600 font-bold">24.3%</span>, '2.1x', '1.8x', '1.2x', <StatusBadge key="s" status="Active" />],
+          [<span key="f" className="font-medium text-gray-900">Walker Enterprise III</span>, <span key="i" className="text-emerald-600 font-bold">19.8%</span>, '1.8x', '1.6x', '1.1x', <StatusBadge key="s" status="Active" />],
+          [<span key="f" className="font-medium text-gray-900">Lopez RE Opps III</span>, <span key="i" className="text-emerald-600">17.2%</span>, '1.6x', '1.4x', '0.9x', <StatusBadge key="s" status="Active" />],
           [<span key="f" className="font-medium text-gray-900">Cruz Ventures II</span>, '15.8%', '1.5x', '1.3x', '0.8x', <StatusBadge key="s" status="Active" />],
-          [<span key="f" className="font-medium text-gray-900">Sullivan Alpha</span>, <span key="i" className="font-mono text-amber-600">11.5%</span>, '1.3x', '1.2x', '0.7x', <StatusBadge key="s" status="Under Review" />],
-          [<span key="f" className="font-medium text-gray-900">White Senior Credit V</span>, <span key="i" className="font-mono text-red-500">8.2%</span>, '1.1x', '1.0x', '0.6x', <StatusBadge key="s" status="At Risk" />],
-          [<span key="f" className="font-medium text-gray-900">Rodriguez EM FoF I</span>, <span key="i" className="font-mono text-red-500">6.8%</span>, '0.9x', '0.8x', '0.1x', <StatusBadge key="s" status="J-Curve" />],
+          [<span key="f" className="font-medium text-gray-900">Sullivan Alpha</span>, <span key="i" className="text-amber-600">11.5%</span>, '1.3x', '1.2x', '0.7x', <StatusBadge key="s" status="Under Review" />],
+          [<span key="f" className="font-medium text-gray-900">White Senior Credit V</span>, <span key="i" className="text-red-500">8.2%</span>, '1.1x', '1.0x', '0.6x', <StatusBadge key="s" status="At Risk" />],
+          [<span key="f" className="font-medium text-gray-900">Rodriguez EM FoF I</span>, <span key="i" className="text-red-500">6.8%</span>, '0.9x', '0.8x', '0.1x', <StatusBadge key="s" status="J-Curve" />],
         ]} />
       </div>
     ),

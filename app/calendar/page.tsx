@@ -118,7 +118,7 @@ export default function CalendarPage() {
                         <span className="text-sm font-medium text-gray-500">
                           {event.allDay ? 'All Day' : formatTime(event.startTime)}
                         </span>
-                        <span className="text-base font-semibold text-gray-900">
+                        <span className="text-sm font-semibold text-gray-900">
                           {event.title}
                         </span>
                         <span

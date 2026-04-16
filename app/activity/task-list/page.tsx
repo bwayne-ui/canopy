@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import PageHeader from '@/components/PageHeader';
 import MetricCard from '@/components/MetricCard';
 import DataTable, { Column } from '@/components/DataTable';
@@ -23,12 +24,12 @@ const tasks = [
 ];
 
 const columns: Column[] = [
-  { key: 'id', label: 'ID', width: 'w-20', render: (v) => <span className="font-mono text-[10px] text-gray-400">{v}</span> },
-  { key: 'task', label: 'Task', sortable: true, render: (v) => <span className="font-medium text-gray-900">{v}</span> },
-  { key: 'client', label: 'Client', sortable: true },
-  { key: 'assignee', label: 'Assignee', sortable: true },
+  { key: 'id', label: 'ID', width: 'w-20', render: (v) => <span className="text-xs text-gray-400">{v}</span> },
+  { key: 'task', label: 'Task', sortable: true, render: (v: string) => <Link href={`/data-vault/task-definitions?search=${encodeURIComponent(v)}`} className="font-medium text-gray-900 hover:text-[#00C97B] transition-colors">{v}</Link> },
+  { key: 'client', label: 'Client', sortable: true, render: (v: string) => <Link href={`/data-vault/clients?search=${encodeURIComponent(v)}`} className="text-[#00C97B] hover:underline hover:text-[#00A866] transition-colors">{v}</Link> },
+  { key: 'assignee', label: 'Assignee', sortable: true, render: (v: string) => <Link href={`/data-vault/internal-users?search=${encodeURIComponent(v)}`} className="text-[#00C97B] hover:underline hover:text-[#00A866] transition-colors">{v}</Link> },
   { key: 'priority', label: 'Priority', sortable: true, render: (v) => <StatusBadge status={v} /> },
-  { key: 'dueDate', label: 'Due Date', sortable: true, render: (v) => <span className="font-mono text-[11px]">{v}</span> },
+  { key: 'dueDate', label: 'Due Date', sortable: true, render: (v) => <span className="text-xs">{v}</span> },
   { key: 'status', label: 'Status', sortable: true, render: (v) => <StatusBadge status={v} /> },
 ];
 

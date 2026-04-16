@@ -6,6 +6,7 @@ import MetricCard from '@/components/MetricCard';
 import DataTable, { Column } from '@/components/DataTable';
 import StatusBadge from '@/components/StatusBadge';
 import { ClipboardCheck, CheckCircle2, Loader, AlertTriangle } from 'lucide-react';
+import Link from 'next/link';
 
 interface TaskAssignmentRow {
   id: number;
@@ -27,16 +28,21 @@ const priorityBadge = (priority: string) => {
     Low: 'bg-gray-100 text-gray-500',
   };
   return (
-    <span className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ${colors[priority] || 'bg-gray-100 text-gray-600'}`}>
+    <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${colors[priority] || 'bg-gray-100 text-gray-600'}`}>
       {priority}
     </span>
   );
 };
 
 const columns: Column[] = [
-  { key: 'taskName', label: 'Task', sortable: true, render: (v) => <span className="font-medium text-gray-900">{v}</span> },
-  { key: 'entityName', label: 'Entity', sortable: true },
-  { key: 'assignedTo', label: 'Assigned To', sortable: true, render: (v) => v || '—' },
+  { key: 'taskName', label: 'Task', sortable: true, render: (v: string, row: any) => (
+    <Link href={`/data-vault/task-assignments/${row.id}`} className="block group">
+      <div className="font-semibold text-gray-900 group-hover:text-[#00C97B] transition-colors">{v}</div>
+      <div className="text-[10px] text-gray-400">{row.taskCode}</div>
+    </Link>
+  ) },
+  { key: 'entityName', label: 'Entity', sortable: true, render: (v: string) => <Link href={`/data-vault/entities?search=${encodeURIComponent(v)}`} className="text-[#00C97B] hover:underline hover:text-[#00A866] transition-colors">{v}</Link> },
+  { key: 'assignedTo', label: 'Assigned To', sortable: true, render: (v: string | null) => v ? <Link href={`/data-vault/internal-users?search=${encodeURIComponent(v)}`} className="text-[#00C97B] hover:underline hover:text-[#00A866] transition-colors">{v}</Link> : '—' },
   { key: 'status', label: 'Status', sortable: true, render: (v) => <StatusBadge status={v} /> },
   { key: 'dueDate', label: 'Due Date', sortable: true },
   { key: 'periodEnd', label: 'Period', sortable: true },

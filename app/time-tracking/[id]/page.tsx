@@ -123,7 +123,7 @@ export default function TimesheetDetail() {
 
       {/* Entries by day */}
       <div className="bg-white rounded-lg shadow-sm p-4 space-y-4">
-        <h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Daily Entries</h3>
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Daily Entries</h3>
         {dates.length === 0 && <div className="text-center text-gray-400 text-xs py-6">No entries yet — add your first below.</div>}
         {dates.map((date) => {
           const dayEntries = byDate[date];
@@ -131,8 +131,8 @@ export default function TimesheetDetail() {
           return (
             <div key={date} className="border-l-2 border-[#00C97B]/40 pl-3">
               <div className="flex items-center justify-between mb-1">
-                <div className="text-[11px] font-semibold text-gray-700">{fmtDate(date)}</div>
-                <div className="text-[10px] text-gray-400 font-mono">{dayHours.toFixed(2)}h</div>
+                <div className="text-xs font-semibold text-gray-700">{fmtDate(date)}</div>
+                <div className="text-[10px] text-gray-400">{dayHours.toFixed(2)}h</div>
               </div>
               <div className="space-y-1">
                 {dayEntries.map((e) => (
@@ -144,8 +144,8 @@ export default function TimesheetDetail() {
                       </div>
                     </div>
                     <span className={`text-[10px] px-1.5 py-0.5 rounded ${e.billable ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600'}`}>{e.category}</span>
-                    <span className="font-mono text-[11px] w-12 text-right">{e.hours.toFixed(2)}h</span>
-                    {e.billRate && <span className="font-mono text-[10px] text-gray-400 w-16 text-right">${(e.hours * e.billRate).toFixed(0)}</span>}
+                    <span className="text-xs w-12 text-right">{e.hours.toFixed(2)}h</span>
+                    {e.billRate && <span className="text-[10px] text-gray-400 w-16 text-right">${(e.hours * e.billRate).toFixed(0)}</span>}
                     {editable && <button onClick={() => deleteEntry(e.id)} className="text-gray-300 hover:text-red-500"><Trash2 className="w-3 h-3" /></button>}
                   </div>
                 ))}
@@ -163,13 +163,13 @@ export default function TimesheetDetail() {
               <input value={newEntry.clientName} onChange={(e) => setNewEntry({ ...newEntry, clientName: e.target.value })} placeholder="Client (GP)" className="px-2 py-1 border rounded" />
               <input value={newEntry.entityName} onChange={(e) => setNewEntry({ ...newEntry, entityName: e.target.value })} placeholder="Entity" className="px-2 py-1 border rounded" />
               <input value={newEntry.projectName} onChange={(e) => setNewEntry({ ...newEntry, projectName: e.target.value })} placeholder="Project" className="px-2 py-1 border rounded" />
-              <input value={newEntry.taskCode} onChange={(e) => setNewEntry({ ...newEntry, taskCode: e.target.value })} placeholder="Task code" className="px-2 py-1 border rounded font-mono" />
+              <input value={newEntry.taskCode} onChange={(e) => setNewEntry({ ...newEntry, taskCode: e.target.value })} placeholder="Task code" className="px-2 py-1 border rounded" />
               <select value={newEntry.category} onChange={(e) => setNewEntry({ ...newEntry, category: e.target.value, billable: e.target.value === 'Billable' })} className="px-2 py-1 border rounded">
                 {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
               </select>
               <input value={newEntry.description} onChange={(e) => setNewEntry({ ...newEntry, description: e.target.value })} placeholder="Description" className="md:col-span-3 px-2 py-1 border rounded" />
-              <input type="number" step="0.25" value={newEntry.hours} onChange={(e) => setNewEntry({ ...newEntry, hours: e.target.value })} placeholder="Hours" className="px-2 py-1 border rounded font-mono" />
-              <input type="number" step="25" value={newEntry.billRate} onChange={(e) => setNewEntry({ ...newEntry, billRate: e.target.value })} placeholder="Rate" disabled={!newEntry.billable} className="px-2 py-1 border rounded font-mono disabled:bg-gray-100" />
+              <input type="number" step="0.25" value={newEntry.hours} onChange={(e) => setNewEntry({ ...newEntry, hours: e.target.value })} placeholder="Hours" className="px-2 py-1 border rounded" />
+              <input type="number" step="25" value={newEntry.billRate} onChange={(e) => setNewEntry({ ...newEntry, billRate: e.target.value })} placeholder="Rate" disabled={!newEntry.billable} className="px-2 py-1 border rounded disabled:bg-gray-100" />
               <button onClick={addEntry} className="bg-[#00C97B] hover:bg-[#00A866] text-white text-xs font-semibold rounded flex items-center justify-center gap-1"><Plus className="w-3 h-3" />Add</button>
             </div>
           </div>

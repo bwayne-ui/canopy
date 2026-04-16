@@ -50,7 +50,7 @@ export default function TransactionsPage() {
       sortable: true,
       render: (v: string) => (
         <span
-          className={`inline-block rounded-full px-2 py-0.5 text-[11px] font-medium ${
+          className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
             v === 'Inflow' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
           }`}
         >

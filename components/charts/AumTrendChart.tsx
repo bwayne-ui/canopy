@@ -9,7 +9,7 @@ interface Props {
 export default function AumTrendChart({ data }: Props) {
   return (
     <div className="bg-white rounded-lg shadow-sm p-4">
-      <h3 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-3">AUM Trend (12 Months)</h3>
+      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">AUM Trend (12 Months)</h3>
       <ResponsiveContainer width="100%" height={260}>
         <AreaChart data={data}>
           <defs>

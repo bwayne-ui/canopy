@@ -7,6 +7,7 @@ import MetricCard from '@/components/MetricCard';
 import DataTable, { Column } from '@/components/DataTable';
 import StatusBadge from '@/components/StatusBadge';
 import { fmtMoney, fmtPct } from '@/lib/utils';
+import Link from 'next/link';
 
 interface ClientRow {
   id: string;
@@ -24,6 +25,12 @@ interface ClientRow {
 export default function ClientsPage() {
   const [data, setData] = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchInit, setSearchInit] = useState('');
+
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get('search');
+    if (q) setSearchInit(q);
+  }, []);
 
   useEffect(() => {
     fetch('/api/clients')
@@ -38,31 +45,35 @@ export default function ClientsPage() {
   const activeClients = data.filter((r) => r.status === 'Active').length;
 
   const columns: Column[] = [
-    { key: 'name', label: 'Name', sortable: true, render: (v) => <span className="font-semibold">{v}</span> },
+    { key: 'name', label: 'Name', sortable: true, render: (v: string, row: any) => (
+      <Link href={`/data-vault/clients/${row.id}`} className="block group">
+        <div className="font-semibold text-gray-900 group-hover:text-[#00C97B] transition-colors">{v}</div>
+      </Link>
+    ) },
     { key: 'strategy', label: 'Strategy', sortable: true },
     { key: 'hqCity', label: 'HQ City', sortable: true },
     { key: 'region', label: 'Region', sortable: true },
     { key: 'entities', label: 'Entities', sortable: true, align: 'right' },
     {
       key: 'totalNavMm',
-      label: 'NAV ($MM)',
+      label: 'NAV',
       sortable: true,
       align: 'right',
-      render: (v) => <span className="font-mono">{fmtMoney(v ?? 0)}</span>,
+      render: (v) => <span className="">{fmtMoney(v ?? 0)}</span>,
     },
     {
       key: 'revenueL12m',
       label: 'Revenue L12M',
       sortable: true,
       align: 'right',
-      render: (v) => <span className="font-mono">{fmtMoney(v ?? 0)}</span>,
+      render: (v) => <span className="">{fmtMoney(v ?? 0)}</span>,
     },
     {
       key: 'marginPct',
       label: 'Margin %',
       sortable: true,
       align: 'right',
-      render: (v) => <span className="font-mono">{fmtPct(v ?? 0)}</span>,
+      render: (v) => <span className="">{fmtPct(v ?? 0)}</span>,
     },
     {
       key: 'status',
@@ -93,7 +104,7 @@ export default function ClientsPage() {
       {loading ? (
         <div className="text-center py-12 text-gray-400">Loading clients...</div>
       ) : (
-        <DataTable columns={columns} data={data} searchPlaceholder="Search clients..." />
+        <DataTable columns={columns} data={data} searchPlaceholder="Search clients..." initialSearch={searchInit} />
       )}
     </div>
   );

@@ -80,6 +80,7 @@ model Entity {
   region               String?
   dataQualityScore     Decimal?
   confidenceScore      Decimal?
+  fundFamilyTags       String?       // JSON array of tag strings, e.g. '["#WalkerComplex","#SPVs"]'
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
@@ -230,6 +231,8 @@ model Entity {
   gpCarryDomain                  GPCarryDomainFields?
   manCoDomain                    ManCoDomainFields?
   otherDomain                    OtherDomainFields?
+  securityLinks                  SecurityEntityLink[]
+  wfFund                         WfFund?
 }
 
 // ──────────────────────────────────────────────
@@ -443,6 +446,57 @@ model Security {
   creditRating   String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+  entityLinks    SecurityEntityLink[]
+}
+
+// ──────────────────────────────────────────────
+// EMPLOYEE → ENTITY / CLIENT ASSIGNMENTS
+// Drives capacity planning & auto-assignment
+// ──────────────────────────────────────────────
+
+model EmployeeEntityAssignment {
+  id           String       @id @default(cuid())
+  employeeId   String
+  employee     InternalUser @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  entityName   String?      // denormalized, matches TaskAssignment.entityName
+  clientName   String?      // GP/client name
+  department   String       // e.g. "Fund Accounting"
+  serviceLine  String       // e.g. "NAV Calculation"
+  role         String       // "Primary" | "Secondary"
+  coveragePct  Float        @default(100)
+  startDate    DateTime?
+  status       String       @default("Active")
+  notes        String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model SecurityEntityLink {
+  id                     String   @id @default(cuid())
+  securityId             String
+  security               Security @relation(fields: [securityId], references: [id], onDelete: Cascade)
+  entityId               String
+  entity                 Entity   @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  // ── Client-specific naming & classification
+  financialStatementName String?
+  clientNickname         String?
+  // ── Deal / investment details
+  dealPartner            String?
+  investmentThesis       String?
+  acquisitionDate        DateTime?
+  exitDate               DateTime?
+  // ── Economics
+  costAtAcquisition      Decimal?
+  currentCarryingValue   Decimal?
+  ownershipPct           Decimal?
+  // ── Operational
+  isActiveholding        Boolean  @default(true)
+  watchlistFlag          Boolean  @default(false)
+  notes                  String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@unique([securityId, entityId])
 }
 
 // ──────────────────────────────────────────────
@@ -472,12 +526,14 @@ model TaskAssignment {
   entityName       String
   assignedToId     String?
   assignedTo       InternalUser?   @relation(fields: [assignedToId], references: [id])
+  assignees        String?         // JSON: [{employeeId, employeeName, role: "Primary"|"Secondary"}]
   status           String          @default("Not Started")
   dueDate          DateTime
   completedDate    DateTime?
   periodEnd        String
   priority         String
   notes            String?
+  stepCompletions  String?
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
 }
@@ -840,9 +896,66 @@ model InternalUser {
   lastSyncDate              DateTime?
   dataQualityScore          Decimal?
   confidenceScore           Decimal?
+  // ── SALESFORCE / SEGMENTATION ──
+  sfUserId                  String?   // Salesforce User Id
+  sfUsername                String?   // Salesforce Username
+  jsqEmployeeId             String?   // JSQ_Employee_ID__c
+  segment                   String?   // Segment__c
+  serviceGroup              String?   // Service_Group__c
+  licenseType               String?   // License_Type__c
+  userTypeSf                String?   // Type__c
+  dealDeskGroup             String?   // Deal_Desk_Group__c
+  csm                       String?   // CSM__c (boolean flag as text)
+  teamLead1                 String?   // TeamLead1Text__c
+  teamLead2                 String?   // TeamLead2Text__c
+  teamLead3                 String?   // TeamLead3Text__c
+  managerSf                 String?   // Manager__c lookup name
+  managerOfManager          String?   // Manager_of_Manager__c lookup name
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt
+  capacityHours             Float    @default(40)
   taskAssignments           TaskAssignment[]
+  entityAssignments         EmployeeEntityAssignment[]
+  survey                    InternalUserSurvey?
+}
+
+// ──────────────────────────────────────────────
+// QUALTRICS FA ONBOARDING SURVEY DATA
+// ──────────────────────────────────────────────
+
+model InternalUserSurvey {
+  id                   String       @id @default(cuid())
+  employeeId           String       @unique
+  employee             InternalUser @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  // ── EDUCATION ──
+  college              String?
+  graduateDegree       String?
+  hasMba               Boolean      @default(false)
+  hasCpa               Boolean      @default(false)
+  otherCerts           String?
+  // ── PRIOR EMPLOYERS (JSON arrays) ──
+  priorFaFirms         String?
+  priorGpFirms         String?
+  priorAuditFirms      String?
+  priorConsultingFirms String?
+  // ── CLIENT SERVICE ──
+  csYears              Float?
+  csLevel              String?
+  // ── COMPLIANCE SKILLS (JSON string map: label → level) ──
+  complianceSkills     String?
+  // ── PRIVATE MARKETS ASSETS ──
+  pmYears              Float?
+  pmAssetSkills        String?
+  // ── ALLOCATIONS ──
+  allocationSkills     String?
+  // ── OTHER OPERATIONAL ──
+  otherOpSkills        String?
+  // ── TECHNOLOGY ──
+  preferredPmSoftware  String?
+  technologySkills     String?
+  submittedAt          DateTime?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
 }
 
 model ExternalContact {
@@ -1074,8 +1187,17 @@ model Relationship {
   status           String    @default("Active")
   effectiveDate    DateTime?
   notes            String?
+  ownershipPct     Decimal?      // e.g. 99.0 for "99% LP interest"
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+}
+
+model FundFamilyTag {
+  id          String   @id @default(cuid())
+  tag         String   @unique   // e.g. "#WalkerComplex"
+  description String?
+  color       String?            // optional hex color for the tag chip
+  createdAt   DateTime @default(now())
 }
 
 // ──────────────────────────────────────────────
@@ -1176,4 +1298,675 @@ model TimesheetEntry {
   approved     Boolean   @default(false)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+}
+
+// ──────────────────────────────────────────────
+// TRANSACTION PARAMETERS (ILPA-aligned config)
+// ──────────────────────────────────────────────
+
+model TransactionParameter {
+  id                  String   @id @default(cuid())
+  code                String   @unique          // e.g. CC-INV, DIST-ROC
+  name                String                    // Full display name
+  ilpaCategory        String                    // Capital Call | Distribution | Fee & Expense | Carried Interest | Facility/Debt | Other
+  ilpaSubtype         String?                   // ILPA template sub-classification string
+  ilpaTemplateRef     String?                   // ILPA template version reference
+  direction           String                    // Inflow | Outflow | Bilateral | N/A
+  insideFund          Boolean  @default(true)   // true = Inside Fund per ILPA Sept 2025 CC&D
+  recallable          Boolean  @default(false)  // Recallable distribution flag
+  navImpact           String                    // Increase NAV | Decrease NAV | No NAV Impact | GP Allocation
+  glDebit             String?                   // Investran GL debit account
+  glCredit            String?                   // Investran GL credit account
+  journalType         String?                   // JE type code (e.g. JE-CC, JE-DIST)
+  perfTemplateClass   String?                   // ILPA Perf Template class: Contribution | Distribution | Fee | Carried Interest | N/A
+  perfTemplateMethod  String?                   // Granular | Gross Up | Both | N/A
+  feeOffset           Boolean  @default(false)  // Does this transaction generate a fee offset?
+  feeOffsetType       String?                   // Management Fee Base | Carry Basis | Both | None
+  waterfallTier       String?                   // Return of Capital | Preferred Return | Catch-Up | Carried Interest | N/A
+  commitmentImpact    String?                   // Reduces Unfunded | No Impact | Restores Unfunded | Increases Unfunded
+  settlementDays      String?                   // T+0 | T+1 | T+2 | T+3 | T+5 | T+30
+  autoReconcile       Boolean  @default(false)
+  approvalRequired    Boolean  @default(false)
+  taxReporting        String?                   // K-1 Line XX | Sched K-1 | None
+  sortOrder           Int      @default(99)
+  isActive            Boolean  @default(true)
+  notes               String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  fundOverrides       FundTransactionOverride[]
+}
+
+model FundTransactionOverride {
+  id                  String   @id @default(cuid())
+  transParamCode      String
+  transParam          TransactionParameter @relation(fields: [transParamCode], references: [code], onDelete: Cascade)
+  fundId              String                        // Client fund / Entity identifier
+  fundName            String?
+  glDebit             String?
+  glCredit            String?
+  journalType         String?
+  recallable          Boolean?
+  feeOffset           Boolean?
+  feeOffsetType       String?
+  waterfallTier       String?
+  settlementDays      String?
+  notes               String?
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@unique([transParamCode, fundId])
+}
+
+// ──────────────────────────────────────────────
+// WATERFALL ENGINE — Wf* prefixed models
+// ──────────────────────────────────────────────
+
+model WfFund {
+  id               String   @id @default(cuid())
+  name             String
+  shortName        String
+  strategy         String
+  waterfallType    String
+  status           String   @default("active")
+  vintage          Int
+  currency         String   @default("USD")
+  totalCommitment  Float    @default(0)
+  totalNav         Float    @default(0)
+  totalDistributed Float    @default(0)
+  totalUnrealized  Float    @default(0)
+  exceptionCount   Int      @default(0)
+  lastRefreshed    DateTime?
+  validationStatus String   @default("pending")
+  complexityScore  Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  entityId       String?  @unique
+  entity         Entity?  @relation(fields: [entityId], references: [id])
+
+  terms          WfFundTerm?
+  waterfallSteps WfWaterfallStep[]
+  investors      WfFundInvestor[]
+  navSnapshots   WfNavSnapshot[]
+  exceptions     WfException[]
+}
+
+model WfFundTerm {
+  id               String  @id @default(cuid())
+  fundId           String  @unique
+  hurdleRate       Float   @default(0.08)
+  carryPct         Float   @default(0.20)
+  catchupType      String  @default("full")
+  mgmtFeeRate      Float   @default(0.02)
+  mgmtFeeBasis     String  @default("committed")
+  clawbackEnabled  Boolean @default(false)
+  preferredReturn  Float   @default(0.08)
+  fundLife         Int     @default(10)
+  investmentPeriod Int     @default(5)
+  fund             WfFund  @relation(fields: [fundId], references: [id])
+}
+
+model WfWaterfallStep {
+  id          String @id @default(cuid())
+  fundId      String
+  stepOrder   Int
+  stepName    String
+  lpSplit     Float  @default(1.0)
+  gpSplit     Float  @default(0.0)
+  description String @default("")
+  formula     String @default("")
+  fund        WfFund @relation(fields: [fundId], references: [id])
+  @@index([fundId])
+}
+
+model WfFundInvestor {
+  id               String    @id @default(cuid())
+  fundId           String
+  investorName     String
+  investorType     String    @default("institutional")
+  investorClass    String    @default("A")
+  commitment       Float     @default(0)
+  contributed      Float     @default(0)
+  distributed      Float     @default(0)
+  nav              Float     @default(0)
+  closingDate      DateTime
+  overrideHurdle   Float?
+  overrideCarryPct Float?
+  overrideMgmtFee  Float?
+  hasEqualization  Boolean   @default(false)
+  equalizationAmt  Float     @default(0)
+  fund             WfFund    @relation(fields: [fundId], references: [id])
+  @@index([fundId])
+}
+
+model WfNavSnapshot {
+  id           String   @id @default(cuid())
+  fundId       String
+  snapshotDate DateTime
+  totalNav     Float
+  unrealized   Float    @default(0)
+  source       String   @default("canopy")
+  fund         WfFund   @relation(fields: [fundId], references: [id])
+}
+
+model WfException {
+  id               String    @id @default(cuid())
+  fundId           String
+  exceptionType    String
+  severity         String    @default("medium")
+  title            String
+  description      String
+  impactAmount     Float     @default(0)
+  affectedEntities String    @default("[]")
+  recommendedFix   String
+  confidence       Float     @default(0.9)
+  status           String    @default("open")
+  resolvedAt       DateTime?
+  resolvedBy       String?
+  createdAt        DateTime  @default(now())
+  fund             WfFund    @relation(fields: [fundId], references: [id])
+  actions          WfRecommendedAction[]
+}
+
+model WfRecommendedAction {
+  id          String      @id @default(cuid())
+  exceptionId String
+  actionType  String
+  description String
+  status      String      @default("pending")
+  createdAt   DateTime    @default(now())
+  completedAt DateTime?
+  exception   WfException @relation(fields: [exceptionId], references: [id])
+  diuBatches  WfDiuBatch[]
+}
+
+model WfDiuBatch {
+  id          String              @id @default(cuid())
+  actionId    String?
+  batchRef    String              @unique
+  fundName    String
+  status      String              @default("generated")
+  generatedAt DateTime            @default(now())
+  postedAt    DateTime?
+  refreshedAt DateTime?
+  totalLines  Int                 @default(0)
+  totalAmount Float               @default(0)
+  fileContent String              @default("")
+  action      WfRecommendedAction? @relation(fields: [actionId], references: [id])
+  lines       WfDiuBatchLine[]
+}
+
+model WfDiuBatchLine {
+  id              String     @id @default(cuid())
+  batchId         String
+  lineNumber      Int
+  entityName      String
+  fundName        String
+  effectiveDate   String
+  transactionDate String
+  transactionType String
+  amount          Float
+  debitCredit     String
+  investorId      String
+  accountRef      String
+  memo            String     @default("")
+  externalRef     String     @default("")
+  batch           WfDiuBatch @relation(fields: [batchId], references: [id])
+}
+
+model WfAuditLog {
+  id         String   @id @default(cuid())
+  entityType String
+  entityId   String
+  action     String
+  actor      String   @default("system")
+  before     String?
+  after      String?
+  note       String?
+  createdAt  DateTime @default(now())
+}
+
+// ============================================================
+// Revenue Ops — Quote-to-Cash (Salesforce replacement)
+// ============================================================
+
+model Account {
+  id                  String        @id @default(cuid())
+  accountId           String        @unique
+  name                String
+  domain              String?
+  industry            String?
+  hqCity              String?
+  hqState             String?
+  hqCountry           String?
+  region              String?
+  employeeCount       Int?
+  aumMm               Decimal?
+  website             String?
+  linkedInUrl         String?
+  description         String?
+  notes               String?
+  status              String        @default("Prospect")
+  ownerId             String?
+  ownerName           String?
+  convertedToClientId String?
+  clientId            String?       // FK to Client.id — populated for Active Client accounts
+  tags                String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  contacts            Contact[]
+  opportunities       Opportunity[]
+  activities          Activity[]
+  contracts           Contract[]
+}
+
+model Contact {
+  id               String               @id @default(cuid())
+  contactId        String               @unique
+  firstName        String
+  lastName         String
+  title            String?
+  email            String?
+  phone            String?
+  mobilePhone      String?
+  linkedInUrl      String?
+  accountId        String?
+  accountName      String?
+  isPrimary        Boolean              @default(false)
+  contactType      String               @default("Contact")
+  department       String?
+  status           String               @default("Active")
+  notes            String?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  account          Account?             @relation(fields: [accountId], references: [id])
+  opportunityRoles OpportunityContact[]
+  activities       Activity[]
+}
+
+model Lead {
+  id                     String    @id @default(cuid())
+  leadId                 String    @unique
+  firstName              String
+  lastName               String
+  email                  String?
+  phone                  String?
+  company                String?
+  title                  String?
+  leadSource             String    @default("Inbound")
+  status                 String    @default("New")
+  ownerId                String?
+  ownerName              String?
+  notes                  String?
+  assignedAt             DateTime?
+  convertedAt            DateTime?
+  convertedAccountId     String?
+  convertedContactId     String?
+  convertedOpportunityId String?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+}
+
+model Opportunity {
+  id              String               @id @default(cuid())
+  opportunityId   String               @unique
+  name            String
+  accountId       String?
+  accountName     String
+  stage           String               @default("Prospecting")
+  probability     Int                  @default(10)
+  closeDate       DateTime?
+  amount          Decimal?
+  tcv             Decimal?
+  currency        String               @default("USD")
+  ownerId         String?
+  ownerName       String?
+  description     String?
+  lostReason      String?
+  competitorNotes String?
+  nextStepDate    DateTime?
+  nextStepNote    String?
+  leadSource      String?
+  entityCount     Int?
+  aumMm           Decimal?
+  fundStrategies  String?
+  scopeNotes      String?
+  closedAt        DateTime?
+  clientId        String?       // FK to Client.id — set for Expansion deals on existing clients
+  clientName      String?       // denormalized client name for expansion deals
+  dealType        String        @default("New Logo") // New Logo | Expansion
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  account         Account?             @relation(fields: [accountId], references: [id])
+  contacts        OpportunityContact[]
+  activities      Activity[]
+  quotes          Quote[]
+  contracts       Contract[]
+}
+
+model OpportunityContact {
+  id            String      @id @default(cuid())
+  opportunityId String
+  contactId     String
+  role          String      @default("Contact")
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  contact       Contact     @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@unique([opportunityId, contactId])
+}
+
+model Activity {
+  id              String       @id @default(cuid())
+  activityId      String       @unique
+  type            String       @default("Note")
+  subject         String
+  description     String?
+  outcome         String?
+  direction       String?
+  durationMinutes Int?
+  activityDate    DateTime     @default(now())
+  accountId       String?
+  accountName     String?
+  contactId       String?
+  contactName     String?
+  opportunityId   String?
+  opportunityName String?
+  ownerId         String?
+  ownerName       String?
+  nextStepDate    DateTime?
+  completed       Boolean      @default(true)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  account         Account?     @relation(fields: [accountId], references: [id])
+  contact         Contact?     @relation(fields: [contactId], references: [id])
+  opportunity     Opportunity? @relation(fields: [opportunityId], references: [id])
+}
+
+model Quote {
+  id              String      @id @default(cuid())
+  quoteId         String      @unique
+  name            String
+  opportunityId   String?
+  opportunityName String?
+  accountId       String?
+  accountName     String
+  status          String      @default("Draft")
+  validUntil      DateTime?
+  currency        String      @default("USD")
+  totalArr        Decimal?
+  totalTcv        Decimal?
+  discountPct     Decimal?
+  discountReason  String?
+  notes           String?
+  sentAt          DateTime?
+  acceptedAt      DateTime?
+  rejectedAt      DateTime?
+  createdById     String?
+  createdByName   String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  opportunity     Opportunity? @relation(fields: [opportunityId], references: [id])
+  lines           QuoteLine[]
+}
+
+model QuoteLine {
+  id                String    @id @default(cuid())
+  quoteId           String
+  service           String
+  description       String?
+  aumTierLabel      String?
+  aumTierMin        Decimal?
+  aumTierMax        Decimal?
+  pricePerEntity    Decimal?
+  estimatedEntities Int?
+  annualValue       Decimal?
+  notes             String?
+  sortOrder         Int       @default(0)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  quote             Quote     @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+}
+
+model PriceBook {
+  id             String   @id @default(cuid())
+  service        String
+  aumTierLabel   String
+  aumTierMin     Decimal?
+  aumTierMax     Decimal?
+  pricePerEntity Decimal
+  effectiveDate  DateTime @default(now())
+  isActive       Boolean  @default(true)
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Contract {
+  id                    String       @id @default(cuid())
+  contractId            String       @unique
+  name                  String
+  opportunityId         String?
+  accountId             String?
+  accountName           String
+  status                String       @default("Draft")
+  contractType          String       @default("MSA")
+  startDate             DateTime?
+  endDate               DateTime?
+  autoRenew             Boolean      @default(false)
+  noticePeriodDays      Int?
+  totalValue            Decimal?
+  annualValue           Decimal?
+  paymentTerms          String?
+  billingFrequency      String       @default("Quarterly")
+  signedDate            DateTime?
+  executedDate          DateTime?
+  counterpartySignatory String?
+  jsqSignatory          String?
+  documentRef           String?
+  notes                 String?
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+  opportunity           Opportunity? @relation(fields: [opportunityId], references: [id])
+  account               Account?     @relation(fields: [accountId], references: [id])
+  orders                Order[]
+}
+
+model Order {
+  id               String    @id @default(cuid())
+  orderId          String    @unique
+  contractId       String?
+  accountId        String?
+  accountName      String
+  status           String    @default("Pending")
+  billingStartDate DateTime?
+  billingEndDate   DateTime?
+  annualValue      Decimal?
+  billingFrequency String    @default("Quarterly")
+  nextBillingDate  DateTime?
+  entityCount      Int?
+  notes            String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  contract         Contract? @relation(fields: [contractId], references: [id])
+}
+
+// ============================================================
+// Deal Capture Form (DCF) — intake form submitted by prospects
+// Each submission is linked to an Opportunity. Most detail lives
+// in DcfEntity (one row per fund/entity in the mandate).
+// ============================================================
+
+model DcfSubmission {
+  id                          String           @id @default(cuid())
+  dcfId                       String           @unique   // DCF-2024-001
+  opportunityId               String?          // FK to Opportunity.id
+  opportunityName             String?
+  accountId                   String?          // FK to Account.id
+  accountName                 String?
+  status                      String           @default("Draft")
+  // Draft | Submitted | Under Review | Complete | Rejected
+  submittedAt                 DateTime?
+  reviewedAt                  DateTime?
+  reviewedBy                  String?
+
+  // Submitter (from "Your Information" section)
+  contactFirstName            String?
+  contactLastName             String?
+  contactEmail                String?
+  contactTitle                String?
+
+  // General org questions
+  financeOutsourced           Boolean          @default(false)
+  financeOutsourcedNotes      String?
+  prevAdminExperience         Boolean          @default(false)
+  prevAdminExperienceNotes    String?
+
+  // Current admin technology
+  adminTechCompany            String?
+  adminTechProduct            String?
+  adminTechDetails            String?
+
+  // Language/locale preferences
+  preferredLanguage           String           @default("English")
+  preferredDateFormat         String           @default("MM-DD-YYYY")
+  autoTimezone                Boolean          @default(true)
+
+  // Internal notes / review
+  internalNotes               String?
+
+  createdAt                   DateTime         @default(now())
+  updatedAt                   DateTime         @updatedAt
+
+  advisors                    DcfAdvisor[]
+  entities                    DcfEntity[]
+  bankAccounts                DcfBankAccount[]
+  integrations                DcfIntegration[]
+}
+
+// Service providers/advisors attached to a DCF submission
+// advisorType: Legal | Bank | Current Admin | Tax | Auditor
+model DcfAdvisor {
+  id              String        @id @default(cuid())
+  dcfSubmissionId String
+  advisorType     String        // Legal | Bank | Current Admin | Tax | Auditor
+  firstName       String?
+  lastName        String?
+  firmName        String?
+  email           String?
+  details         String?
+  createdAt       DateTime      @default(now())
+  submission      DcfSubmission @relation(fields: [dcfSubmissionId], references: [id], onDelete: Cascade)
+}
+
+// Per-entity/fund detail — one row per fund entity in the mandate.
+// Maps to the entity-scoped sections of the DCF (Fund Info, Fund Size,
+// Investor Info, Investment Info, Allocation, Capital Activity,
+// Reporting, Other Services, GP Entities, Data Migration).
+model DcfEntity {
+  id                          String        @id @default(cuid())
+  dcfSubmissionId             String
+  entityName                  String        // name as entered on the form
+  entityId                    String?       // FK to Entity.id if matched post-intake
+  sortOrder                   Int           @default(0)
+
+  // ── Fund Information ────────────────────────────────────────────
+  jurisdiction                String?       // e.g. "Cayman Islands", "Delaware"
+  vintageYear                 Int?
+  entityType                  String?       // PE | VC | RE | Credit | FoF | CLO | SMA | Co-Invest | Other
+  firstCapitalCallDate        DateTime?
+  expectedLaunchDate          DateTime?     // new funds only
+  gpLegalName                 String?
+  gpSupportNeeded             Boolean       @default(false)
+  lineOfCredit                Boolean       @default(false)
+  fundLevelLeverage           Boolean       @default(false)
+  futureRaising               String?
+
+  // ── Fund Size ───────────────────────────────────────────────────
+  currentCommittedCapitalMm   Decimal?
+  targetCommittedCapitalMm    Decimal?
+  twelveMonthTargetMm         Decimal?      // open-end only
+  currentCalledCapitalMm      Decimal?
+  expectedFirstCallDate       DateTime?     // if none called yet
+
+  // ── Investor Information ────────────────────────────────────────
+  currentInvestorCount        Int?
+  targetInvestorCount         Int?
+  nonUsInvestorCount          Int?
+  subscriptionDocsReceived    Int?          // new funds
+  redemptionFrequency         String?       // open-end: Monthly | Quarterly | Annually
+  sideLetterFeeClasses        Int?
+  digitalSubscriptionConcerns Boolean       @default(false)
+
+  // ── Investment Information ──────────────────────────────────────
+  currentInvestmentCount      Int?
+  expectedTotalInvestments    Int?
+  expectedDebtInvestments     Int?
+  ventureStage                String?       // Seed | Early | Growth | Late
+  fofMethodology              String?
+  realEstateAcctMethod        String?       // Operating | Non-operating
+  debtLoanOrigination         String?
+  debtAmortizationMethod      String?
+  avgLoanSizeMm               Decimal?
+  drawdownPct                 Decimal?
+  investmentAdditionalContext String?
+
+  // ── Allocation Information ──────────────────────────────────────
+  proRataStructure            Boolean       @default(true)
+  managementFeeCalc           String?
+  managementFeeWaiver         Boolean       @default(false)
+  waterfallType               String?       // European | American | Other
+
+  // ── Capital Activity & Treasury ────────────────────────────────
+  annualCallsDistributions    Int?
+  monthlyWires                Int?
+  monthlyAch                  Int?
+  processFundInvoices         Boolean       @default(false)
+  initiateAcquisitionFunding  Boolean       @default(false)
+
+  // ── Reporting Information ───────────────────────────────────────
+  firstReportingQuarter       String?       // e.g. "Q1 2025"
+  reportingCurrency           String?       @default("USD")
+  accountingStandard          String?       // US GAAP | IFRS | Other
+  reportingFrequency          String?       // Monthly | Quarterly | Annually | Other
+  valuationDeliveryFrequency  String?
+  reportingDeadlineDays       Int?
+  quarterlyFootnotes          Boolean       @default(false)
+  auditLiaisonSupport         Boolean       @default(false)
+  regulatoryReportingSupport  String?
+
+  // ── Other Service Support ───────────────────────────────────────
+  support1099                 Boolean       @default(false)
+  investorWatchlistScreenings Boolean       @default(false)
+
+  // ── GP Entities / Carry Vehicles ───────────────────────────────
+  customizedReportingRequired Boolean       @default(false)
+
+  // ── Data Migration ──────────────────────────────────────────────
+  migrationApproach           String?       // Full | Point in Time | Hybrid
+  currentDataStorage          String?       // Excel | QuickBooks | Other
+  migrateHistoricalDocs       Boolean       @default(false)
+  investorDataAvailable       Boolean       @default(false)
+
+  createdAt                   DateTime      @default(now())
+  updatedAt                   DateTime      @updatedAt
+  submission                  DcfSubmission @relation(fields: [dcfSubmissionId], references: [id], onDelete: Cascade)
+}
+
+model DcfBankAccount {
+  id              String        @id @default(cuid())
+  dcfSubmissionId String
+  bankName        String
+  details         String?
+  createdAt       DateTime      @default(now())
+  submission      DcfSubmission @relation(fields: [dcfSubmissionId], references: [id], onDelete: Cascade)
+}
+
+model DcfIntegration {
+  id              String        @id @default(cuid())
+  dcfSubmissionId String
+  applicationName String
+  details         String?
+  createdAt       DateTime      @default(now())
+  submission      DcfSubmission @relation(fields: [dcfSubmissionId], references: [id], onDelete: Cascade)
 }

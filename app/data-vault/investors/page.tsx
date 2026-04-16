@@ -7,6 +7,7 @@ import MetricCard from '@/components/MetricCard';
 import DataTable, { Column } from '@/components/DataTable';
 import StatusBadge from '@/components/StatusBadge';
 import { fmtMoney } from '@/lib/utils';
+import Link from 'next/link';
 
 interface InvestorRow {
   id: string;
@@ -23,6 +24,12 @@ interface InvestorRow {
 export default function InvestorsPage() {
   const [data, setData] = useState<InvestorRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchInit, setSearchInit] = useState('');
+
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get('search');
+    if (q) setSearchInit(q);
+  }, []);
 
   useEffect(() => {
     fetch('/api/investors')
@@ -38,21 +45,26 @@ export default function InvestorsPage() {
 
   const columns: Column[] = [
     { key: 'investorId', label: 'Investor ID', sortable: true },
-    { key: 'name', label: 'Name', sortable: true, render: (v) => <span className="font-semibold">{v}</span> },
+    { key: 'name', label: 'Name', sortable: true, render: (v: string, row: any) => (
+      <Link href={`/data-vault/investors/${row.investorId}`} className="block group">
+        <div className="font-semibold text-gray-900 group-hover:text-[#00C97B] transition-colors">{v}</div>
+        <div className="text-[10px] text-gray-400">{row.investorId}</div>
+      </Link>
+    ) },
     { key: 'type', label: 'Type', sortable: true },
     {
       key: 'commitmentMm',
-      label: 'Commitment ($MM)',
+      label: 'Commitment',
       sortable: true,
       align: 'right',
-      render: (v) => <span className="font-mono">{fmtMoney(v ?? 0)}</span>,
+      render: (v) => <span className="">{fmtMoney(v ?? 0)}</span>,
     },
     {
       key: 'navMm',
-      label: 'NAV ($MM)',
+      label: 'NAV',
       sortable: true,
       align: 'right',
-      render: (v) => <span className="font-mono">{v != null ? fmtMoney(v) : '—'}</span>,
+      render: (v) => <span className="">{v != null ? fmtMoney(v) : '—'}</span>,
     },
     { key: 'domicile', label: 'Domicile', sortable: true },
     { key: 'entity', label: 'Entity', sortable: true },
@@ -85,7 +97,7 @@ export default function InvestorsPage() {
       {loading ? (
         <div className="text-center py-12 text-gray-400">Loading investors...</div>
       ) : (
-        <DataTable columns={columns} data={data} searchPlaceholder="Search investors..." />
+        <DataTable columns={columns} data={data} searchPlaceholder="Search investors..." initialSearch={searchInit} />
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import PageHeader from '@/components/PageHeader';
 import MetricCard from '@/components/MetricCard';
 import DataTable, { Column } from '@/components/DataTable';
@@ -15,22 +16,22 @@ const priorityStyles: Record<string, string> = {
 };
 
 const columns: Column[] = [
-  { key: 'projectId', label: 'Project ID', render: (v: string) => <span className="font-mono text-sm">{v}</span> },
+  { key: 'projectId', label: 'Project ID', render: (v: string) => <span>{v}</span> },
   { key: 'name', label: 'Name', sortable: true, render: (v: string) => <span className="font-medium text-gray-900">{v}</span> },
   { key: 'projectType', label: 'Type', sortable: true },
-  { key: 'clientName', label: 'Client', sortable: true, render: (v: string | null) => v || '—' },
+  { key: 'clientName', label: 'Client', sortable: true, render: (v: string | null) => v ? <Link href={`/data-vault/clients?search=${encodeURIComponent(v)}`} className="text-[#00C97B] hover:underline hover:text-[#00A866] transition-colors">{v}</Link> : '—' },
   { key: 'status', label: 'Status', render: (v: string) => <StatusBadge status={v} /> },
   { key: 'priority', label: 'Priority', render: (v: string) => <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${priorityStyles[v] || 'bg-gray-100 text-gray-700'}`}>{v}</span> },
-  { key: 'leadName', label: 'Lead', sortable: true, render: (v: string | null) => v || '—' },
+  { key: 'leadName', label: 'Lead', sortable: true, render: (v: string | null) => v ? <Link href={`/data-vault/internal-users?search=${encodeURIComponent(v)}`} className="text-[#00C97B] hover:underline hover:text-[#00A866] transition-colors">{v}</Link> : '—' },
   { key: 'startDate', label: 'Start', sortable: true, render: (v: string) => <span className="whitespace-nowrap">{fmtDate(v)}</span> },
   { key: 'targetEndDate', label: 'Target End', sortable: true, render: (v: string) => <span className="whitespace-nowrap">{fmtDate(v)}</span> },
   { key: 'completionPct', label: 'Completion', sortable: true, render: (v: number) => (
     <div className="flex items-center gap-2">
       <div className="h-2 w-20 rounded-full bg-gray-200"><div className="h-2 rounded-full bg-[#00C97B]" style={{ width: `${Math.min(v, 100)}%` }} /></div>
-      <span className="text-xs font-mono text-gray-600">{v}%</span>
+      <span className="text-xs text-gray-600">{v}%</span>
     </div>
   )},
-  { key: 'totalTasks', label: 'Tasks', render: (_v: number, row: any) => <span className="text-sm font-mono">{row.completedTasks}/{row.totalTasks}</span> },
+  { key: 'totalTasks', label: 'Tasks', render: (_v: number, row: any) => <span>{row.completedTasks}/{row.totalTasks}</span> },
 ];
 
 export default function ProjectsPage() {

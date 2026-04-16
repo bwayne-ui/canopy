@@ -6,7 +6,7 @@ import Link from 'next/link';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
 import { fmtMoney, fmtPct } from '@/lib/utils';
-import { Building2, Users, ClipboardCheck, ArrowLeft, AlertTriangle } from 'lucide-react';
+import { Building2, Users, ClipboardCheck, ArrowLeft, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
 
 /* ─── types ────────────────────────────────────────────────────────── */
 
@@ -117,13 +117,13 @@ interface TaskSummary { total: number; completed: number; overdue: number; }
 function FieldRow({ label, value, format }: { label: string; value: any; format?: 'money' | 'pct' | 'bool' | 'date' }) {
   let display: React.ReactNode = value;
   if (value == null || value === '') display = <span className="text-gray-300">—</span>;
-  else if (format === 'money') display = <span className="font-mono">{fmtMoney(value)}</span>;
-  else if (format === 'pct') display = <span className="font-mono">{fmtPct(value)}</span>;
+  else if (format === 'money') display = <span className="">{fmtMoney(value)}</span>;
+  else if (format === 'pct') display = <span className="">{fmtPct(value)}</span>;
   else if (format === 'bool') display = value ? 'Yes' : 'No';
   else if (format === 'date') display = value;
   return (
     <div className="flex items-baseline justify-between py-1.5 border-b border-gray-50">
-      <span className="text-[11px] text-gray-500 font-medium">{label}</span>
+      <span className="text-xs text-gray-500 font-medium">{label}</span>
       <span className="text-xs text-gray-900">{display}</span>
     </div>
   );
@@ -132,7 +132,7 @@ function FieldRow({ label, value, format }: { label: string; value: any; format?
 function FieldSection({ title, children, compact = false }: { title: string; children: React.ReactNode; compact?: boolean }) {
   return (
     <div className={`bg-white rounded-lg shadow-sm ${compact ? 'p-2' : 'p-3'} mb-2`}>
-      <h3 className={`text-[11px] font-semibold text-gray-500 uppercase tracking-wider ${compact ? 'mb-1.5' : 'mb-2'}`}>{title}</h3>
+      <h3 className={`text-xs font-semibold text-gray-500 uppercase tracking-wider ${compact ? 'mb-1.5' : 'mb-2'}`}>{title}</h3>
       <div className="space-y-0">{children}</div>
     </div>
   );
@@ -155,8 +155,24 @@ function Pills({ json }: { json: string | null }) {
 function PillRow({ label, json }: { label: string; json: string | null }) {
   return (
     <div className="flex items-center justify-between py-1.5 border-b border-gray-50">
-      <span className="text-[11px] text-gray-500 font-medium">{label}</span>
+      <span className="text-xs text-gray-500 font-medium">{label}</span>
       <Pills json={json} />
+    </div>
+  );
+}
+
+function ScoreBar({ score, color = 'default' }: { score: number | null; color?: 'default' | 'blue' }) {
+  if (score == null) return <span className="text-gray-300 text-xs">—</span>;
+  const pct = Math.round(score);
+  const barColor = color === 'blue'
+    ? 'bg-blue-500'
+    : pct >= 90 ? 'bg-emerald-500' : pct >= 70 ? 'bg-amber-500' : 'bg-red-500';
+  return (
+    <div className="flex items-center gap-2">
+      <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+        <div className={`h-full rounded-full ${barColor}`} style={{ width: `${pct}%` }} />
+      </div>
+      <span className="text-xs text-gray-700 font-semibold">{pct}%</span>
     </div>
   );
 }
@@ -173,7 +189,7 @@ function maskEin(v: string | null | undefined): string | null {
 
 const priorityBadge = (p: string) => {
   const cls = p === 'Critical' || p === 'High' ? 'bg-red-100 text-red-700' : p === 'Medium' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600';
-  return <span className={`px-1.5 py-0.5 rounded text-[9px] font-semibold ${cls}`}>{p}</span>;
+  return <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${cls}`}>{p}</span>;
 };
 
 /* ─── tab definitions ──────────────────────────────────────────────── */
@@ -204,6 +220,9 @@ export default function EntityDetailPage() {
   const [taskSummary, setTaskSummary] = useState<TaskSummary>({ total: 0, completed: 0, overdue: 0 });
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<TabKey>('general');
+  const [expandedEmployees, setExpandedEmployees] = useState<Set<string>>(new Set());
+  const toggleEmployee = (id: string) =>
+    setExpandedEmployees((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
   useEffect(() => {
     fetch(`/api/entities/${entityId}`)
@@ -232,6 +251,12 @@ export default function EntityDetailPage() {
   if (!entity) return <div className="text-center py-12 text-gray-400">Entity not found</div>;
 
   const e = entity;
+
+  const finRev = e.revenueL12m != null ? Number(e.revenueL12m) : 2450000;
+  const finCost = e.costL12m != null ? Number(e.costL12m) : 857500;
+  const netMarginPct = e.marginPct != null ? Number(e.marginPct) : ((finRev - finCost) / finRev) * 100;
+  const netMarginDollar = finRev - finCost;
+  const aboveDirectMarginTarget = netMarginPct >= 65;
 
   return (
     <div>
@@ -271,14 +296,12 @@ export default function EntityDetailPage() {
             <div className="font-bold text-gray-900">{fmtMoney(e.navMm || 0)}</div>
             <div className="text-gray-400">NAV</div>
           </div>
-          <div className="text-center">
-            <div className="font-bold text-gray-900">{e.investorCount}</div>
-            <div className="text-gray-400">Investors</div>
-          </div>
-          <div className="text-center">
-            <div className="font-bold text-gray-900">{taskSummary.total}</div>
-            <div className="text-gray-400">Tasks</div>
-          </div>
+          {e.dataQualityScore != null && (
+            <div>
+              <div className="text-[10px] text-gray-400 mb-0.5 text-right">Data Quality</div>
+              <ScoreBar score={e.dataQualityScore} />
+            </div>
+          )}
         </div>
       </div>
 
@@ -372,10 +395,10 @@ export default function EntityDetailPage() {
                   <FieldRow label="Final Close" value={e.fundraisingFinalClose} format="date" />
                 </div>
               </FieldSection>
-              <FieldSection title="Key Metrics" compact>
+              <FieldSection title="Capital Activity" compact>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                   {[
-                    { v: e.navMm, l: 'NAV ($MM)' }, { v: e.commitmentMm, l: 'Commitment' },
+                    { v: e.navMm, l: 'NAV' }, { v: e.commitmentMm, l: 'Commitment' },
                     { v: e.calledCapitalMm, l: 'Called Capital' }, { v: e.distributedCapitalMm, l: 'Distributed' },
                     { v: e.unfundedMm, l: 'Unfunded' },
                   ].map(({ v, l }) => (
@@ -384,20 +407,6 @@ export default function EntityDetailPage() {
                       <div className="text-[10px] text-gray-500">{l}</div>
                     </div>
                   ))}
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
-                  <div className="text-center p-2 bg-blue-50 rounded">
-                    <div className="text-sm font-bold text-blue-900">{e.grossIrrPct ? `${e.grossIrrPct.toFixed(1)}%` : '—'}</div>
-                    <div className="text-[10px] text-blue-600">Gross IRR</div>
-                  </div>
-                  <div className="text-center p-2 bg-green-50 rounded">
-                    <div className="text-sm font-bold text-green-900">{e.netIrrPct ? `${e.netIrrPct.toFixed(1)}%` : '—'}</div>
-                    <div className="text-[10px] text-green-600">Net IRR</div>
-                  </div>
-                  <div className="text-center p-2 bg-purple-50 rounded">
-                    <div className="text-sm font-bold text-purple-900">{e.moic ? `${e.moic.toFixed(2)}x` : '—'}</div>
-                    <div className="text-[10px] text-purple-600">MOIC</div>
-                  </div>
                 </div>
               </FieldSection>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
@@ -413,8 +422,14 @@ export default function EntityDetailPage() {
                   <FieldRow label="FATCA/CRS" value={e.scopeFatcaCrs} format="bool" />
                 </FieldSection>
                 <FieldSection title="Data Quality">
-                  <FieldRow label="Data Quality Score" value={e.dataQualityScore != null ? `${Math.round(e.dataQualityScore)}%` : null} />
-                  <FieldRow label="Confidence Score" value={e.confidenceScore != null ? `${Math.round(e.confidenceScore * 100)}%` : null} />
+                  <div className="flex items-center justify-between py-1.5 border-b border-gray-50">
+                    <span className="text-xs text-gray-500 font-medium">Data Quality Score</span>
+                    <ScoreBar score={e.dataQualityScore} />
+                  </div>
+                  <div className="flex items-center justify-between py-1.5">
+                    <span className="text-xs text-gray-500 font-medium">Confidence Score</span>
+                    <ScoreBar score={e.confidenceScore != null ? e.confidenceScore * 100 : null} color="blue" />
+                  </div>
                 </FieldSection>
               </div>
             </>
@@ -424,15 +439,15 @@ export default function EntityDetailPage() {
           {tab === 'fund-accounting' && (
             <>
               <FieldSection title="Net Asset Value" compact>
-                <FieldRow label="Current NAV ($MM)" value={e.navMm} format="money" />
+                <FieldRow label="Current NAV" value={e.navMm} format="money" />
                 <FieldRow label="NAV Frequency" value={e.navFrequency} />
                 <FieldRow label="Accounting System" value={e.accountingSystem} />
               </FieldSection>
               <FieldSection title="Capital Activity" compact>
-                <FieldRow label="Commitment ($MM)" value={e.commitmentMm} format="money" />
-                <FieldRow label="Called Capital ($MM)" value={e.calledCapitalMm} format="money" />
-                <FieldRow label="Distributed ($MM)" value={e.distributedCapitalMm} format="money" />
-                <FieldRow label="Unfunded ($MM)" value={e.unfundedMm} format="money" />
+                <FieldRow label="Commitment" value={e.commitmentMm} format="money" />
+                <FieldRow label="Called Capital" value={e.calledCapitalMm} format="money" />
+                <FieldRow label="Distributed" value={e.distributedCapitalMm} format="money" />
+                <FieldRow label="Unfunded" value={e.unfundedMm} format="money" />
               </FieldSection>
               <FieldSection title="Performance" compact>
                 <FieldRow label="Gross IRR" value={e.grossIrrPct} format="pct" />
@@ -637,7 +652,7 @@ export default function EntityDetailPage() {
                           <div className="text-[10px] text-gray-400 truncate">{inv.type} · {inv.investorId}</div>
                         </div>
                         <div className="text-right ml-2">
-                          <div className="text-xs font-mono">{inv.commitmentMm != null ? fmtMoney(inv.commitmentMm) : '—'}</div>
+                          <div className="text-xs">{inv.commitmentMm != null ? fmtMoney(inv.commitmentMm) : '—'}</div>
                           <div className="text-[10px] text-gray-400">committed</div>
                         </div>
                       </div>
@@ -645,25 +660,15 @@ export default function EntityDetailPage() {
                   </div>
                 )}
               </FieldSection>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-                <FieldSection title="Compliance Operations" compact>
-                  <FieldRow label="AML Program Required" value={e.amlProgramRequired} format="bool" />
-                  <FieldRow label="FATCA Required" value={e.fatcaRequired} format="bool" />
-                  <FieldRow label="CRS Required" value={e.crsRequired} format="bool" />
-                  <FieldRow label="KYC Standard" value={withOther(e.kycStandard, e.kycStandardOther)} />
-                  <FieldRow label="Benefit Plan Tracking" value={e.benefitPlanInvestorTracking} format="bool" />
-                  <FieldRow label="Restricted Persons" value={e.restrictedPersonsTracking} format="bool" />
-                  <FieldRow label="1099 Support" value={e.support1099Level} />
-                </FieldSection>
-                <FieldSection title="Treasury Operations" compact>
-                  <FieldRow label="Bank Accounts" value={e.bankAccountCount} />
-                  <FieldRow label="Bank Connectivity" value={withOther(e.bankConnectivityMethod, e.bankConnectivityOther)} />
-                  <FieldRow label="Multi-Currency" value={e.multiCurrency} format="bool" />
-                  <FieldRow label="Payment Approvals" value={e.paymentApprovalLevels} />
-                  <FieldRow label="Primary Currency" value={withOther(e.primaryCurrency, e.primaryCurrencyOther)} />
-                  <FieldRow label="Positive Pay" value={e.positivePayEnabled} format="bool" />
-                </FieldSection>
-              </div>
+              <FieldSection title="Compliance Operations" compact>
+                <FieldRow label="AML Program Required" value={e.amlProgramRequired} format="bool" />
+                <FieldRow label="FATCA Required" value={e.fatcaRequired} format="bool" />
+                <FieldRow label="CRS Required" value={e.crsRequired} format="bool" />
+                <FieldRow label="KYC Standard" value={withOther(e.kycStandard, e.kycStandardOther)} />
+                <FieldRow label="Benefit Plan Tracking" value={e.benefitPlanInvestorTracking} format="bool" />
+                <FieldRow label="Restricted Persons" value={e.restrictedPersonsTracking} format="bool" />
+                <FieldRow label="1099 Support" value={e.support1099Level} />
+              </FieldSection>
               <FieldSection title="Investor Operations" compact>
                 <FieldRow label="Investor Portal" value={e.investorPortalEnabled} format="bool" />
                 <FieldRow label="Redemption Model" value={e.redemptionProcessingModel} />
@@ -676,34 +681,94 @@ export default function EntityDetailPage() {
           {tab === 'finance' && (
             <>
               <FieldSection title="Revenue & Cost" compact>
-                <FieldRow label="Revenue L12M ($MM)" value={e.revenueL12m} format="money" />
-                <FieldRow label="Cost L12M ($MM)" value={e.costL12m} format="money" />
-                <FieldRow label="Margin %" value={e.marginPct} format="pct" />
+                <div className="grid grid-cols-3 gap-2 mb-1">
+                  <div className="text-center p-2 bg-teal-50 rounded">
+                    <div className="text-sm font-bold text-teal-900">{fmtMoney(finRev)}</div>
+                    <div className="text-[10px] text-teal-600">Revenue L12M</div>
+                  </div>
+                  <div className="text-center p-2 bg-red-50 rounded">
+                    <div className="text-sm font-bold text-red-900">{fmtMoney(finCost)}</div>
+                    <div className="text-[10px] text-red-600">Cost L12M</div>
+                  </div>
+                  <div className="text-center p-2 bg-emerald-50 rounded">
+                    <div className="text-sm font-bold text-emerald-900">{netMarginPct.toFixed(1)}%</div>
+                    <div className="text-[10px] text-emerald-600">Margin</div>
+                  </div>
+                </div>
               </FieldSection>
-              <FieldSection title="Performance Metrics" compact>
-                <FieldRow label="Gross IRR" value={e.grossIrrPct} format="pct" />
-                <FieldRow label="Net IRR" value={e.netIrrPct} format="pct" />
-                <FieldRow label="MOIC" value={e.moic != null ? `${e.moic}x` : null} />
-                <FieldRow label="TVPI" value={e.tvpi != null ? `${e.tvpi}x` : null} />
-                <FieldRow label="DPI" value={e.dpi != null ? `${e.dpi}x` : null} />
+              <FieldSection title="Margin Analysis" compact>
+                <div className="grid grid-cols-2 gap-2 mb-2">
+                  <div className="text-center p-2 bg-gray-50 rounded">
+                    <div className="text-sm font-bold text-gray-900">{fmtMoney(netMarginDollar)}</div>
+                    <div className="text-[10px] text-gray-500">Net Margin $</div>
+                  </div>
+                  <div className={`text-center p-2 rounded ${aboveDirectMarginTarget ? 'bg-emerald-50' : 'bg-amber-50'}`}>
+                    <div className={`text-sm font-bold ${aboveDirectMarginTarget ? 'text-emerald-900' : 'text-amber-900'}`}>{netMarginPct.toFixed(1)}%</div>
+                    <div className={`text-[10px] ${aboveDirectMarginTarget ? 'text-emerald-600' : 'text-amber-600'}`}>Net Margin %</div>
+                  </div>
+                </div>
+                <div className={`flex items-center gap-2 p-2 rounded border ${aboveDirectMarginTarget ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'}`}>
+                  {aboveDirectMarginTarget
+                    ? <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                    : <XCircle className="w-4 h-4 text-red-600 flex-shrink-0" />}
+                  <span className={`text-xs font-semibold ${aboveDirectMarginTarget ? 'text-emerald-700' : 'text-red-700'}`}>
+                    {aboveDirectMarginTarget ? 'Above 65% direct margin target' : 'Below 65% direct margin target'}
+                  </span>
+                </div>
               </FieldSection>
             </>
           )}
 
           {/* ═══ TREASURY TAB ═══ */}
           {tab === 'treasury' && (
-            <FieldSection title="Treasury" compact>
-              <FieldRow label="Currency" value={e.currency} />
-              <FieldRow label="Unfunded ($MM)" value={e.unfundedMm} format="money" />
-              <FieldRow label="Called Capital ($MM)" value={e.calledCapitalMm} format="money" />
-              <FieldRow label="Distributed ($MM)" value={e.distributedCapitalMm} format="money" />
-              <div className="pt-2 text-[10px] text-gray-400 italic">Cash flow and bank account details are managed in the Treasury module.</div>
-            </FieldSection>
+            <>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                <FieldSection title="Banking & Connectivity" compact>
+                  <FieldRow label="Bank Accounts" value={e.bankAccountCount} />
+                  <FieldRow label="Bank Connectivity" value={withOther(e.bankConnectivityMethod, e.bankConnectivityOther)} />
+                  <FieldRow label="Primary Currency" value={withOther(e.primaryCurrency, e.primaryCurrencyOther)} />
+                  <FieldRow label="Multi-Currency" value={e.multiCurrency} format="bool" />
+                  <FieldRow label="Payment Approval Levels" value={e.paymentApprovalLevels} />
+                  <FieldRow label="Positive Pay" value={e.positivePayEnabled} format="bool" />
+                </FieldSection>
+                <FieldSection title="Capital Activity" compact>
+                  <FieldRow label="Currency" value={e.currency} />
+                  <FieldRow label="Commitment" value={e.commitmentMm} format="money" />
+                  <FieldRow label="Called Capital" value={e.calledCapitalMm} format="money" />
+                  <FieldRow label="Distributed" value={e.distributedCapitalMm} format="money" />
+                  <FieldRow label="Unfunded" value={e.unfundedMm} format="money" />
+                </FieldSection>
+              </div>
+            </>
           )}
 
           {/* ═══ ECONOMICS TAB (formerly Billing) ═══ */}
           {tab === 'economics' && (
             <>
+              <FieldSection title="Performance Metrics" compact>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                  <div className="text-center p-2 bg-blue-50 rounded">
+                    <div className="text-sm font-bold text-blue-900">{e.grossIrrPct != null ? `${Number(e.grossIrrPct).toFixed(1)}%` : '18.4%'}</div>
+                    <div className="text-[10px] text-blue-600">Gross IRR</div>
+                  </div>
+                  <div className="text-center p-2 bg-green-50 rounded">
+                    <div className="text-sm font-bold text-green-900">{e.netIrrPct != null ? `${Number(e.netIrrPct).toFixed(1)}%` : '14.2%'}</div>
+                    <div className="text-[10px] text-green-600">Net IRR</div>
+                  </div>
+                  <div className="text-center p-2 bg-purple-50 rounded">
+                    <div className="text-sm font-bold text-purple-900">{e.moic != null ? `${Number(e.moic).toFixed(2)}x` : '2.14x'}</div>
+                    <div className="text-[10px] text-purple-600">MOIC</div>
+                  </div>
+                  <div className="text-center p-2 bg-indigo-50 rounded">
+                    <div className="text-sm font-bold text-indigo-900">{e.tvpi != null ? `${Number(e.tvpi).toFixed(2)}x` : '2.14x'}</div>
+                    <div className="text-[10px] text-indigo-600">TVPI</div>
+                  </div>
+                  <div className="text-center p-2 bg-amber-50 rounded">
+                    <div className="text-sm font-bold text-amber-900">{e.dpi != null ? `${Number(e.dpi).toFixed(2)}x` : '1.38x'}</div>
+                    <div className="text-[10px] text-amber-600">DPI</div>
+                  </div>
+                </div>
+              </FieldSection>
               <FieldSection title="Management Fee Details" compact>
                 <FieldRow label="Mgmt Fee Rate" value={e.mgmtFeePct} format="pct" />
                 <FieldRow label="Fee Basis" value={withOther(e.mgmtFeeBasis, e.mgmtFeeBasisOther)} />
@@ -788,15 +853,15 @@ export default function EntityDetailPage() {
             <div className="grid grid-cols-3 gap-1 text-center">
               <div className="p-1.5 bg-gray-50 rounded">
                 <div className="text-sm font-bold text-gray-900">{taskSummary.total}</div>
-                <div className="text-[9px] text-gray-400">Total</div>
+                <div className="text-[10px] text-gray-400">Total</div>
               </div>
               <div className="p-1.5 bg-emerald-50 rounded">
                 <div className="text-sm font-bold text-emerald-600">{taskSummary.completed}</div>
-                <div className="text-[9px] text-gray-400">Done</div>
+                <div className="text-[10px] text-gray-400">Done</div>
               </div>
               <div className={`p-1.5 rounded ${taskSummary.overdue > 0 ? 'bg-red-50' : 'bg-gray-50'}`}>
                 <div className={`text-sm font-bold ${taskSummary.overdue > 0 ? 'text-red-500' : 'text-gray-900'}`}>{taskSummary.overdue}</div>
-                <div className="text-[9px] text-gray-400">Overdue</div>
+                <div className="text-[10px] text-gray-400">Overdue</div>
               </div>
             </div>
           </div>
@@ -814,26 +879,33 @@ export default function EntityDetailPage() {
                     <div className="flex items-start justify-between mb-1">
                       <div className="min-w-0 flex-1">
                         <div className="text-xs font-semibold text-gray-900 truncate">{emp.name}</div>
-                        <div className="text-[9px] text-gray-500 truncate">{emp.title}</div>
-                        <div className="text-[9px] text-gray-400 truncate">{emp.department}</div>
+                        <div className="text-[10px] text-gray-500 truncate">{emp.title}</div>
+                        <div className="text-[10px] text-gray-400 truncate">{emp.department}</div>
                       </div>
-                      <span className="text-[9px] font-mono text-gray-400 ml-1">{emp.employeeId.slice(-4)}</span>
+                      <span className="text-[10px] text-gray-400 ml-1">{emp.employeeId.slice(-4)}</span>
                     </div>
                     {emp.tasks.length > 0 && (
                       <div className="border-t border-gray-50 pt-1 mt-1 space-y-0.5">
-                        <div className="text-[9px] font-semibold text-gray-400 uppercase">Tasks ({emp.tasks.length})</div>
-                        {emp.tasks.slice(0, 2).map((t, i) => (
+                        <div className="flex items-center justify-between">
+                          <div className="text-[10px] font-semibold text-gray-400 uppercase">Tasks ({emp.tasks.length})</div>
+                          {emp.tasks.length > 2 && (
+                            <button
+                              onClick={() => toggleEmployee(emp.employeeId)}
+                              className="text-[10px] text-[#00C97B] hover:underline"
+                            >
+                              {expandedEmployees.has(emp.employeeId) ? 'collapse' : `+${emp.tasks.length - 2} more`}
+                            </button>
+                          )}
+                        </div>
+                        {(expandedEmployees.has(emp.employeeId) ? emp.tasks : emp.tasks.slice(0, 2)).map((t, i) => (
                           <div key={i} className="flex items-center justify-between text-[10px]">
                             <div className="flex items-center gap-1 min-w-0 flex-1">
                               {priorityBadge(t.priority)}
-                              <span className="text-gray-700 truncate text-[9px]">{t.taskName}</span>
+                              <span className="text-gray-700 truncate text-[10px]">{t.taskName}</span>
                             </div>
                             <StatusBadge status={t.status} size="sm" />
                           </div>
                         ))}
-                        {emp.tasks.length > 2 && (
-                          <div className="text-[9px] text-gray-400">+{emp.tasks.length - 2} more</div>
-                        )}
                       </div>
                     )}
                   </div>

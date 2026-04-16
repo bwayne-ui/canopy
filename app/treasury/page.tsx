@@ -8,14 +8,14 @@ import StatusBadge from '@/components/StatusBadge';
 import { fmtMoney, fmtDate } from '@/lib/utils';
 
 const accountColumns: Column[] = [
-  { key: 'accountId', label: 'Account ID', render: (v: string) => <span className="font-mono text-sm">{v}</span> },
+  { key: 'accountId', label: 'Account ID', render: (v: string) => <span className="text-sm">{v}</span> },
   { key: 'accountName', label: 'Name', sortable: true, render: (v: string) => <span className="font-medium text-gray-900">{v}</span> },
   { key: 'accountType', label: 'Type', sortable: true },
   { key: 'institution', label: 'Institution', sortable: true },
-  { key: 'currentBalance', label: 'Balance', align: 'right', sortable: true, render: (v: number) => <span className={`font-mono font-medium ${v >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>{fmtMoney(v)}</span> },
-  { key: 'availableBalance', label: 'Available', align: 'right', render: (v: number) => <span className="font-mono">{fmtMoney(v)}</span> },
-  { key: 'pendingInflows', label: 'Inflows', align: 'right', render: (v: number) => v > 0 ? <span className="font-mono text-emerald-600">{fmtMoney(v)}</span> : <span className="text-gray-300">—</span> },
-  { key: 'pendingOutflows', label: 'Outflows', align: 'right', render: (v: number) => v > 0 ? <span className="font-mono text-red-500">{fmtMoney(v)}</span> : <span className="text-gray-300">—</span> },
+  { key: 'currentBalance', label: 'Balance', align: 'right', sortable: true, render: (v: number) => <span className={`font-medium ${v >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>{fmtMoney(v)}</span> },
+  { key: 'availableBalance', label: 'Available', align: 'right', render: (v: number) => <span className="">{fmtMoney(v)}</span> },
+  { key: 'pendingInflows', label: 'Inflows', align: 'right', render: (v: number) => v > 0 ? <span className="text-emerald-600">{fmtMoney(v)}</span> : <span className="text-gray-300">—</span> },
+  { key: 'pendingOutflows', label: 'Outflows', align: 'right', render: (v: number) => v > 0 ? <span className="text-red-600">{fmtMoney(v)}</span> : <span className="text-gray-300">—</span> },
   { key: 'entityName', label: 'Entity', render: (v: string | null) => v || '—' },
   { key: 'status', label: 'Status', render: (v: string) => <StatusBadge status={v} /> },
 ];
@@ -24,7 +24,7 @@ const cashFlowColumns: Column[] = [
   { key: 'transactionDate', label: 'Date', sortable: true, render: (v: string) => <span className="whitespace-nowrap">{fmtDate(v)}</span> },
   { key: 'flowType', label: 'Type', render: (v: string) => <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${v === 'Inflow' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>{v}</span> },
   { key: 'category', label: 'Category', sortable: true },
-  { key: 'amount', label: 'Amount', align: 'right', sortable: true, render: (v: number, row: any) => <span className={`font-mono font-medium ${row.flowType === 'Inflow' ? 'text-emerald-600' : 'text-red-600'}`}>{fmtMoney(Math.abs(v))}</span> },
+  { key: 'amount', label: 'Amount', align: 'right', sortable: true, render: (v: number, row: any) => <span className={`font-medium ${row.flowType === 'Inflow' ? 'text-emerald-600' : 'text-red-600'}`}>{fmtMoney(Math.abs(v))}</span> },
   { key: 'accountName', label: 'Account', sortable: true },
   { key: 'entityName', label: 'Entity', render: (v: string | null) => v || '—' },
   { key: 'counterparty', label: 'Counterparty', render: (v: string | null) => v || '—' },
@@ -63,12 +63,12 @@ export default function TreasuryPage() {
       </div>
 
       <div>
-        <h2 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-2">Treasury Accounts</h2>
+        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Treasury Accounts</h2>
         <DataTable columns={accountColumns} data={accounts} searchPlaceholder="Search accounts..." />
       </div>
 
       <div>
-        <h2 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-2">Recent Cash Flows</h2>
+        <h2 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Recent Cash Flows</h2>
         <DataTable columns={cashFlowColumns} data={cashFlows} searchPlaceholder="Search cash flows..." />
       </div>
     </div>

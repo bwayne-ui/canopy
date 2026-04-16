@@ -1,0 +1,951 @@
+﻿Name,Reports To,Job Title,Number of Direct Reports,Department,Location
+"Jumani, Komal Suresh","Schulte, Matt",Senior QA Engineer,0,Engineering,Texas
+"McLain, Jordan","Howell, Jake",Senior Customer Solutions Specialist,0,GPX - Support,Georgia
+"Rachmel, Nir","Ginsburg, Adam","VP, Product Management",4,Product Management,Tennessee
+"Kawano, Rina","Gleason, Brian","Senior Associate, Fund Administration",0,FA - Onboarding,California - SoCal
+"Elgaouni, Karim","Fou, Amy","Senior Associate, Fund Administration",0,FA - Fund Accounting,New Jersey
+"Goomar, Ish","Romanello, George","Senior Associate, Fund Administration",0,FA - Capital Events,Illinois
+"Minor, Lance","Charny, Jonathan","Account Executive 3, Private Equity",0,Sales - AE,New York
+"Brinck, Jack","Duvvuri, Virinchi","Director, Solutions Engineering",5,Sales - SE,California - SoCal
+"Buckner, Logan","Farber, Jay","Director, Customer Success",5,GPX - CSM,Texas
+"Calles, Justin","Azares, Jason",Sr Staff Product Designer,0,Product Management,California - NorCal
+"Pearce, Tyler","Gupta, Shilpi",Senior Software Engineer,0,Engineering,Washington
+"Perriello, Alana","Duvvuri, Virinchi","Senior Director, Real Asset Sales",12,Sales - AE,California - NorCal
+"Peters, Alanna","Farber, Jay","Senior Director, Product Onboarding",4,GPX - Product Onboarding,Texas
+"Charny, Jonathan","Duvvuri, Virinchi","VP, Sales",9,Sales - General,California - NorCal
+"Reimers, Vittoria","Robinson, Alex","SVP, People",9,People,California - NorCal
+"de Regt, Kevin","Ginsburg, Adam","Director, Product Management",3,Product Management,Colorado
+"Robinson, Alex", ,Cofounder and CEO,9,Office of the CEO,California - NorCal
+"Rogoz, Izabela","Kowalski, Dorota","Director, Fund Administration",6,FA - Fund Accounting,Illinois
+"Ross, Rachel","Farber, Jay","Senior Manager, Customer Success",7,GPX - CSM,Ohio
+"Sanders, Emily","Karns, Kyle","Account Executive, Venture Capital",0,Sales - AE,Texas
+"Schmidt, Erin","Duvvuri, Virinchi","Director, Sales",11,Sales - AE,Texas
+"Dwyer, Andrew","Perriello, Alana",Account Executive 5,0,Sales - AE,New York
+"Erickson, Haley","Farley, Keith",Senior Product Manager,0,Product Management,California - NorCal
+"Farber, Jay","Robinson, Alex","General Manager, GPX",11,GPX - General,California - NorCal
+"Fisseha, Yonas","Hyder, Adam",Chief Technology Officer,0,Engineering,California - NorCal
+"Sedloff, Brandon","Farber, Jay",Chief Relationship Officer,3,Sales - General,California - SoCal
+"Silianok, Vlad","Schulte, Matt",Senior QA Engineer,0,Engineering,California - NorCal
+"Smith, Tanner","Jenny, Eric","VP, Finance",5,Corporate Operations,California - NorCal
+"Su, Joshua","Owen, Tom",Lead Product Onboarding Manager,0,GPX - Product Onboarding,California - NorCal
+"Garcia, Alejandra","de Regt, Kevin",Lead Product Manager,0,Product Management,California - SoCal
+"Ginsburg, Adam","Rembe, Brandon",Cofounder & Chief Product Officer,6,Product Management,California - NorCal
+"Goble, Andrew","Brinck, Jack",Principal Solutions Engineer,0,Sales - SE,Texas
+"Gallegos, Carla","Sedloff, Brandon",Executive Operations Manager,0,Office of the COO,California - NorCal
+"Tatum, Will","Peters, Alanna","Group Manager, Technical Consulting",9,GPX - Technical Consultant,Texas
+"Ulvert, Victoria","Ross, Rachel","Senior Customer Success Manager, Enterprise",0,GPX - CSM Enterprise,International
+"Berdick, Andrea","Buckner, Logan","Senior Manager, Customer Success",8,GPX - CSM,Washington
+"Wilson, Erskine","Mullaney, Kelly","Lead Technical Writer, Product & AI Solutions",0,Office of the COO,Idaho
+"Hoover, Scott","Brinck, Jack",Senior Solutions Engineer,0,Sales - SE,Texas
+"Horn, Jared","Krump, Brian",Product Manager,0,Product Management,California - NorCal
+"Howard, Chelsea","Folarin, Raphew","Senior Associate, Fund Administration",0,FA - Core IS,California - NorCal
+"Jacobsohn, Lou","Perriello, Alana",Account Executive 5,0,Sales - AE,California - SoCal
+"Koroleva, Anya","Hyder, Adam","Director, PMO & COS",2,Engineering,California - NorCal
+"Kowalski, Dorota","Egbert, Christine","Senior Director, Fund Administration",6,FA - Fund Accounting,Illinois
+"Kuo, Katrina","Krump, Brian",Senior Product Manager,0,Product Management,California - NorCal
+"Lebovitz, Andrew","Peters, Alanna","Sr. Manager, Data Product Services",2,GPX - PO Data Product Services,California - NorCal
+"Lee, David","Bakthavalsalan, Priyanka",Senior Software Engineer,0,Engineering,California - SoCal
+"Lim, Darence","Gupta, Sid",Senior Software Engineer,0,Engineering,New York
+"Lu, Wilson","Jancsar, Cole",Staff Software Engineer,0,Engineering,California - NorCal
+"Martin, Lauren","Buckner, Logan","Senior Manager, Customer Success",8,GPX - CSM,California - NorCal
+"Martin, Tyler","Farber, Jay",Partner Success Director,0,GPX - General,Texas
+"McCann, Garett","Gupta, Sid",Staff Software Engineer,0,Engineering,Texas
+"Rembe, Brandon","Robinson, Alex",Chief Solutions Officer,3,Product Management,Washington
+"Maher, Lauren","Shetler, Andrew","Associate II, Fund Administration",0,FA - Core IS,Colorado
+"Warren, Christopher","Rougier, Matthew","Senior Manager, Fund Administration",1,FA - Fund Accounting,Massachusetts
+"Shanahan, Derek","Sedloff, Brandon",Strategic Partnerships Director,0,Sales - General,California - SoCal
+"Martinez, Michelle","Frank, Meghan",Senior Marketing Campaign Manager,0,Marketing,California - NorCal
+"Karns, Kyle","Duvvuri, Virinchi","Director, Venture Capital Sales",9,Sales - AE,California - NorCal
+"Shirsat, Sathwik","Faraji, Moe","Senior Software Engineer, Data",0,Engineering,California - NorCal
+"Vaagen, Nina","Kreilein, Colleen","Senior Associate, Fund Administration",0,FA - Fund Accounting,Washington
+"Falconer, Darryl","Stein, Drew",Staff IT Systems Administrator,0,Business Operations,Oregon
+"Asenova, Sofiya","Reddy, Niharika","Associate, Fund Administration Intern",0,FA - Fund Accounting,California - NorCal
+"Will, Michael","Mangum, Justin","Associate, Fund Administration",0,FA - Fund Accounting,Indiana
+"Tesoro, Michael","Kowalski, Dorota","Senior Director, Fund Administration",1,FA - Fund Accounting,New York
+"Okal, Danya","Rogoz, Izabela","Assistant Manager, Fund Administration",3,FA - Fund Accounting,Texas
+"White, Tim","Adejobi, Eden","Manager, Fund Administration",6,FA - Core IS,Ohio
+"Yamada, James","Moorhead, Bobby","Senior Associate, Fund Administration",0,FA - Fund Accounting,Pennsylvania
+"Carey, Shannon","Martin, Lauren",Senior Customer Success Manager,0,GPX - CSM,Minnesota
+"St. Lezin, William","Farley, Keith",Senior Product Manager,0,Product Management,California - NorCal
+"Taylor, Shamar","Adigun, Yemi","Senior Associate, Fund Administration",0,FA - Fund Accounting,Connecticut
+"Nguyen, Travis","Rodriguez, Ana","Senior Associate, Fund Administration",0,FA - Fund Accounting,Colorado
+"Murdock, Tyler","Suits, Amanda","Manager, Fund Administration",3,FA - Fund Accounting,Utah
+"Brown, Patricia","Egbert, Christine",Executive Assistant,0,Office of the CEO,New Jersey
+"Tian, Harvey","Kowalski, Dorota","Director, Fund Administration",1,FA - Fund Accounting,Indiana
+"Valles, Anthony","McNamara, Ross","Manager, Fund Administration",2,FA - Fund Accounting,New Jersey
+"Khan, Shazman","Dahl, Ashley",Senior Product Manager,0,Product Management,Washington
+"Brucker, Anders","Dornfried, Bryan","Associate II, Fund Administration",0,FA - Fund Accounting,Massachusetts
+"Goss, Molly","Krump, Brian",Senior Product Manager,0,Product Management,California - NorCal
+"Palmer, Megan","Rothenberg, Dan",Corporate Counsel - Commercial,0,Corporate Operations,Washington
+"Farley, Keith","de Regt, Kevin",Group Product Manager,3,Product Management,California - NorCal
+"Azares, Jason","Ginsburg, Adam","Director, Product Design",8,Product Management,California - NorCal
+"Nalamati, Raja","Jancsar, Cole",Software Engineer 2,0,Engineering,Georgia
+"Goldin, Alex","Li, Qi","Manager, Fund Administration",0,FA - Fund Accounting,New York
+"Rector, Hayden","Kreilein, Colleen","Senior Associate, Fund Administration",0,FA - Fund Accounting,Indiana
+"Rabin, Gabriel","Perriello, Alana",Sales Associate I,0,Sales - SDR,New York
+"Patin, Laura","Montefusco, Francesco","Manager, Fund Administration",0,FA - Fund Accounting,Florida
+"Gialanella, Nicholas","Peters, Alanna","Senior Manager, Project Management",6,GPX - Project Management,New Jersey
+"Dahl, Ashley","Rachmel, Nir",Group Product Manager,2,Product Management,Washington
+"Te, Elena","Schmidt, Erin",Senior Sales Associate,0,Sales - SDR,New York
+"Maher, Denny", ,"Associate II, Fund Administration",0,FA - Core IS,Texas
+"Megaw, Michael","Robinson, Alex","SVP, Enterprise Platforms",1,Office of the COO,New Jersey
+"Kieffer, Austin","Martin, Lauren",Customer Success Manager,0,GPX - CSM,California - SoCal
+"Saviano, Emily","Folarin, Raphew","Associate II, Fund Administration",0,FA - Core IS,Utah
+"Page, David","Siwulec, Julie","Senior Associate, Fund Administration",0,FA - Fund Accounting,North Carolina
+"Taormina, Daniel","Ross, Rachel","Senior Customer Success Manager, Enterprise",0,GPX - CSM,New York
+"Tarvin, Valerie","Ram, Prasana",Assistant Corporate Controller,3,Corporate Operations,Arizona
+"Parikh, Bhavisha","Siwulec, Julie","Senior Manager, Fund Administration",2,FA - Fund Accounting,California - SoCal
+"Yu, Wellern","Romanello, George","Senior Associate, Fund Administration",0,FA - Capital Events,New York
+"La Nguyen, Jasmyne","Pariman, Jennifer","Assistant Manager, Fund Administration",0,FA - Fund Accounting,Arizona
+"Kailay, Jaskaran","Pruyn, Paul","Associate II, Fund Administration",0,FA - Fund Accounting,Indiana
+"Johnson, Marquez","Amaral, Nelson","Senior Associate, Fund Administration",0,FA - Fund Accounting,North Carolina
+"Laguna, Leslie","Berdick, Andrea",Senior Customer Success Manager,0,GPX - CSM,New Jersey
+"Cavigli, Connor","Berdick, Andrea",Senior Customer Success Manager,0,GPX - CSM,Montana
+"Taylor, Donald","Romanello, George","Assistant Manager, Fund Administration",0,FA - Capital Events,California - NorCal
+"Collier, Madisyn","Lui, Jen","Senior Manager, Fund Administration",6,FA - Fundraising,Texas
+"Daschke, Amy","Menon, Felicia",Senior Recruiter,0,People,Texas
+"Rameshkumar, Karthick","George, Sunil","Senior Manager, Engineering",10,Engineering,California - NorCal
+"Yokyingyong, Michelle","Martens, Alexis",Senior Deal Desk Analyst,0,Corporate Operations,California - SoCal
+"Klonecke, Thomas","Gupta, Sid",Staff Software Engineer,0,Engineering,Dist. of Columbia
+"Phifer, Jessica","Buckner, Logan",Renewals Manager,0,GPX - CSM,New York
+"Hanna, Kate","Varley, Lindsay",Senior Finance Manager,0,Corporate Operations,Texas
+"Owen, Tom","King, Matt","Senior Manager, Product Onboarding",5,GPX - Product Onboarding,Texas
+"Whitney, Stephanie","Martens, Alexis",Senior Deal Desk Manager,0,Corporate Operations,Texas
+"Jodar, Maia","Breaugh, Katie",Revenue Ops Business Systems Administrator,0,Sales - Rev Ops,California - NorCal
+"Pinheiro, Chad","Dornfried, Bryan","Manager, Fund Administration",1,FA - Fund Accounting,Massachusetts
+"Brooks, Stefanie","Ram, Prasana","Senior Manager, Billing",3,Corporate Operations,Georgia
+"Lane, Landen","Montefusco, Francesco","Manager, Fund Administration",2,FA - Fund Accounting,Utah
+"Salem, Ben","Tatum, Will",Technical Consultant,0,GPX - Technical Consultant,California - NorCal
+"Neupane, Shrawani","Menon, Felicia",Recruiter II,0,People,California - NorCal
+"Arabi, Yasmeen","Lee, Matthew",Product Onboarding Manager,0,GPX - Product Onboarding,California - NorCal
+"Zirille, Joe","Buckner, Logan",Senior Renewals Manager,0,GPX - CSM,Indiana
+"Burgin, Casey","Long, Shauna","Senior Associate, Fund Administration",1,FA - Fund Accounting,Utah
+"Wilkinson, Rey","Wong, Eric","Assistant Manager, Fund Administration",1,FA - Fund Accounting,Kansas
+"Yoro, Andrew","Dierken, Brianna","Manager, Fund Administration",3,FA - Capital Events,Texas
+"Han, Eren","Smith, Brandon",Revenue Data Analyst II,0,Sales - Rev Ops,California - NorCal
+"Mangum, Justin","Lubanski, MaryAnn","Assistant Manager, Fund Administration",1,FA - Fund Accounting,Oregon
+"Santillan, Jeremy","Pariman, Jennifer","Senior Associate, Fund Administration",0,FA - Fund Accounting,Arizona
+"Ruwona, Joyce","Long, Shauna","Assistant Manager, Fund Administration",0,FA - Fund Accounting,Texas
+"Loftin, Chaa","Rameshkumar, Karthick",Senior Software Engineer,0,Engineering,Florida
+"Ho, Chon Hou","Gupta, Sid",Senior Software Engineer,0,Engineering,California - SoCal
+"Nowell, Zach","Tatum, Will",Technical Consultant,0,GPX - Technical Consultant,Texas
+"Jackson, Jonathan","Long, Shauna","Associate, Fund Administration",0,FA - Fund Accounting,South Carolina
+"Hamouda, Mandi","Quattrociocchi, Paul","Associate II, Fund Administration",0,FA - Core IS,North Carolina
+"Massari, Sara","Lofaro, Noelle","Senior Manager, Fund Administration",2,FA - Onboarding,New Jersey
+"Lowry, David","Bakthavalsalan, Priyanka",Software Engineer 2,0,Engineering,Washington
+"Wieland, Jeff","Rameshkumar, Karthick",Staff Site Reliability Engineer,0,Engineering,North Carolina
+"Ali, Amira","Gialanella, Nicholas",Senior Project Manager,0,GPX - Project Management,Arizona
+"Manalang, Marco","Owen, Tom",Senior Product Onboarding Manager,0,GPX - Product Onboarding,Texas
+"Graef, Nick","Bakthavalsalan, Priyanka",Senior Software Engineer,0,Engineering,Maine
+"Fou, Amy","Rogoz, Izabela","Director, Fund Administration",4,FA - Fund Accounting,California - SoCal
+"George, Sunil","Hyder, Adam","Senior Director, Engineering",4,Engineering,California - NorCal
+"Sherrer, Haley","Ross, Rachel","Senior Customer Success Manager, Enterprise",0,GPX - CSM,Washington
+"Molstad, Joey","Suits, Amanda","Assistant Manager, Fund Administration",1,FA - Fund Accounting,Indiana
+"Larson, Anna","Reimers, Vittoria",People Operations Specialist,0,People,Oregon
+"Dunn, Conner","Rameshkumar, Karthick",Senior Software Engineer,0,Engineering,Washington
+"Payne, Dylan","Perriello, Alana","Account Executive 3, Commercial",0,Sales - AE,California - SoCal
+"Bakthavalsalan, Priyanka","Bandyopadhyay, Anupam","Senior Manager, Engineering",14,Engineering,California - NorCal
+"Lo, Darren","Yoro, Andrew","Senior Associate, Fund Administration",0,FA - Capital Events,Ohio
+"Armada, Chase","Cardoso, Thalita","Senior Associate, Fund Administration",0,FA - Core IS,California - NorCal
+"Zhao, Seline","Howell, Jake",Lead Customer Solutions Specialist,0,GPX - Support,California - NorCal
+"Licu, Rebecca","Hyder, Adam",Executive Assistant,0,Office of the CEO,California - NorCal
+"Shahid, Faisal","Reed, Stephen",Product Onboarding Manager,0,GPX - Product Onboarding,California - NorCal
+"Jones, Alysa","Martin, Lauren",Senior Customer Success Manager,0,GPX - CSM,Utah
+"Weigand, Matt","Perriello, Alana","Account Executive 3, Commercial",0,Sales - AE,Texas
+"Gupta, Shilpi","Bandyopadhyay, Anupam","Senior Manager, Engineering",10,Engineering,Washington
+"Patterson, Natascha","Karas, Katherine","Senior Associate, Fund Administration",0,FA - Fund Accounting,New York
+"Reed, Stephen","King, Matt","Manager, Product Onboarding",5,GPX - Product Onboarding,Texas
+"Arredondo, Antonio","Stein, Drew",IT System Administrator,0,Business Operations,California - NorCal
+"O'Rear, David","Ross, Rachel",Senior Customer Success Manager,0,GPX - CSM,Washington
+"Waldman, Ashley","Howell, Jake","Manager, Customer Support",11,GPX - Support,California - NorCal
+"Reeder, Lauren","Montefusco, Francesco","Assistant Manager, Fund Administration",1,FA - Fund Accounting,Colorado
+"Adams, Nate","Bakthavalsalan, Priyanka",Senior Software Engineer,0,Engineering,Utah
+"Schulte, Matt","Ahmed, Manzoor","Manager, QA",8,Engineering,California - NorCal
+"Pathak, Siddharth","Gotosa, Cynthia","Assistant Manager, Fund Administration",0,FA - Fund Accounting,New Jersey
+"Saravanan, Sangeetha","Schulte, Matt",Senior QA Lead,0,Engineering,California - NorCal
+"Henderson, Bryce","Schmidt, Erin","Manager, Sales Development",3,Sales - SDR,Texas
+"Narcisse, Kyland","Adejobi, Eden","Associate II, Fund Administration",0,FA - Core IS,New York
+"Rahman, Sammy","Perriello, Alana","Account Executive 3, Commercial",0,Sales - AE,Texas
+"Abdirahman, Mohamed","Collier, Madisyn","Senior Associate, Fund Administration",0,FA - Fundraising,Texas
+"Jones, Garrett","Lane, Landen","Senior Associate, Fund Administration",0,FA - Fund Accounting,Idaho
+"Degapudi, Pratyusha Reddy","Bakthavalsalan, Priyanka",Senior Software Engineer,0,Engineering,Washington
+"Martens, Alexis","Jenny, Eric","Director, Deal Desk and Order Management",4,Corporate Operations,Texas
+"Polidore, Luke","Ross, Rachel",Senior Customer Success Manager,0,GPX - CSM,New Jersey
+"Panizales, Jamie","Karns, Kyle","Account Executive 3, Venture Capital",0,Sales - AE,California - SoCal
+"Bowman, Mandi","Ram, Prasana",Lead Business Systems Manager,0,Corporate Operations,Maryland
+"Russell, Robin","Mullaney, Kelly","Director, Customer Education",3,Office of the COO,Washington
+"Bunn, Chris","Tatum, Will",Technical Consultant,0,GPX - Technical Consultant,Washington
+"Mullaney, Kelly","Rembe, Brandon","Vice President, Customer Education",3,Office of the COO,Washington
+"Gameiro, Susan","Egbert, Christine","Senior Director, Fund Administration",4,FA - Fund Accounting,Florida
+"Ahmed, Kedir","Mustafa, Lamya","Associate II, Fund Administration",0,FA - Fund Accounting,California - NorCal
+"Hyder, Adam","Robinson, Alex","Chief Development Officer, EVP Engineering",7,Engineering,California - NorCal
+"Lin, Winston","Breaugh, Katie",Program Manager,0,Sales - Rev Ops,Texas
+"Kornfeld, Mindy","Faraji, Moe",Senior Software Engineer,0,Engineering,New Jersey
+"Colanto, Greg","Charny, Jonathan",Account Executive,0,Sales - AE,Illinois
+"Mendaros, Audie","Bakthavalsalan, Priyanka",Software Engineer 2,0,Engineering,California - SoCal
+"Davis, Jazmin","Waldman, Ashley",Senior Customer Solutions Specialist,0,GPX - Support,Virginia
+"Lopez-Roman, Samantha","White, Tim","Associate II, Fund Administration",0,FA - Core IS,Texas
+"Harner, Mark","Lebovitz, Andrew",Senior Data Product Services Manager,0,GPX - PO Data Product Services,Illinois
+"Polachini, Dani","Reimers, Vittoria",Senior People Operations Manager,0,People,California - NorCal
+"O'Brien, Lucas","Martin, Lauren",Senior Customer Success Manager,0,GPX - CSM,California - NorCal
+"Madden, Kasey","Tatum, Will",Senior Technical Consultant,0,GPX - Technical Consultant,Texas
+"Farris, Dee","Schulte, Matt",Senior QA Lead,0,Engineering,Florida
+"Ramchandani, Basanti","Ram, Prasana",Billing and Collections Specialist,0,Corporate Operations,Georgia
+"Griffen, Charlie","Lee, Matthew",Senior Product Onboarding Manager,0,GPX - Product Onboarding,California - NorCal
+"Landis, Alysha","Tatum, Will","Manager, Technical Consulting",1,GPX - Technical Consultant,Texas
+"Lipinski, Robin","Menon, Felicia",Lead Recruiter,0,People,Texas
+"Lofaro, Noelle","Gameiro, Susan","Director, Fund Administration",6,FA - Strategy & Ops,New York
+"Gould, Nate","Karns, Kyle","Account Executive 3, Venture Capital",0,Sales - AE,Tennessee
+"Mugomba, Wallace","Long, Shauna","Assistant Manager, Fund Administration",1,FA - Fund Accounting,Texas
+"Morrison, Jacob","Reed, Stephen",Senior Product Onboarding Manager,0,GPX - Product Onboarding,California - NorCal
+"Cornell, Taylor","Romanello, George","Assistant Manager, Fund Administration",0,FA - Capital Events,Ohio
+"Gupta, Sid","Bandyopadhyay, Anupam","Director, Engineering",11,Engineering,California - NorCal
+"Millham, Makenna","Martin, Lauren",Customer Success Manager,0,GPX - CSM,California - NorCal
+"Parson, Matthew","Pariman, Jennifer","Associate, Fund Administration",0,FA - Fund Accounting,Indiana
+"Akinbobola, Victor","Yoro, Andrew","Assistant Manager, Fund Administration",0,FA - Capital Events,Texas
+"Goldin, Shahar","Madziarczyk, Jon",Senior Site Reliability Engineer,0,Engineering,Washington
+"Falcone, Aspen","Waldman, Ashley",Customer Support Specialist,0,GPX - Support,Colorado
+"Reisig, Preston","Varley, Lindsay",Finance Manager,0,Corporate Operations,California - SoCal
+"Beal, Alayna","Martens, Alexis",Senior Order Operations Analyst,0,Corporate Operations,Texas
+"Brown, Canon","Wayne, Billy","Assistant Manager, Fund Administration",0,FA - Strategy & Ops,Colorado
+"Romanello, George","Dierken, Brianna","Manager, Fund Administration",4,FA - Capital Events,New York
+"Rickmers, Dylan","Krueger, David","Manager, Systems & Solutions",3,Business Operations,Washington
+"Humberston, Nathan","Howell, Jake",Senior Customer Solutions Specialist,0,GPX - Support,California - SoCal
+"Velgara, Anita","Tarvin, Valerie",Staff Accountant,0,Corporate Operations,Florida
+"Suits, Amanda","Atwood, Adam","Senior Manager, Fund Administration",7,FA - Fund Accounting,Georgia
+"Wessel, Jessica","Gialanella, Nicholas",Senior Project Manager,0,GPX - Project Management,Pennsylvania
+"Yang, Claudia","Ram, Prasana","Director, Revenue Accounting",0,Corporate Operations,Texas
+"Styer, Patrick","Faraji, Moe","Senior Software Engineer, Data",0,Engineering,Washington
+"Condren, Sean","Rogoz, Izabela","Senior Manager, Fund Administration",1,FA - Fund Accounting,Texas
+"Holzel, Edward","Nelson, Eric","Senior Associate, Fund Administration",0,FA - Fund Accounting,Delaware
+"Toler, Leah","Gialanella, Nicholas",Senior Project Manager,0,GPX - Project Management,New York
+"Urban, Brody","Reibold, Bradley","Senior Associate, Fund Administration",0,FA - Fund Accounting,Utah
+"Lubanski, MaryAnn","Lofaro, Noelle","Manager, Fund Administration",1,FA - Fund Accounting,New Jersey
+"Dee, Sara","Duvvuri, Virinchi",Senior Sales Enablement Manager,0,Sales - General,New York
+"Bosico, Luke","Alman, Kyle","Associate II, Fund Administration",0,FA - Fund Accounting,Pennsylvania
+"Dimit, Brandon","Varley, Lindsay",Lead Finance Manager,0,Corporate Operations,California - SoCal
+"Johnson, Daniel","Murdock, Tyler","Senior Associate, Fund Administration",0,FA - Fund Accounting,Georgia
+"Horton, Douglas","Kowalski, Dorota","Senior Director, Fund Administration",0,FA - Fund Accounting,Florida
+"Cruz, Jessica","Pruyn, Paul","Assistant Manager, Fund Administration",0,FA - Fund Accounting,Pennsylvania
+"Olsen, Chloe","Waldman, Ashley",Customer Support Specialist,0,GPX - Support,Texas
+"Shenoy, Pranab","Gupta, Sid","Staff Software Engineer, AI",0,Engineering,New Mexico
+"Marshall, Patrick","Tatum, Will",Technical Consultant,0,GPX - Technical Consultant,California - NorCal
+"Tyburski, Kelley","Perriello, Alana","Account Executive, Growth",0,Sales - AE,California - SoCal
+"Bamert, Gina","Breaugh, Katie",Senior Revenue Operations Manager,0,Sales - Rev Ops,Washington
+"Chapman, Angelica Kristine","Rogoz, Izabela","Senior Associate, Fund Administration",0,FA - Fund Accounting,Illinois
+"Hall, Parker","Charny, Jonathan",Account Executive,0,Sales - AE,New York
+"Pohl, Josh","Henderson, Bryce",Senior Sales Associate,0,Sales - SDR,Florida
+"Sharlow, Haley","Collier, Madisyn","Associate II, Fund Administration",0,FA - Fundraising,Connecticut
+"Duerden, Brynn","Reimers, Vittoria",People Operations Manager,0,People,California - SoCal
+"Siwulec, Julie","Gameiro, Susan","Director, Fund Administration",6,FA - Fund Accounting,New York
+"Sproulls, Analicia","Karas, Katherine","Associate II, Fund Administration",0,FA - Fund Accounting,Texas
+"Mah, Shen Ming","Stein, Drew",Staff IT Systems Administrator,0,Business Operations,California - NorCal
+"Grewal, Simarpreet","Smith, Tanner","Senior Director, Procurement and Strategic So",0,Corporate Operations,California - NorCal
+"Kepner, Madison","Gialanella, Nicholas",Project Manager,0,GPX - Project Management,Illinois
+"Gleason, Brian","Massari, Sara","Manager, Fund Administration",2,FA - Onboarding,Washington
+"Smith, Brandon","Breaugh, Katie","Senior Manager, Revenue Analytics",1,Sales - Rev Ops,Illinois
+"Baker, Ryan","Murdock, Tyler","Assistant Manager, Fund Administration",2,FA - Fund Accounting,Utah
+"Ghobashy, Ramy","White, Tim","Associate, Fund Administration",0,FA - Core IS,California - NorCal
+"Gonzalez, Jose","Varela Torres, Orestes",Staff Software Engineer,0,Engineering,Florida
+"Long, Shauna","Tesoro, Michael","Senior Manager, Fund Administration",4,FA - Fund Accounting,Texas
+"Frank, Meghan","Farber, Jay","Senior Director, Growth Marketing",5,Marketing,North Carolina
+"Lavery, Sam","Azares, Jason",Staff Product Designer,0,Product Management,New Jersey
+"Gonzalez, Nicolas","Breaugh, Katie","Manager, Revenue Operations",0,Sales - Rev Ops,California - NorCal
+"Cannon, Kevin","Charny, Jonathan",Account Executive,0,Sales - AE,Massachusetts
+"Wolf, Jenna","Schmidt, Erin",Sales Associate II,0,Sales - SDR,California - NorCal
+"Leiva, Ernesto","Varela Torres, Orestes",Software Engineer 1,0,Engineering,Florida
+"Sethi, Ishvin","Reed, Stephen",Senior Product Onboarding Manager,0,GPX - Product Onboarding,California - NorCal
+"Montefusco, Francesco","Kowalski, Dorota","Director, Fund Administration",11,FA - Fund Accounting,Massachusetts
+"Bandyopadhyay, Anupam","Hyder, Adam","VP, Engineering",7,Engineering,Florida
+"Saw, Kaini","Collier, Madisyn","Associate, Fund Administration",0,FA - Fundraising,California - NorCal
+"Brown, Andrew","Menon, Felicia",Recruiter II,0,People,New York
+"Leichter, Helene","Rothenberg, Dan",Senior Contracts Manager,0,Corporate Operations,California - NorCal
+"Cotton, Wardy","Pruyn, Paul","Senior Associate, Fund Administration",0,FA - Fund Accounting,Texas
+"Scandale, Frank","Schmidt, Erin",Sales Associate II,0,Sales - SDR,New York
+"Cress, Brianna","Adejobi, Eden","Senior Associate, Fund Administration",0,FA - Core IS,Missouri
+"Whalen, Lexa","Reddy, Niharika","Assistant Manager, Fund Administration",1,FA - Fund Accounting,Indiana
+"Ferreira, Caua","Suits, Amanda","Manager, Fund Administration",0,FA - Fund Accounting,Illinois
+"Kulick, Melanie","Farber, Jay",Senior Enterprise Product Marketing Manager,0,Marketing,New Hampshire
+"Huelgas, Timothy","Pruyn, Paul","Assistant Manager, Fund Administration",0,FA - Fund Accounting,Arizona
+"Nieves, Nicholas","Rougier, Matthew","Manager, Fund Administration",1,FA - Fund Accounting,California - SoCal
+"Cardoso, Thalita","Lui, Jen","Manager, Fund Administration",2,FA - Core IS,Florida
+"Yen, Chelsea", ,"Associate II, Fund Administration",0,FA - Core IS,Florida
+"Tierney, Lauren","Rippon, Kevin",Senior Visual Design Manager,0,Marketing,Oregon
+"Jean-Phillippe, Valery","Gandhi, Chirag","Senior Associate, Fund Administration",0,FA - Fund Accounting,Georgia
+"Duvvuri, Virinchi","Farber, Jay","SVP, Sales & Revenue Operations",9,Sales - Rev Ops,California - SoCal
+"Casaletta, Raymond","Henderson, Bryce",Senior Sales Associate,0,Sales - SDR,New Jersey
+"Luu, Dennis","Schmidt, Erin",Sales Associate II,0,Sales - SDR,California - NorCal
+"Hill, Brogan","Charny, Jonathan","Account Executive, Private Equity",0,Sales - AE,Florida
+"Pena Sanchez, Genesis","Rougier, Matthew","Manager, Fund Administration",0,FA - Fund Accounting,Massachusetts
+"Valencia, John","Martin, Lauren",Customer Success Manager,0,GPX - CSM,California - NorCal
+"Oslund, Christian","Warren, Christopher","Manager, Fund Administration",0,FA - Fund Accounting,Massachusetts
+"Ennis, John","Faraji, Moe",Senior Software Engineer,0,Engineering,Alabama
+"Cuffe, Nick","Siwulec, Julie","Director, Fund Administration",0,FA - Fund Accounting,Virginia
+"Marin, Christopher","Rougier, Matthew","Senior Manager, Fund Administration",0,FA - Fund Accounting,New Jersey
+"Gandhi, Trisha","Howell, Jake",Customer Support AI Solutions Intern,0,GPX - Support,North Carolina
+"Yahya, Jenna","Suits, Amanda","Associate, Fund Administration Intern",0,FA - Fund Accounting,Illinois
+"Baldwin, Alex","Wilson, Brian","Associate II, Fund Administration",0,FA - Fund Accounting,Pennsylvania
+"Chadha, Veerpal","Farley, Keith",Senior Product Manager,0,Product Management,California - NorCal
+"Simpson, Alice","Landis, Alysha",Technical Consultant,0,GPX - Technical Consultant,North Carolina
+"Cecil, Amber","McNamara, Ross","Senior Associate, Fund Administration",0,FA - Fund Accounting,Florida
+"Rothenberg, Dan","Jenny, Eric",Head of Legal,3,Corporate Operations,California - SoCal
+"Wuang, Keidy","Rameshkumar, Karthick",Software Engineer 2,0,Engineering,Texas
+"Solis, Chris","Jancsar, Cole",Senior Software Engineer,0,Engineering,Texas
+"Clark, Robert","Montefusco, Francesco","Manager, Fund Administration",0,FA - Fund Accounting,Massachusetts
+"Ball, Sarah","Robinson, Alex",Executive Assistant to the CEO,0,Office of the CEO,California - NorCal
+"Khong, Kim","Waldman, Ashley",Customer Support Specialist,0,GPX - Support,Nevada
+"Adigun, Yemi","Siwulec, Julie","Senior Manager, Fund Administration",1,FA - Fund Accounting,New Jersey
+"Tang, Jane","Reimers, Vittoria",Executive Assistant,0,Office of the CEO,California - NorCal
+"Hong, Easak","Bakthavalsalan, Priyanka",Senior Software Engineer,0,Engineering,California - NorCal
+"Ajemian, Sara","Farber, Jay","Senior Director, Corporate Marketing",0,Marketing,New York
+"Whittington, Amariah","Whalen, Lexa","Associate II, Fund Administration",0,FA - Fund Accounting,Utah
+"Abbott, Bradley","Pirangi, Ruth","Manager, Fund Administration",0,FA - Fund Accounting,Indiana
+"Nelson, Jared","Pinheiro, Chad","Senior Associate, Fund Administration",0,FA - Fund Accounting,Indiana
+"Varley, Lindsay","Smith, Tanner","Senior Director, FP&A",3,Corporate Operations,Connecticut
+"Aguiar, Mark","Karns, Kyle","Account Executive, Growth",0,Sales - AE,California - SoCal
+"Pinkston, Tara","Berdick, Andrea","Sr. CSM, Team Lead",0,GPX - CSM,California - NorCal
+"Savage, Rob","Ziman, Diane","Assistant Manager, Fund Administration",0,FA - Fund Accounting,Florida
+"Nemzer, Brad","Egbert, Christine","Senior Director, Operations Strategy",0,FA - Relationship Management,Colorado
+"Glaser, Travis","Lee, Matthew",Product Onboarding Manager,0,GPX - Product Onboarding,Pennsylvania
+"Valliappan, Meyappan","Bakthavalsalan, Priyanka",Software Engineer 1,0,Engineering,New York
+"Kyriakides, Stelios","Condren, Sean","Senior Associate, Fund Administration",0,FA - Fund Accounting,California - NorCal
+"Nazario, Rachel","Howard, Gregg","Senior Director, Fund Administration",2,FA - Fund Accounting,New Jersey
+"Arend, Nicole","Frank, Meghan",Marketing Campaign Manager,0,Marketing,California - SoCal
+"Li, Qi","Mastriano, Peter","Director, Fund Administration",8,FA - Fund Accounting,New York
+"Llosas, Nathalie","Lee, Matthew",Senior Product Onboarding Manager,0,GPX - Product Onboarding,New York
+"Matthews, Garrett","Charny, Jonathan","Account Executive, Private Equity",0,Sales - AE,New York
+"Ukah, Didi","Breaugh, Katie",Senior Marketing Operations Manager,0,Marketing,New Jersey
+"Jones, Heather","Frank, Meghan",Digital Marketing Manager,0,Marketing,Arkansas
+"Correa Cherone, Juan","Bandyopadhyay, Anupam","Manager, Engineering",3,Engineering,Florida
+"Morgan, Jeremy","Perriello, Alana","Account Executive 3, Commercial",0,Sales - AE,Texas
+"Chung, Timothy","Dahl, Ashley",Senior Product Manager,0,Product Management,Illinois
+"Breaugh, Katie","Duvvuri, Virinchi","Manager, Business Systems",6,Sales - Rev Ops,Colorado
+"Gleason, Jeremy","Russell, Robin",Senior Instructional Designer,0,Office of the COO,North Carolina
+"Dolan, Dani","Jancsar, Cole",Software Engineer 2,0,Engineering,Texas
+"Alman, Kyle","Nazario, Rachel","Director, Fund Administration",2,FA - Fund Accounting,Massachusetts
+"Northcott, Bryce","Folarin, Raphew","Associate II, Fund Administration",0,FA - Core IS,Florida
+"Ziman, Diane","Siwulec, Julie","Manager, Fund Administration",2,FA - Fund Accounting,New York
+"Ram, Prasana","Jenny, Eric",Chief Accounting Officer,7,Corporate Operations,California - NorCal
+"Smith, Stetson","Lane, Landen","Senior Associate, Fund Administration",0,FA - Fund Accounting,Utah
+"Wright-Smith, Shawna","Rippon, Kevin",Content Strategy Director,0,Marketing,Oregon
+"Day, Isaac","Alexander, Blake","Associate, Fund Administration Intern",0,FA - Fund Accounting,Indiana
+"Park, Nancy","Wayne, Billy","Director, Fund Administration",1,FA - Fund Accounting,New Jersey
+"Khinvasara, Arnav","Gupta, Sid",AI Engineer Intern,0,Engineering,California - NorCal
+"Bischke, Ryan","Taylor, Levi","Associate, Fund Administration",0,FA - Fund Accounting,Indiana
+"Pearce, Spencer","Solano, Tony","Senior Associate, Fund Administration",0,FA - Fund Accounting,North Carolina
+"Einck, Amanda","Parikh, Bhavisha","Assistant Manager, Fund Administration",0,FA - Fund Accounting,Georgia
+"Bradford, Nina","Montefusco, Francesco","Senior Associate, Fund Administration",0,FA - Fund Accounting,Georgia
+"Kocher, Christian","Okal, Danya","Associate, Fund Administration",0,FA - Fund Accounting,Indiana
+"Spellman, Deirdre","Amaral, Nelson","Associate, Fund Administration Intern",0,FA - Strategy & Ops,Washington
+"Sokmen, Simay","Waldman, Ashley",Customer Support Specialist,0,GPX - Support,New York
+"Lantrip, Preston","Pruyn, Paul","Associate II, Fund Administration",0,FA - Fund Accounting,Texas
+"Ziegler, Christine","Jenny, Eric",Administrative Business Partner,0,Corporate Operations,Texas
+"O'Brien, Tyler","Murdock, Tyler","Assistant Manager, Fund Administration",0,FA - Fund Accounting,Utah
+"Singh, Gary","Sehtya, Chetan",Staff QA Automation Engineer,0,Engineering,Pennsylvania
+"Stevenson, Adam","Mastriano, Peter","Director, Fund Administration",0,FA - Fund Accounting,Massachusetts
+"South, Erin","Reimers, Vittoria",Principal Business Partner,0,People,Pennsylvania
+"McDearmon, Shawn","Schulte, Matt",QA Automation Engineer 2,0,Engineering,Wisconsin
+"Goley, Alyssa","Gandhi, Chirag","Senior Associate, Fund Administration",0,FA - Fund Accounting,Florida
+"Lee, Matthew","King, Matt","Manager, Product Onboarding",5,GPX - Product Onboarding,California - NorCal
+"Huang, Jon","Gupta, Shilpi",Senior Software Engineer,0,Engineering,California - SoCal
+"Subbu, Kartik","Hammond, Craig","Senior Manager, GRC",0,IT,North Carolina
+"Niles, Paige","Berdick, Andrea",Customer Success Manager,0,GPX - CSM,California - SoCal
+"Abruzzo, Joseph","Wayne, Billy","Assistant Manager, Fund Administration",0,FA - Fund Accounting,New York
+"Ulsh, Aaron","King, Matt",Senior Product Onboarding Manager,0,GPX - Product Onboarding,Pennsylvania
+"Devan, Vishruth","Gupta, Shilpi",Software Engineer 1,0,Engineering,New York
+"Patel, Niraj","McCarthy, Damien","Senior Associate, Fund Administration",0,FA - Fund Accounting,New Jersey
+"Moorhead, Bobby","Li, Qi","Senior Manager, Fund Administration",2,FA - Fund Accounting,New York
+"Storms, Chris","Charny, Jonathan","Account Executive, Private Equity",0,Sales - AE,Texas
+"Berreth, James","Madziarczyk, Jon",Senior Site Reliability Engineer,0,Engineering,Idaho
+"King, Matt","Peters, Alanna","Director, Product Operations",5,GPX - Product Onboarding,Washington
+"Rideout, Bianca","Azares, Jason",Senior Product Designer,0,Product Management,Oregon
+"Warner, Erinn","Martin, Lauren","Customer Success Manager, Growth",0,GPX - CSM,Oregon
+"Mirabal, Jesus","Ginsburg, Adam","VP, Credit Products",0,Product Management,Florida
+"Solano, Tony","Park, Nancy","Manager, Fund Administration",2,FA - Fund Accounting,Massachusetts
+"Wood, Antony","Gialanella, Nicholas",Senior Project Manager,0,GPX - Project Management,North Carolina
+"Montilva Zambrano, Jose","Nelson, Eric","Senior Associate, Fund Administration",0,FA - Fund Accounting,Florida
+"Erekson, Jessica","Gleason, Brian","Senior Associate, Fund Administration",0,FA - Onboarding,Texas
+"Bass, Amber","Duvvuri, Virinchi",Executive Assistant,0,Office of the CEO,California - SoCal
+"McNamara, Ross","Nazario, Rachel","Senior Manager, Fund Administration",2,FA - Fund Accounting,Massachusetts
+"Bryan, Jason","Isaacson, Rachel","Assistant Manager, Fund Administration",0,FA - Onboarding,Georgia
+"Derian, JT","de Regt, Kevin",Senior Product Manager,0,Product Management,California - NorCal
+"Dierken, Brianna","Demers, Joshua","Director, Fund Administration",2,FA - Core IS,Arizona
+"Lobisser, John","Charny, Jonathan","Account Executive, Private Equity",0,Sales - AE,Massachusetts
+"Jensen, Matthew","Quintana, Lauren","Senior Associate, Fund Administration",0,FA - Fund Accounting,Colorado
+"Scalia, Pedro","Suits, Amanda","Associate, Fund Administration Intern",0,FA - Fund Accounting,Illinois
+"Jimoh, Abdel-Basit","Howell, Jake",Customer Support AI Solutions Intern,0,GPX - Support,Indiana
+"Garcia, Mario","Correa Cherone, Juan",Staff Software Engineer,0,Engineering,Florida
+"Krueger, David","Rembe, Brandon","Vice President, Operations",2,Business Operations,Washington
+"Resendiz, Julio","Reed, Stephen",Lead Product Onboarding Manager,0,GPX - Product Onboarding,Texas
+"Reddy, Niharika","Rougier, Matthew","Manager, Fund Administration",7,FA - Fund Accounting,California - NorCal
+"Hegna, Lauren","Westphal, Danielle",Field Marketing Associate,0,Marketing,Nevada
+"Steiner, Andrew","Fou, Amy","Assistant Manager, Fund Administration",0,FA - Fund Accounting,Ohio
+"Thayer, Bryan","Molstad, Joey","Associate II, Fund Administration",0,FA - Fund Accounting,Virginia
+"Taylor, Levi","Suits, Amanda","Associate II, Fund Administration",1,FA - Fund Accounting,Michigan
+"Ngo, Michael","Rickmers, Dylan",Systems & Solutions Administrator,0,Business Operations,Maryland
+"May, Jarrod","Perriello, Alana","Account Executive, Growth",0,Sales - AE,Texas
+"Stein, Drew","Hammond, Craig","Senior Manager, IT",6,IT,Arizona
+"Haber, Benjamin","Waldman, Ashley",Customer Support Specialist,0,GPX - Support,Dist. of Columbia
+"Starodubtseva, Katya","Reddy, Niharika","Senior Associate, Fund Administration",0,FA - Fund Accounting,Florida
+"Alexander, Blake","Pruyn, Paul","Senior Associate, Fund Administration",1,FA - Fund Accounting,Indiana
+"Soto, Fabiana","Berdick, Andrea","Customer Success Manager, Growth",0,GPX - CSM,Texas
+"Ali, Jennifer","Perriello, Alana","Account Executive 3, Commercial",0,Sales - AE,New York
+"Ching, Aaron","Jancsar, Cole",Software Engineer 2,0,Engineering,California - NorCal
+"Lipkin, Daniel","Hyder, Adam","VP, Engineering",0,Engineering,California - NorCal
+"Levin, Eli","Rachmel, Nir",Senior Program Manager,0,Product Management,Washington
+"Fung, Sarah","Azares, Jason",Senior Product Designer,0,Product Management,California - NorCal
+"Wong, Eric","Wayne, Billy","Senior Manager, Fund Administration",1,FA - Fund Accounting,New York
+"Carreno-Mendez, Andres","Schmidt, Erin",Sales Associate I,0,Sales - SDR,Texas
+"Husar, Samuel","Valles, Anthony","Assistant Manager, Fund Administration",0,FA - Fund Accounting,Colorado
+"Espinoza, Andrew","Cardoso, Thalita","Associate II, Fund Administration",0,FA - Core IS,New York
+"Radabaugh, Dakotah","Brinck, Jack",Senior Solutions Engineer,0,Sales - SE,Florida
+"Miller, Stephen","Alman, Kyle","Manager, Fund Administration",1,FA - Fund Accounting,Massachusetts
+"Meiners, Keith","Tian, Harvey","Senior Associate, Fund Administration",0,FA - Fund Accounting,Indiana
+"Botha, Bryan","Karns, Kyle","Account Executive, Private Equity",0,Sales - AE,California - NorCal
+"Lee, Jiu","Schmidt, Erin",Sales Associate II,0,Sales - SDR,Massachusetts
+"Idoeta, Tomas","Schmidt, Erin",Sales Associate II,0,Sales - SDR,Idaho
+"Kim, San","Azares, Jason",Senior Product Designer,0,Product Management,California - NorCal
+"Li, Jonathan","Karns, Kyle","Account Executive, PE/VC",0,Sales - AE,California - NorCal
+"Tang, Brenda","Fou, Amy","Assistant Manager, Fund Administration",0,FA - Fund Accounting,California - SoCal
+"Le, Thu","Rippon, Kevin",Senior Visual Designer,0,Marketing,California - NorCal
+"Quintana, Lauren","Nieves, Nicholas","Assistant Manager, Fund Administration",2,FA - Fund Accounting,Texas
+"McRea, Meg","Perriello, Alana",Account Executive,0,Sales - AE,California - SoCal
+"Guyot, Katrina","Gotosa, Cynthia","Senior Associate, Fund Administration",0,FA - Fund Accounting,Colorado
+"Iheanacho, Angus","Montefusco, Francesco","Senior Associate, Fund Administration",0,FA - Fund Accounting,New Jersey
+"Miller, Stephanie","Robinson, Alex",Chief Operating Officer,0,Office of the COO,Florida
+"Negeri, Milki","Gupta, Sid",Software Engineer 1,0,Engineering,California - NorCal
+"Errez, Nate","Brinck, Jack",Solutions Consultant,0,Sales - SE,California - SoCal
+"Lytle, Adam","Hollen, Cameron","Senior Associate, Fund Administration",1,FA - Fund Accounting,Indiana
+"Pemberton, William","Baker, Ryan","Senior Associate, Fund Administration",0,FA - Fund Accounting,Indiana
+"Bull, James","Waldman, Ashley",Customer Support Specialist,0,GPX - Support,Massachusetts
+"Hodge, Sabrina","Yoro, Andrew","Associate II, Fund Administration",0,FA - Capital Events,Colorado
+"Delaney, Sean","Ram, Prasana","Senior Manager, Business Systems",3,Corporate Operations,Florida
+"Westphal, Danielle","Frank, Meghan","Manager, Field Marketing",1,Marketing,California - NorCal
+"Pruyn, Paul","Siwulec, Julie","Manager, Fund Administration",7,FA - Fund Accounting,Florida
+"Walker, Charles","Gandhi, Chirag","Senior Associate, Fund Administration",0,FA - Fund Accounting,Kentucky
+"Pettengill, Aaron","Bakthavalsalan, Priyanka",Senior Software Engineer,0,Engineering,Maine
+"Wayne, Billy","Egbert, Christine","Senior Director, Fund Administration",6,FA - Fund Accounting,Indiana
+"Goodfellow, Bailey","Okal, Danya","Senior Associate, Fund Administration",0,FA - Fund Accounting,Texas
+"Smith, Timothy","Hollen, Cameron","Senior Associate, Fund Administration",1,FA - Fund Accounting,Massachusetts
+"Tassone, Jordan","Brinck, Jack",Senior Solutions Engineer,0,Sales - SE,Massachusetts
+"Barbato, Tonia","Tatum, Will",Senior Technical Consultant,0,GPX - Technical Consultant,Florida
+"Desai, Rima","Owen, Tom",Senior Product Onboarding Manager,0,GPX - Product Onboarding,Texas
+"Madziarczyk, Jon","George, Sunil","Senior Manager, Engineering",9,Engineering,California - SoCal
+"Layland, Kimmie","Collier, Madisyn","Associate II, Fund Administration",0,FA - Fundraising,California - NorCal
+"Wilson, Brian","Montefusco, Francesco","Senior Manager, Fund Administration",2,FA - Fund Accounting,Massachusetts
+"Pariman, Jennifer","Pirangi, Ruth","Manager, Fund Administration",5,FA - Fund Accounting,Indiana
+"Menon, Felicia","Reimers, Vittoria","Director, Talent Acquisition",9,People,Wisconsin
+"Schuermer, Megan","Demers, Joshua","Director, Fund Administration",1,FA - Core IS,Colorado
+"Leedeman, Juliana","Waldman, Ashley",Customer Support Specialist,0,GPX - Support,California - NorCal
+"Kile, Ryker","Schmidt, Erin",Sales Associate II,0,Sales - SDR,California - SoCal
+"Buley, Thomas","Ginsburg, Adam","Director, Product Management",0,Product Management,Oregon
+"Pachigalla, Philip","Bakthavalsalan, Priyanka",Senior Software Engineer,0,Engineering,California - NorCal
+"Hammond, Craig","Ginsburg, Adam",Director of Information Technology,3,IT,California - NorCal
+"Sharifi, Omran","Adejobi, Eden","Manager, Fund Administration",0,FA - Core IS,New York
+"Chung, Anthony","Sedloff, Brandon","VP, Sales",0,Sales - General,North Carolina
+"Patel, Raj","Gotosa, Cynthia","Assistant Manager, Fund Administration",0,FA - Fund Accounting,Illinois
+"Gonzalez Nieda, Alain","Correa Cherone, Juan",Software Engineer 2,0,Engineering,Florida
+"Amorello, Jake","Perriello, Alana",Account Executive,0,Sales - AE,Massachusetts
+"Isaacson, Rachel","Massari, Sara","Manager, Fund Administration",1,FA - Onboarding,Indiana
+"Zhou, Yoki","Jancsar, Cole",Software Engineer 2,0,Engineering,California - NorCal
+"Taverrite, Chris","Waldman, Ashley",Customer Support Specialist,0,GPX - Support,Texas
+"LaManna, Amber","Reeder, Lauren","Senior Associate, Fund Administration",0,FA - Fund Accounting,North Carolina
+"Basavaraju, Kaushik","Montefusco, Francesco","Senior Associate, Fund Administration",0,FA - Fund Accounting,Texas
+"Morgan, Gavin","Reddy, Niharika","Associate, Fund Administration",0,FA - Fund Accounting,Indiana
+"Mastriano, Peter","Egbert, Christine","Senior Director, Fund Administration",2,FA - Fund Accounting,New Jersey
+"Rougier, Matthew","Kowalski, Dorota","Senior Director, Fund Administration",7,FA - Fund Accounting,Massachusetts
+"Campbell, Colin","Gotosa, Cynthia","Associate, Fund Administration Intern",0,FA - Fund Accounting,Indiana
+"Leatherman, Alan","Megaw, Michael",Lead Program Manager,0,Office of the COO,Connecticut
+"Bunaidi, Vera","Fou, Amy","Senior Associate, Fund Administration",0,FA - Fund Accounting,California - SoCal
+"Campbell, Taylor","Owen, Tom",Product Onboarding Manager,0,GPX - Product Onboarding,California - SoCal
+"Rodriguez, Abel","Mustafa, Lamya","Senior Associate, Fund Administration",0,FA - Fund Accounting,Florida
+"Hollen, Cameron","Pirangi, Ruth","Manager, Fund Administration",2,FA - Fund Accounting,Indiana
+"Speciale Jackson, Isabella","Ross, Rachel","Senior Customer Success Manager, Enterprise",0,GPX - CSM,California - NorCal
+"Dinardo, James","Reed, Stephen",Product Onboarding Manager,0,GPX - Product Onboarding,Massachusetts
+"Dalton, Lana","Berdick, Andrea",Senior Customer Success Manager,0,GPX - CSM,Montana
+"Buhl, Kegan","Rougier, Matthew","Director, Fund Administration",0,FA - Fund Accounting,Colorado
+"Merrill, Trey","Kreilein, Colleen","Associate, Fund Administration",0,FA - Fund Accounting,Indiana
+"Egbert, Christine","Robinson, Alex","General Manager, Fund Administration",9,FA - General,New Jersey
+"Gillilan, Cody","Delaney, Sean",Senior Business Systems Administrator,0,Corporate Operations,Ohio
+"Lawler, Caitlynn","Ram, Prasana",Senior Billing and Collections Specialist,0,Corporate Operations,Florida
+"Jenny, Eric","Robinson, Alex",Chief Financial Officer,5,Corporate Operations,Texas
+"Kunz, Justin","Mustafa, Lamya","Senior Associate, Fund Administration",0,FA - Fund Accounting,New York
+"Amaral, Nelson","Lofaro, Noelle","Senior Manager, Fund Administration",4,FA - Strategy & Ops,Massachusetts
+"Maxwell, Mellisa","Rothenberg, Dan",Corporate Counsel,0,Corporate Operations,Texas
+"Gonzalez, Javier","Lee, Matthew",Senior Product Onboarding Manager,0,GPX - Product Onboarding,California - NorCal
+"Muhammad, Inaya","Lofaro, Noelle","Associate, Fund Administration",0,FA - Onboarding,Georgia
+"Colwell, Caroline","Farber, Jay",Product Marketing Manager,0,Marketing,California - NorCal
+"Flores, Morgan","Mugomba, Wallace","Senior Associate, Fund Administration",0,FA - Fund Accounting,Illinois
+"Thadeshwar, Sneha","Schulte, Matt",Senior QA Engineer,0,Engineering,California - NorCal
+"Beckmann, Ashlyn","Frank, Meghan",Lead Field Marketing Manager,0,Marketing,New York
+"Coss, Grecia","Reibold, Bradley","Associate II, Fund Administration",0,FA - Fund Accounting,Texas
+"Howard, Gregg","Gameiro, Susan","Senior Director, Fund Administration",3,FA - Fund Accounting,Massachusetts
+"Phu, Franklin","Tatum, Will",Senior Technical Consultant,0,GPX - Technical Consultant,Nevada
+"Krump, Brian","Rachmel, Nir","Director, Product Management",3,Product Management,Oregon
+"Wilson, Holly","Howell, Jake",Lead Customer Solutions Specialist,0,GPX - Support,Texas
+"Sconiers, Brittany","Adejobi, Eden","Assistant Manager, Fund Administration",0,FA - Core IS,Florida
+"Sankovich, Eric","Tatum, Will",Senior Technical Consultant,0,GPX - Technical Consultant,Texas
+"Udalova, Kate","Schulte, Matt",Staff QA Engineer,0,Engineering,Utah
+"Karas, Katherine","Rogoz, Izabela","Assistant Manager, Fund Administration",2,FA - Fund Accounting,New York
+"Feid, Charles","Karns, Kyle","Account Executive, Private Equity",0,Sales - AE,California - SoCal
+"Fowers, Corbin","Suits, Amanda","Manager, Fund Administration",2,FA - Fund Accounting,Minnesota
+"Ghosh, Dipanjan","Koroleva, Anya",Technical Program Manager,0,Engineering,Florida
+"Pemberton, Chance","Schulte, Matt",QA Automation Engineer 2,0,Engineering,Missouri
+"Le, Tue","Rougier, Matthew","Senior Manager, Fund Administration",0,FA - Fund Accounting,Massachusetts
+"Atwood, Adam","Wayne, Billy","Director, Fund Administration",2,FA - Fund Accounting,Indiana
+"Itner, Bryan","Pariman, Jennifer","Senior Associate, Fund Administration",0,FA - Fund Accounting,Florida
+"Ghaderi, Zoheyr","Hammond, Craig",Staff Security Engineer,0,IT,Virginia
+"Hagler, Josh","Karns, Kyle","Account Executive, Venture Capital",0,Sales - AE,Texas
+"Burdick, Nate","Charny, Jonathan","Account Executive, Private Equity",0,Sales - AE,Pennsylvania
+"Musser, Ben","Berdick, Andrea","Customer Success Manager, Mid Market",0,GPX - CSM,Washington
+"Rodriguez, Ana","Fowers, Corbin","Senior Associate, Fund Administration",1,FA - Fund Accounting,Texas
+"Fabiano, Gab","Waldman, Ashley",Customer Support Specialist,0,GPX - Support,Texas
+"Barron, Austin","Quintana, Lauren","Associate II, Fund Administration",0,FA - Fund Accounting,Indiana
+"Gust, Scott","Madziarczyk, Jon",Staff Site Reliability Engineer,0,Engineering,California - NorCal
+"Shetler, Andrew","Lui, Jen","Manager, Fund Administration",1,FA - Core IS,Indiana
+"Ohman, Tess","Russell, Robin",Senior Instructional Designer,0,Office of the COO,Washington
+"Santarcangelo, Thomas","Pariman, Jennifer","Senior Associate, Fund Administration",0,FA - Fund Accounting,Florida
+"Reibold, Bradley","Howard, Gregg","Senior Manager, Fund Administration",2,FA - Fund Accounting,Indiana
+"Martin, Alex","Russell, Robin",Principal Instructional Designer,0,Office of the COO,Pennsylvania
+"Baker, Ethan","Smith, Timothy","Associate, Fund Administration",0,FA - Fund Accounting,Utah
+"Nelson, Eric","Gotosa, Cynthia","Assistant Manager, Fund Administration",2,FA - Fund Accounting,Georgia
+"Kreilein, Colleen","Fowers, Corbin","Assistant Manager, Fund Administration",3,FA - Fund Accounting,Indiana
+"Loyst, Christine","Burgin, Casey","Associate II, Fund Administration",0,FA - Fund Accounting,Colorado
+"Pirangi, Ruth","Atwood, Adam","Senior Manager, Fund Administration",3,FA - Fund Accounting,New Jersey
+"Luciano, Emily","Pruyn, Paul","Senior Associate, Fund Administration",0,FA - Fund Accounting,Connecticut
+"Seeger, Stephen","Moorhead, Bobby","Senior Associate, Fund Administration",0,FA - Fund Accounting,New York
+"Mysore, Kendra","Reimers, Vittoria",Senior People Analytics & Programs Manager,0,People,California - NorCal
+"Howell, Jake","Farber, Jay","Group Manager, Customer Support",7,GPX - Support,California - NorCal
+"Varela Torres, Orestes","Bandyopadhyay, Anupam","Manager, Engineering",4,Engineering,Florida
+"Pait, Kristen","Martens, Alexis",Senior Deal Desk Analyst,0,Corporate Operations,North Carolina
+"Mays-Johnson, Keona","Gialanella, Nicholas",Senior Project Manager,0,GPX - Project Management,Florida
+"Watts, Gabriel","Henderson, Bryce",Sales Associate II,0,Sales - SDR,Texas
+"Prezelski, Taylor","Schmidt, Erin",Senior Sales Associate,0,Sales - AE,North Carolina
+"Mustafa, Lamya","Ziman, Diane","Manager, Fund Administration",3,FA - Fund Accounting,New Jersey
+"Biel, Hadyn","Lytle, Adam","Associate II, Fund Administration",0,FA - Fund Accounting,Indiana
+"Tang, Crystal","Collier, Madisyn","Assistant Manager, Fund Administration",0,FA - Fundraising,California - NorCal
+"Dornfried, Bryan","Howard, Gregg","Director, Fund Administration",2,FA - Fund Accounting,Massachusetts
+"Sankhe, Amanda","Owen, Tom",Senior Product Onboarding Manager,0,GPX - Product Onboarding,California - SoCal
+"Deraleau, Veronica","Ross, Rachel",GPX Product Readiness & Operations Lead,0,GPX - CSM,Washington
+"Cannella, Cristina","Azares, Jason",Staff Product Designer,0,Product Management,New York
+"Barss, Meg","Reimers, Vittoria",Lead People Business Partner,1,People,Maine
+"Wheelis, Reagan","Montefusco, Francesco","Assistant Manager, Fund Administration",0,FA - Fund Accounting,Texas
+"Jayachandran, Sruthi","Rameshkumar, Karthick",Software Engineer 1,0,Engineering,Nevada
+"Dec, Amanda","Stein, Drew",IT Helpdesk Specialist,0,IT,California - NorCal
+"Elgabari, Anas","Montefusco, Francesco","Senior Associate, Fund Administration",0,FA - Fund Accounting,New York
+"Yeung, Mandy","Buckner, Logan",Lead Customer Success Manager,0,GPX - CSM,New York
+"Chen, Linda","Berdick, Andrea","Customer Success Manager, Mid Market",0,GPX - CSM,California - SoCal
+"Smith, Darren","Karns, Kyle","Account Executive, PE/VC",0,Sales - AE,California - NorCal
+"Fokas, Ana","Martin, Lauren","Customer Success Manager, Mid Market",0,GPX - CSM,North Carolina
+"Protsenko, Iryna","Madziarczyk, Jon",Site Reliability Engineer II,0,Engineering,Illinois
+"Ashfaq, Azhar","Wayne, Billy","Senior Director, Operations Strategy",0,FA - Strategy & Ops,New Jersey
+"Plascencia, Gerardo","Lebovitz, Andrew",Senior Data Product Services Manager,0,GPX - PO Data Product Services,California - SoCal
+"Witte, Portia","Collier, Madisyn","Senior Associate, Fund Administration",0,FA - Fundraising,International
+"Tawri, Pritam","Malbary, Mufaddal","Senior Associate, Fund Administration",0,FA - Core IS,International
+"Chandel, Rinu","Malbary, Mufaddal","Senior Associate, Fund Administration",0,FA - Core IS,International
+"Gupta, Aditi","Agrawal, Anu","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Thakkar, Ishan","Malbary, Mufaddal","Associate II, Fund Administration",0,FA - Core IS,International
+"Porwal, Ansh","Faraji, Moe",Software Engineer 1,0,Engineering,International
+"Rawat, Saurabh","Choudhary, Krutika","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Joshi, Omkar","Singh, Mahesh",Software Engineer 2,0,Engineering,International
+"Rizvi, Ahsen","Lui, Jen","Senior Associate, Fund Administration",0,FA - Core IS,International
+"Beaudoin, Sean","Mullaney, Kelly",Senior Technical Writer,0,Product Management,International
+"Ahmed, Manzoor","Sanyal, Santanu","Director, Quality Assurance",2,Engineering,International
+"Singh, Anand Kumar","Pathak, Himanshu",Technical Lead,0,Engineering,International
+"Gaur, Avi","Okal, Danya","Associate, Fund Administration",0,FA - Fund Accounting,International
+"Butta, Raghavendra","Verma, Puja","Manager, Fund Administration",6,FA - Fund Accounting,International
+"Kanth, Kanish","Verma, Puja","Assistant Manager, Fund Administration",0,FA - Fund Accounting,International
+"Doshi, Naman","K, Ravi","Manager, Fund Administration",5,FA - Fund Accounting,International
+"Chhajed, Harsh","Verma, Puja","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Agarwal, Anirudh","Shah, Anupam",Senior Technical Lead,0,Engineering,International
+"Thota, Dinesh","Waldman, Ashley",Customer Support Specialist,0,GPX - Support,International
+"Bhavsar, Parth","Verma, Puja","Assistant Manager, Fund Administration",1,FA - Fund Accounting,International
+"Jaldu, hemanth","Suresh, Nakkala","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Kang, Jeehun","Gupta, Sid",Software Engineer 2,0,Engineering,International
+"Zheng, Azi","Jancsar, Cole",Software Engineer 2,0,Engineering,International
+"Kokal, Sneha","Malbary, Mufaddal","Associate II, Fund Administration",0,FA - Core IS,International
+"Raja, Akhil","V, Sushmitha","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"kota, Satya","Yadav, Alka","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Meiappan, Uma","K, Ravi","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Sanyal, Santanu","Hyder, Adam","Managing Director/VP, Engineering",4,Engineering,International
+"Rathod, Rohini","Pathak, Himanshu",Technical Lead,0,Engineering,International
+"Hatekar, Vaishnavi","Bhandari, Anup",QA Automation Engineer 2,0,Engineering,International
+"Reddy, Aparna","K, Ravi","Associate, Fund Administration",0,FA - Fund Accounting,International
+"Pramanik, Moumita","K, Ravi","Assistant Manager, Fund Administration",0,FA - Fund Accounting,International
+"Nuwal, Saransh","Butta, Raghavendra","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Singh, Mahesh","Gupta, Sid","Senior Manager, Engineering",7,Engineering,International
+Conan,"Rameshkumar, Karthick",Senior Software Engineer,0,Engineering,International
+"A, Mohamed Abul Hissam","Shivamurthy, Sharath",Software Engineer 2,0,Engineering,International
+"Akhand, Aftab","Syed, Mehmood",Software Engineer 1,0,Engineering,International
+"Srinivas, Venkatesh","Bhandari, Anup",QA Lead,0,Engineering,International
+"Narang, Punish","Gupta, Shilpi",Technical Lead,0,Engineering,International
+"Fehervari, Istvan","Bandyopadhyay, Anupam","Senior Staff Engineer, AI",0,Engineering,International
+"Agrawal, Honey","Verma, Puja","Assistant Manager, Fund Administration",0,FA - Fund Accounting,International
+"Thakkar, Jinesh","Shah, Anupam",Software Engineer 1,0,Engineering,International
+"Shastry L, Ranjitha","Amaral, Nelson","Instructional Designer, Fund Administration",0,FA - Fund Accounting,International
+"Chauhan, Shaktisinh","Valles, Anthony","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"McCarthy, Damien","Gotosa, Cynthia","Manager, Fund Administration",2,FA - Fund Accounting,International
+"Sari, Attila","Gupta, Shilpi",Senior Software Engineer,0,Engineering,International
+"Divekar, Sakshi","Kumar P L, Praveen","Associate, Fund Administration",0,FA - Onboarding,International
+"Anupogulu, Babu","Malbary, Mufaddal","Assistant Manager, Fund Administration",0,FA - Core IS,International
+"Yerra, Surya Teja","Mishra, Sandeep","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Venugopal, Vishnu","Rameshkumar, Karthick",Principal Engineer,0,Engineering,International
+"Abraham, Gabriel","Montefusco, Francesco","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Sasi Kumar, Sredha","VS, Vineesh",Data Conversion Analyst,0,GPX - Product Onboarding,International
+"B, Krishna Das","VS, Vineesh",Senior Data Conversion Analyst,0,GPX - Product Onboarding,International
+"Modi, Shikhar","Varkolu, Abhilash","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"George, Tintu","Adikesavan, Abishek","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Nair, Aishwarya","Halan, Nidhi","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Martini, Shannon","Lui, Jen","Associate II, Fund Administration",0,FA - Core IS,International
+"Torres, Gena","Adejobi, Eden","Senior Associate, Fund Administration",0,FA - Core IS,International
+"Jancsar, Cole","George, Sunil","Senior Manager, Engineering",11,Engineering,International
+"Tran, Jennifer","Lofaro, Noelle","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Faraji, Moe","Bandyopadhyay, Anupam","Manager, Engineering",10,Engineering,International
+"Gudla, Akhil Kumar","Suresh, Nakkala","Assistant Manager, Fund Administration",3,FA - Fund Accounting,International
+"Veldi, Vijay","Minhajuddin, Mohammad","Assistant Manager, Fund Administration",6,FA - Fund Accounting,International
+"Jia, Lillian","Azares, Jason",Staff Product Designer,0,Product Management,International
+"Ignatius, Kevin","Malbary, Mufaddal","Senior Associate, Fund Administration",0,FA - Core IS,International
+"Zheng, Charles","Li, Qi","Assistant Manager, Fund Administration",0,FA - Fund Accounting,International
+"Chishti, Faisal","Syed, Mehmood",Technical Lead,0,Engineering,International
+"Bagley, Tess","White, Tim","Assistant Manager, Fund Administration",0,FA - Core IS,International
+"Harlalka, Utkarsh","Varkolu, Abhilash","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Pathak, Himanshu","Banikar, Shoaib Ahmed","Manager, Engineering",9,Engineering,International
+"Shivamurthy, Sharath","Shah, Anupam","Manager, Engineering",5,Engineering,International
+"Verma, Devishree","Lavanya, TG","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Gupta, Pavan","Madziarczyk, Jon","Principal Engineer, SRE",0,Engineering,International
+Dongkyu (David),"Bakthavalsalan, Priyanka",Staff Software Engineer,0,Engineering,International
+"Gorthi, Rohith Sai Charan","Grover, Natasha","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Varanasi, Manoj","Grover, Natasha","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Gupta, Rekha","Khetam, Vishal","Senior Manager, Fund Administration",6,FA - Fund Accounting,International
+"Bansal, Deepesh","Minhajuddin, Mohammad","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Harris, Kevan","Stewart, Kristine",Senior Product Marketing Manager,0,Marketing,International
+"Shah, Manan","Li, Qi","Assistant Manager, Fund Administration",0,FA - Fund Accounting,International
+"Hong, Geoff","Krueger, David",Sr. Business Intelligence Manager,0,Business Operations,International
+"Wang, Dashan","Gupta, Sid",Senior Software Engineer,0,Engineering,International
+"Jiang, Zichen","Faraji, Moe",Senior Software Engineer,0,Engineering,International
+"Saad, Faramoz","Reddy, Niharika","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Josyula, Kashyap","Rameshkumar, Karthick",Senior Technical Lead,0,Engineering,International
+"Gotosa, Cynthia","Lofaro, Noelle","Senior Manager, Fund Administration",7,FA - Fund Accounting,International
+"Kivaev, Alan","Adejobi, Eden","Senior Associate, Fund Administration",0,FA - Core IS,International
+Rayudu,"Sehtya, Chetan",Principal QA Engineer,0,Engineering,International
+"Shah, Anupam","Sanyal, Santanu","Director, Engineering",12,Engineering,International
+"Langeh, Maanav","Folarin, Raphew","Senior Associate, Fund Administration",0,FA - Core IS,International
+"Lui, Jen","Demers, Joshua","Director, Fund Administration",8,FA - Core IS,International
+"Zeng, Kailin","Bakthavalsalan, Priyanka",Software Engineer 2,0,Engineering,International
+"Aguilar, Brankica","Menon, Felicia",Recruiter,0,People,International
+"Hung, Wendy","Li, Qi","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Gill, James","Gupta, Shilpi",Senior Software Engineer,0,Engineering,International
+"Lee, Alan","Gupta, Sid",Senior Software Engineer,0,Engineering,International
+"Yang, Andersen","Gupta, Shilpi",Senior Software Engineer,0,Engineering,International
+"Bhandari, Anup","Sehtya, Chetan","Manager, QA",4,Engineering,International
+"Chait, Noah","Faraji, Moe",Senior Software Engineer,0,Engineering,International
+"Basilio, Daniel","Rameshkumar, Karthick",Staff Software Engineer,0,Engineering,International
+"Totlani, Soniya","Kothamasu, Adhitya Sri Gupta","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Kivaev, Jason","Lui, Jen","Associate II, Fund Administration",0,FA - Core IS,International
+"Rajput, Raghunandan","Singh, Mahesh",Senior Technical Lead,0,Engineering,International
+"Ftoni, Anton","Quattrociocchi, Paul","Senior Associate, Fund Administration",0,FA - Core IS,International
+"R, RANJANI","Rickmers, Dylan",Senior Systems & Solutions Engineer,0,Business Operations,International
+"Gupta, Charchit","Syed, Mehmood",Technical Lead,0,Engineering,International
+"Shah, Seema","Choudhary, Krutika","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Folarin, Raphew","Adejobi, Eden","Manager, Fund Administration",5,FA - Core IS,International
+"Abbas, Zainab","Sehtya, Chetan",QA Engineer 1,0,Engineering,International
+"S, Aravind","Veldi, Vijay","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Gurusai Prasad, Nethi","Halan, Nidhi","Assistant Manager, Fund Administration",3,FA - Fund Accounting,International
+"Chandru, Kiran","Stein, Drew",Senior IT Systems Administrator,0,IT,International
+"Kaur, Sukhleen","Mohanty, Satya",Outbound Sales Development Representative,0,Sales - SDR,International
+"Shenoy Kumble, Arjun","Verma, Puja","Assistant Manager, Fund Administration",0,FA - Fund Accounting,International
+"Ronald M J, Robin","Sharma, Dharmanand",Associate Facilities Manager,0,Facilities,International
+"Ghosh, Arindam","Jancsar, Cole","Manager, Engineering",4,Engineering,International
+"Kapoor, Shriyans","Shah, Anupam",Software Engineer 2,0,Engineering,International
+"Raut, Vaidehi","Chakravarthi, Leela","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Kathayat, Ayush","Shivamurthy, Sharath",Software Engineer 1,0,Engineering,International
+"Kumar R, Sharath","Mohanty, Satya",Sr Inbound Sales Development Representative,0,Sales - SDR,International
+"Subash, Venkata","Dalvi, Imaad","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Tulera, Suman","Smith, Tanner",Procurement Specialist,0,Corporate Operations,International
+"Muppudoju, Vinay","Suresh, Nakkala","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Rawat, Durgesh","Malbary, Mufaddal","Associate, Fund Administration",0,FA - Core IS,International
+"Kumar, Vijay","V, Sushmitha","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Bisht, Sandeep","Rajashekar, Manjunatha","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Garg, Anchal","Ghosh, Arindam",Software Engineer 1,0,Engineering,International
+"Hankare, Prathamesh","Malbary, Mufaddal","Associate II, Fund Administration",0,FA - Core IS,International
+"Vij, Sakshi","Banikar, Shoaib Ahmed",Software Engineer 2,0,Engineering,International
+"Moreau, Sophie","Rogoz, Izabela","Assistant Manager, Fund Administration",0,FA - Fund Accounting,International
+"Singh, Ravikant","Smith, Tanner",Senior Procurement Specialist,0,Corporate Operations,International
+"Gurram, Saikumar","Kothamasu, Adhitya Sri Gupta","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Chhabra, Naina","Varkolu, Abhilash","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Shah, Samruddhi","Reddy, Niharika","Manager, Fund Administration",0,FA - Fund Accounting,International
+"Deshmukh, Sarvesh Sanjay","Pathak, Himanshu",Software Engineer 2,0,Engineering,International
+"Adikesavan, Abishek","Gupta, Rekha","Manager, Fund Administration",4,FA - Fund Accounting,International
+"Patel, Jay","Wilson, Brian","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Turakhia, Niraj","Minhajuddin, Mohammad","Assistant Manager, Fund Administration",2,FA - Fund Accounting,International
+"Sharma, Ankit","Lavanya, TG","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Gupta, Joy","Gupta, Shilpi",Software Engineer 2,0,Engineering,International
+"Deshmukh, Amisha","Mohanty, Satya",Sr Outbound Sales Development Representative,0,Sales - SDR,International
+"Pote, Sayali","Halan, Nidhi","Associate, Fund Administration",0,FA - Fund Accounting,International
+"Mathew, Joel","Banikar, Shoaib Ahmed",Software Engineer 2,0,Engineering,International
+"Sharma, Dharmanand","Sanyal, Santanu",Head of Facilities and Administration,1,Facilities,International
+"Bijekar, Apoorv","Karangutkar, Swapnil","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Salve, Darshana","Dalvi, Imaad","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"K, Ravi","Khetam, Vishal","Senior Manager, Fund Administration",16,FA - Fund Accounting,International
+"Narayan Murthy, Sushma","Brooks, Stefanie",Billing & Collections Specialist,0,Corporate Operations,International
+"Ramakrishna, Salluri","Butta, Raghavendra","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Gupta, Preeti","Rameshkumar, Karthick","Manager, Engineering",3,Engineering,International
+"Sevillano (Contractor), Elizabeth Angelica","Tarvin, Valerie",(Contractor) Payroll Manager,0,Corporate Operations,New York
+"Bhavanam, Gowthami","V, Sushmitha","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Mohanty, Satya","Schmidt, Erin","Manager, Inbound Sales Development",7,Sales - SDR,International
+"Anand, Avinash","Grandhi, Venkata Kiran","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Kharbanda, Puneet","Wilkinson, Rey","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Vakhidov, Sharaf","Lui, Jen","Associate II, Fund Administration",0,FA - Core IS,International
+"Pawar, Mahesh","Malbary, Mufaddal","Senior Associate, Fund Administration",0,FA - Core IS,International
+"Kotian, Shravan","Malbary, Mufaddal","Associate II, Fund Administration",0,FA - Core IS,International
+"Gupta, Anushkha","Barss, Meg",Senior People Business Partner,0,People,International
+"Saana, Rajashekar Reddy","Rajashekar, Manjunatha","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"P, Parthiban","Adikesavan, Abishek","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Verma, Puja","Khetam, Vishal","Senior Manager, Fund Administration",10,FA - Fund Accounting,International
+"Chamwad, Abhilash","Banikar, Shoaib Ahmed",Senior Technical Lead,0,Engineering,International
+"Pandav, Tejas","Yadav, Alka","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Nautiyal, Azad","Shivamurthy, Sharath",Software Engineer 2,0,Engineering,International
+"Stacks, Mersedeh","Reimers, Vittoria",People Operations Consultant (Contractor),0,People, 
+"Sharma, Nitin","Gupta, Lakshay",Senior Systems & Solutions Engineer,0,Corporate Operations,International
+"Kivaev, Michelle","White, Tim","Senior Associate, Fund Administration",0,FA - Core IS,International
+"Todi, Yash","Gupta, Preeti",Technical Lead,0,Engineering,International
+"AS, Mythily","Madziarczyk, Jon",Senior SRE Lead,0,Engineering,International
+"Shukla, Sahil","Shah, Anupam",Software Engineer 2,0,Engineering,International
+"Kurupati, Charan","Gurusai Prasad, Nethi","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Kak, Neha","Sehtya, Chetan",QA Automation Engineer 2,0,Engineering,International
+"A, Sophia","Lavanya, TG","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Tiwari, Ash","Lui, Jen","Associate II, Fund Administration",0,FA - Core IS,International
+"Somidi, Srikanth","Grandhi, Venkata Kiran","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Mishra, Sandeep","Verma, Puja","Manager, Fund Administration",3,FA - Fund Accounting,International
+"Arkachari, Sanjay","Doshi, Naman","Assistant Manager, Fund Administration",1,FA - Fund Accounting,International
+"Oulad Itto, Hicham","Gameiro, Susan","Director, Fund Administration",0,FA - Fund Accounting,International
+"P Jaleel, Althaf","Ghosh, Arindam",Technical Lead,0,Engineering,International
+"Kaushik, Chetan","Shah, Anupam",Technical Lead,0,Engineering,International
+"Murugan, Deepalakshmi","Brooks, Stefanie",Billing & Collections Specialist,0,Corporate Operations,International
+"Agrawal, Akshay Kumar","Karangutkar, Swapnil","Assistant Manager, Fund Administration",0,FA - Fund Accounting,International
+"Varkolu, Abhilash","Gupta, Rekha","Assistant Manager, Fund Administration",5,FA - Fund Accounting,International
+"S, Gowtham","Gupta, Shilpi",Software Engineer 2,0,Engineering,International
+"Cheethirala, Shyamala","Grandhi, Venkata Kiran","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Agarwal, Khushboo","Karangutkar, Swapnil","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Bora, Dev","Rickmers, Dylan",Senior Systems & Solutions Engineer,0,Business Operations,International
+"Saini, Bhawna","Stein, Drew",Senior Help Desk Specialist,0,IT,International
+"Shaikh, Uzma Sarwar","Banikar, Shoaib Ahmed",Technical Lead,0,Engineering,International
+"Veerwani, Abhishek","Grover, Natasha","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Wijayasinha, Randu","Miller, Stephen","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Dos Santos, Kheira","Brive, Arnaud","Director, Fund Administration",1,FA - Fund Accounting,International
+"Srivastava, Utkarsh","Pathak, Himanshu",Technical Lead,0,Engineering,International
+"Rai, Ankita","Veldi, Vijay","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Quattrociocchi, Paul","Demers, Joshua","Director, Fund Administration",6,FA - Core IS,International
+"Khetam, Vishal","Egbert, Christine","Director, Fund Administration",8,FA - Fund Accounting,International
+"Pandey, Anurag","Malbary, Mufaddal","Senior Associate, Fund Administration",0,FA - Core IS,International
+"Bhunya, Sunil","Karangutkar, Swapnil","Assistant Manager, Fund Administration",0,FA - Fund Accounting,International
+"Gupta, Poonam","Dalvi, Imaad","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Banikar, Zoheb","Sehtya, Chetan",Senior QA Lead,0,Engineering,International
+"Peramangalam, Seby","Shah, Anupam",Technical Lead,0,Engineering,International
+"C, Yasha","Shah, Anupam",Senior Technical Lead,0,Engineering,International
+"Reddy, Manohar","V, Sushmitha","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Agarwal, Nidhi","Minhajuddin, Mohammad","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Rawat, Riya","Suresh, Nakkala","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Labala, Sravani","Gupta, Preeti",Software Engineer 2,0,Engineering,International
+"Kumar P L, Praveen","Khetam, Vishal","Assistant Manager, Fund Administration",2,FA - Onboarding,International
+"Lavanya, TG","K, Ravi","Assistant Manager, Fund Administration",5,FA - Fund Accounting,International
+"Qureshi, Abubakar","Sehtya, Chetan",QA Engineer 1,0,Engineering,International
+"Thapa, Roshan","Tarvin, Valerie",Staff Accountant,0,Corporate Operations,International
+"Shikhare, Sonali","Gupta, Rekha","Assistant Manager, Fund Administration",0,FA - Fund Accounting,International
+"Limbachiya, Chirag","Grover, Natasha","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Sulakhe, Somesh","K, Ravi","Assistant Manager, Fund Administration",0,FA - Fund Accounting,International
+"Das, Pujaitri","Faraji, Moe",Data Engineer Intern,0,Engineering,International
+"Vachheta, Dhaval","Singh, Mahesh",Technical Lead,0,Engineering,International
+"SG, Krishnan","K, Ravi","Manager, Fund Administration",3,FA - Fund Accounting,International
+"Golani, Himanshu","Varkolu, Abhilash","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Adejobi, Susan","Baker, Ryan","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Vij, Ujjwal","Syed, Mehmood","Software Engineer, Intern",0,Engineering,International
+"VS, Vineesh","King, Matt","Manager, Data Conversion",3,GPX - Product Onboarding,International
+"Barata, Ricardo","Miguel, Fabio","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Gupta, Rishabh","Faraji, Moe",Senior Technical Lead,0,Engineering,International
+"Shaikh, Ajaz","Malbary, Mufaddal","Senior Associate, Fund Administration",0,FA - Core IS,International
+"Mehta, Saket","Butta, Raghavendra","Assistant Manager, Fund Administration",0,FA - Fund Accounting,International
+"Sharma, Aryika","Brooks, Stefanie",Billing & Collections Specialist,0,Corporate Operations,International
+"Suresh, Nakkala","K, Ravi","Manager, Fund Administration",5,FA - Fund Accounting,International
+"Banh, Peter","Jancsar, Cole",Software Engineer 2,0,Engineering,International
+"Mhatre, Supriya","K, Ravi","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Sharma, Varun","Karangutkar, Swapnil","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Rastogi, Ayushi","Grover, Natasha","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Nankani, Muskan","Menon, Felicia",Recruiter II,0,People,International
+"BV, Aishwarya","Butta, Raghavendra","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Dogga, Shyam","Banikar, Shoaib Ahmed",Software Engineer 2,0,Engineering,International
+"Marelic, Noel","Menon, Felicia",Associate Recruiter,0,People,International
+"Jamal, Aleena","Sahil, Mohammed",Sales Operations Support Associate,0,Sales - Rev Ops,International
+"Moopnar, Petchimuthu","Malbary, Mufaddal","Associate, Fund Administration",0,FA - Core IS,International
+"Bhat, Avinash","Agrawal, Anu","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Gupta, Tanish","Gupta, Shilpi",Software Engineer 2,0,Engineering,International
+"Sharma, Dhruv","Mohanty, Satya",Sr Inbound Sales Development Representative,0,Sales - SDR,International
+"Vanganuru, Jyothi","Kothamasu, Adhitya Sri Gupta","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Alphonso, Monica","Menon, Felicia",Recruiter II,0,People,International
+"Sahil, Mohammed","Duvvuri, Virinchi",Sr. Sales Operations Support Associate,1,Sales - Rev Ops,International
+"Rajashekar, Manjunatha","K, Ravi","Assistant Manager, Fund Administration",3,FA - Fund Accounting,International
+"Bajid Begum, Shaik","Doshi, Naman","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Mohamed Anas, Muhammad Umar","Li, Qi","Assistant Manager, Fund Administration",0,FA - Fund Accounting,International
+"Begum, Nusrath","Bhavsar, Parth","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Adejobi, Eden","Demers, Joshua","Director, Fund Administration",8,FA - Core IS,International
+"Manjunath, Anusha","Bhandari, Anup",QA Automation Lead,0,Engineering,International
+"R, JayaGanesh","Madziarczyk, Jon",Senior SRE Lead,0,Engineering,International
+"Bansal, Rohit","Koroleva, Anya",Senior Program Manager,0,Engineering,International
+"Nair, Sanjit","Rachmel, Nir",Product Lead,0,Product Management,International
+"V, Sushmitha","K, Ravi","Assistant Manager, Fund Administration",7,FA - Fund Accounting,International
+"Sodhi, Manjot","Shah, Anupam","Intern, Software Engineer",0,Engineering,International
+"Chidrawar, Pooja","Dalvi, Imaad","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Kaur, Kulpreet","Mohanty, Satya",Sr Inbound Sales Development Representative,0,Sales - SDR,International
+"Andhare, Pratik","Yadav, Alka","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Jobalia, Parag","Kumar P L, Praveen","Associate II, Fund Administration",0,FA - Onboarding,International
+"Nagam, Raj Kamal","Veldi, Vijay","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Oza, Amey","V, Sushmitha","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Ubaid, Mohammad","Singh, Mahesh",Software Engineer 2,0,Engineering,International
+"Waghmare, Pranali","Butta, Raghavendra","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Xia, Norman","Li, Qi","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Soni, Darshna","Mohanty, Satya",Sr Inbound Sales Development Representative,0,Sales - SDR,International
+"Damani, Zainab Fatima","Gotosa, Cynthia","Manager, Fund Administration",2,FA - Fund Accounting,International
+"Muchukuntla, Jaya Krishna Reddy","Dalvi, Imaad","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Marottikunnath, Ramya","Halan, Nidhi","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Akdah, Mohamed","Miguel, Fabio","Associate, Fund Administration",0,FA - Fund Accounting,International
+"Brive, Arnaud","Egbert, Christine","Senior Director, Fund Administration",5,FA - Fund Accounting,International
+"Cumiah, Pravin","Brive, Arnaud","Director, Fund Administration",0,FA - Fund Accounting,International
+"Heintel, Irina","Brive, Arnaud","Director, Fund Administration",0,FA - Fund Accounting,International
+"Karra, Yamine","Miguel, Fabio","Associate, Fund Administration",0,FA - Fund Accounting,International
+"Sheth, Nitul","McCarthy, Damien","Assistant Manager, Fund Administration",0,FA - Fund Accounting,International
+"Patel, Dhruma","Solano, Tony","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Halan, Nidhi","K, Ravi","Manager, Fund Administration",6,FA - Fund Accounting,International
+"Pandey, Harsh","Syed, Mehmood",Software Engineer 2,0,Engineering,International
+"Bajpai, Gaurav","Grandhi, Venkata Kiran","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Marakkar, Siraj","Halan, Nidhi","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Kumar, Akash","Sehtya, Chetan",Senior QA Lead,0,Engineering,International
+"Sehtya, Chetan","Ahmed, Manzoor","Senior Manager, QA",12,Engineering,International
+"Falodia, Kundan","Sehtya, Chetan",QA Automation Lead,0,Engineering,International
+"Kumar, Anshu","Madziarczyk, Jon",Site Reliability Engineer I,0,Engineering,International
+"Hota, Manas","Choudhary, Krutika","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Pujari, Varsharani","Gudla, Akhil Kumar","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Mahankali, Sanjay","Minhajuddin, Mohammad","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Rangel, André","Miguel, Fabio","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Scherer, Laurent","Sheller, Jason","Director, European Business Development",0,Sales - AE,International
+"Skubis, Roksana","Brive, Arnaud","Manager, Fund Administration",0,FA - Fund Accounting,International
+"Vecchio, Giuseppe","Brive, Arnaud","Manager, Fund Administration",0,FA - Fund Accounting,International
+"Manchanda, Jaswinder Singh","Malbary, Mufaddal","Senior Associate, Fund Administration",0,FA - Core IS,International
+"Divyani, Diksha","Yadav, Alka","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Pandey, Shivansh","Pathak, Himanshu",Software Engineer 2,0,Engineering,International
+"Syed, Mehmood","Banikar, Shoaib Ahmed","Manager, Engineering",6,Engineering,International
+"Yu, Kevin","White, Tim","Associate II, Fund Administration",0,FA - Core IS,International
+"Miguel, Fabio","Dos Santos, Kheira","Manager, Fund Administration",4,FA - Fund Accounting,International
+"D, Bharath","Gurusai Prasad, Nethi","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Jangal, Vijay","Ghosh, Arindam",Software Engineer 1,0,Engineering,International
+"Sahu, Kunal","Mohanty, Satya",Associate Inbound Sales Development Represent,0,Sales - SDR,International
+"Sridharan, Manasa","Kothamasu, Adhitya Sri Gupta","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Nagargoje, Namrata","Kothamasu, Adhitya Sri Gupta","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Grover, Natasha","K, Ravi","Assistant Manager, Fund Administration",5,FA - Fund Accounting,International
+"Nath, Shobhan","Banikar, Shoaib Ahmed",Software Engineer 2,0,Engineering,International
+"Ghayas, Fahad","Shah, Anupam",Software Engineer 1,0,Engineering,International
+"Gope, Vaibhav","Singh, Mahesh",Software Engineer 2,0,Engineering,International
+"Gupta, Priya","Doshi, Naman","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Jadhav, Priyanka","Malbary, Mufaddal","Associate II, Fund Administration",0,FA - Core IS,International
+"Pandey, Umesh","Shivamurthy, Sharath",Technical Lead,0,Engineering,International
+"Ingole, Suraj","Lavanya, TG","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Malbary, Mufaddal","Quattrociocchi, Paul","Manager, Fund Administration",18,FA - Core IS,International
+"Gupta, Lakshay","Delaney, Sean","Manager, Systems & Solutions",3,Corporate Operations,International
+"Parker, Edan","Jancsar, Cole",Senior Software Engineer,0,Engineering,International
+"Dalvi, Imaad","Gupta, Rekha","Manager, Fund Administration",6,FA - Fund Accounting,International
+"Dhavane, Ganesh","Smith, Tanner",Senior Finance Systems Analyst,0,Corporate Operations,International
+"Bhoir, Ajit","SG, Krishnan","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Mittal, Nidhi","Gudla, Akhil Kumar","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Gowda, Shashank","Agrawal, Anu","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Kanswal, Keshav","Varkolu, Abhilash","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Kadav, Amol","Malbary, Mufaddal","Assistant Manager, Fund Administration",0,FA - Core IS,International
+"Agrawal, Bhushan","Gurusai Prasad, Nethi","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Choudhari, Sanket","Malbary, Mufaddal","Associate II, Fund Administration",0,FA - Core IS,International
+"Mathur, Akshay","Damani, Zainab Fatima","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Chen, Wei","Bakthavalsalan, Priyanka",Staff Software Engineer,0,Engineering,International
+"Yen, Jacqualine","White, Tim","Senior Associate, Fund Administration",0,FA - Core IS,International
+"Naik, Utkarsh","Quattrociocchi, Paul","Senior Manager, Fund Administration",0,FA - Core IS,International
+"Nanaware, Madhavi","Karangutkar, Swapnil","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Gandhi, Chirag","Li, Qi","Manager, Fund Administration",3,FA - Fund Accounting,International
+"Yung, Ben","Folarin, Raphew","Assistant Manager, Fund Administration",0,FA - Core IS,International
+"Naik, Guruprasad","Lavanya, TG","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Pandey, Rahul","Sehtya, Chetan",Senior QA Lead,0,Engineering,International
+"Ramu, Kavita","Suresh, Nakkala","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"S, Akshay Bharadwaj","Faraji, Moe",Software Engineer 2,0,Engineering,International
+"Pillai, Pratyush","Agrawal, Anu","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Saikumar, Mangali","Mishra, Sandeep","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Demers, Joshua","Egbert, Christine","Senior Director, Fund Administration",5,FA - Core IS,International
+"Chhayala, Harsh","Choudhary, Krutika","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Reddy, Ambati Sreekanth","Gudla, Akhil Kumar","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Yadav, Alka","Khetam, Vishal","Assistant Manager, Fund Administration",4,FA - Fund Accounting,International
+"Shirol, Heena","Menon, Felicia",Senior Technical Recruiter,0,People,International
+"Shinde, Mohit","Banikar, Shoaib Ahmed",Senior Technical Lead,0,Engineering,International
+"Mahant, Aditi","Gupta, Lakshay",Senior Systems & Solutions Administrator,0,Corporate Operations,International
+"Udapi, Sanket","Ghosh, Arindam",Software Engineer 2,0,Engineering,International
+"Jain, Jheel","Reddy, Niharika","Assistant Manager, Fund Administration",0,FA - Fund Accounting,International
+"Shukla, Ankit","Adikesavan, Abishek","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"K, Santhiya","SG, Krishnan","Associate, Fund Administration",0,FA - Fund Accounting,International
+"Kapoor, Sidhant","Quattrociocchi, Paul","Senior Associate, Fund Administration",0,FA - Core IS,International
+"Dar, Sam","Delaney, Sean",Junior Architect,0,Corporate Operations,International
+"Hoffman, David","Jancsar, Cole",Staff Software Engineer,0,Engineering,International
+"Agrawal, Anu","Doshi, Naman","Assistant Manager, Fund Administration",4,FA - Fund Accounting,International
+"A, Sivashankar","Shah, Anupam",Senior Technical Lead,0,Engineering,International
+"Minhajuddin, Mohammad","Gupta, Rekha","Manager, Fund Administration",5,FA - Fund Accounting,International
+"S, Arvindh","Verma, Puja","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Bhuva, Keval","Pathak, Himanshu",Software Engineer 2,0,Engineering,International
+"Basuvaraj, Gowthaman","Bakthavalsalan, Priyanka",Principal Engineer,0,Engineering,International
+"Kothari, Priya","Veldi, Vijay","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Kumar, Raj","Mishra, Sandeep","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Triveni, Setty","Choudhary, Krutika","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Khandelwal, Pranay","Khetam, Vishal","Senior Associate, Fund Administration",0,FA - Onboarding,International
+"Varghese, Binta","V, Sushmitha","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Singh, Amit","Shah, Anupam",Software Engineer 2,0,Engineering,International
+"Chowke, Rishita","Turakhia, Niraj","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Sharma, M Sanjay","Shivamurthy, Sharath",Software Engineer 2,0,Engineering,International
+"Anala, Janardhan","Veldi, Vijay","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Mi, Sylvia Xue Ying","Stewart, Kristine",Product Marketing Manager,0,Marketing,International
+"Grandhi, Venkata Kiran","Doshi, Naman","Assistant Manager, Fund Administration",5,FA - Fund Accounting,International
+"Lee, Sam","Azares, Jason",Senior Product Designer,0,Product Management,International
+"Garg, Aman","Singh, Mahesh",Senior Technical Lead,0,Engineering,Cloud - E
+"Munshi, Yasin","Pathak, Himanshu",Technical Lead,0,Engineering,International
+"Yekkaluri, Harish Reddy","Rajashekar, Manjunatha","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Kothamasu, Adhitya Sri Gupta","K, Ravi","Assistant Manager, Fund Administration",6,FA - Fund Accounting,International
+"Siranji, Ajay","Kothamasu, Adhitya Sri Gupta","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Solanki, Rahul","Banikar, Shoaib Ahmed",Technical Lead,0,Engineering,International
+"Sharma, Ankur","Sehtya, Chetan",Senior QA Lead,0,Engineering,International
+"Rajput, Kunal","Khetam, Vishal","Assistant Manager, Fund Administration",0,FA - Onboarding,International
+"Fernandes, Neil","Madziarczyk, Jon",Site Reliability Engineer I,0,Engineering,International
+"Ahmad, Syed","Syed, Mehmood","Software Engineer, Intern",0,Engineering,International
+"Prabhu, Dinesh","Butta, Raghavendra","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Javiya, Dimple","Halan, Nidhi","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Nama, Priya","Dalvi, Imaad","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Peetha, Prudhveeraju","V, Sushmitha","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Tarkar, Shubham","Gupta, Lakshay",System & Solutions Engineer,0,Corporate Operations,International
+"Saranobat, Komal","Bhandari, Anup",QA Engineer 1,0,Engineering,International
+"Kamat, Kaustubh","Malbary, Mufaddal","Senior Associate, Fund Administration",0,FA - Core IS,International
+"Chakravarthi, Leela","K, Ravi","Assistant Manager, Fund Administration",1,FA - Fund Accounting,International
+"Venkataramappa, Purushotham","Turakhia, Niraj","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Banikar, Shoaib Ahmed","Sanyal, Santanu","Director, Engineering",10,Engineering,International
+"Mule, Ganesh","Arkachari, Sanjay","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Aggarwal, Manan","Veldi, Vijay","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Daripelli, Saikiran","George, Sunil",Architect,0,Engineering,International
+"Shin, Jenny","Quattrociocchi, Paul","Associate II, Fund Administration",0,FA - Core IS,International
+"Choudhary, Krutika","Gupta, Rekha","Manager, Fund Administration",5,FA - Fund Accounting,International
+"Orobe, Angus","Damani, Zainab Fatima","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Agrawal, Tanay","Verma, Puja","Assistant Manager, Fund Administration",0,FA - Fund Accounting,International
+"Kurmi, Mintu Moni","Gupta, Preeti",Software Engineer 2,0,Engineering,International
+"Rathi, Riddhi","Grandhi, Venkata Kiran","Associate II, Fund Administration",0,FA - Fund Accounting,International
+"Dayaramani, Pankaj","Verma, Puja","Operations Manager, Fund Administration",0,FA - Fund Accounting,International
+"Joseph, Febin","SG, Krishnan","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Damian Toscano, Andres","Varela Torres, Orestes",(Contractor) Senior Software Engineer,0,Engineering, 
+"Alfredo Fain Fernández, Máximo","Varela Torres, Orestes",(Contractor) Software Engineer 2,0,Engineering, 
+"Elizabeth Gabucci, Angela","Correa Cherone, Juan",(Contractor) Software Engineer 2,0,Engineering, 
+"Mahajan, Bhushan","Parikh, Bhavisha","Assistant Manager, Fund Administration",0,FA - Fund Accounting,International
+"Munigala, Srinivasulu","K, Ravi","Manager, Fund Administration",0,FA - Fund Accounting,International
+"Mamidi, Praharsha","Adikesavan, Abishek","Senior Associate, Fund Administration",0,FA - Fund Accounting,International
+"Nayak, Kiran","Singh, Mahesh",Software Engineer 2,0,Engineering,International
+"Konisa, Harsha Vardhan","Pathak, Himanshu",Software Engineer 1,0,Engineering,International
+"Karangutkar, Swapnil","Khetam, Vishal","Manager, Fund Administration",6,FA - Fund Accounting,International
+"Abraham, John","VS, Vineesh",Senior Data Conversion Analyst,0,GPX - Product Onboarding,International
+"Varshney, Sneha","Sehtya, Chetan",QA Engineer 1,0,Engineering,International
+"CV, Soumya","Amaral, Nelson","Manager, Fund Administration",0,FA - Fund Accounting,International
+"JHA, SUDHANSHU","Pathak, Himanshu",Technical Lead,0,Engineering,International

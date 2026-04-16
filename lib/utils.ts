@@ -6,14 +6,11 @@ export function toNum(v: Decimal | number | null | undefined): number {
 }
 
 export function fmtMoney(n: number): string {
-  if (Math.abs(n) >= 1_000_000_000) return '$' + (n / 1_000_000_000).toFixed(1) + 'B';
-  if (Math.abs(n) >= 1_000_000) return '$' + (n / 1_000_000).toFixed(1) + 'M';
-  if (Math.abs(n) >= 1_000) return '$' + (n / 1_000).toFixed(0) + 'K';
-  return '$' + n.toFixed(2);
+  return '$' + Math.round(n).toLocaleString('en-US');
 }
 
 export function fmtMoneyFull(n: number): string {
-  return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return '$' + Math.round(n).toLocaleString('en-US');
 }
 
 export function fmtPct(n: number): string {

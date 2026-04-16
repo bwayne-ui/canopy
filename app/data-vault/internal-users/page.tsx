@@ -6,6 +6,7 @@ import MetricCard from '@/components/MetricCard';
 import DataTable, { Column } from '@/components/DataTable';
 import StatusBadge from '@/components/StatusBadge';
 import { fmtPct } from '@/lib/utils';
+import Link from 'next/link';
 import { Users, UserCheck, Building, BarChart3 } from 'lucide-react';
 
 interface InternalUserRow {
@@ -24,14 +25,17 @@ interface InternalUserRow {
   clientsManaged: number;
   tasksAssigned: number;
   tasksOverdue: number;
-  performanceRating: string | null;
+  segment: string | null;
+  serviceGroup: string | null;
+  licenseType: string | null;
+  podId: string | null;
 }
 
 const utilizationCell = (actual: number | null, target: number | null) => {
   if (actual === null) return <span className="text-gray-400">—</span>;
   const t = target ?? 100;
   const color = actual >= t ? 'text-emerald-600' : actual >= t - 5 ? 'text-amber-600' : 'text-red-600';
-  return <span className={`font-mono text-sm ${color}`}>{fmtPct(actual)}</span>;
+  return <span className={`text-sm ${color}`}>{fmtPct(actual)}</span>;
 };
 
 const tasksCell = (assigned: number, overdue: number) => (
@@ -42,12 +46,20 @@ const tasksCell = (assigned: number, overdue: number) => (
 );
 
 const columns: Column[] = [
-  { key: 'employeeId', label: 'Employee ID', sortable: true, render: (v) => <span className="font-mono text-gray-600">{v}</span> },
-  { key: 'lastName', label: 'Name', sortable: true, render: (_, row) => <span className="font-medium text-gray-900">{row.firstName} {row.lastName}</span> },
+  { key: 'employeeId', label: 'Employee ID', sortable: true, render: (v) => <span className="text-gray-600">{v}</span> },
+  { key: 'lastName', label: 'Name', sortable: true, render: (_: any, row: any) => (
+    <Link href={`/data-vault/internal-users/${row.employeeId}`} className="block group">
+      <div className="font-semibold text-gray-900 group-hover:text-[#00C97B] transition-colors">{row.firstName} {row.lastName}</div>
+      <div className="text-[10px] text-gray-400">{row.employeeId}</div>
+    </Link>
+  ) },
   { key: 'title', label: 'Title', sortable: true },
   { key: 'role', label: 'Role', sortable: true },
   { key: 'department', label: 'Department', sortable: true },
   { key: 'officeLocation', label: 'Location', sortable: true, render: (v) => v || '—' },
+  { key: 'segment', label: 'Segment', sortable: true, render: (v) => v ? <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#F0FBF6] text-[#005868]">{v}</span> : <span className="text-gray-400">—</span> },
+  { key: 'serviceGroup', label: 'Service Group', sortable: true, render: (v) => v || <span className="text-gray-400">—</span> },
+  { key: 'licenseType', label: 'License Type', sortable: true, render: (v) => v ? <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">{v}</span> : <span className="text-gray-400">—</span> },
   { key: 'utilizationActual', label: 'Utilization', sortable: true, align: 'right', render: (_, row) => utilizationCell(row.utilizationActual, row.utilizationTarget) },
   { key: 'tasksAssigned', label: 'Tasks', sortable: true, render: (_, row) => tasksCell(row.tasksAssigned, row.tasksOverdue) },
   { key: 'employmentStatus', label: 'Status', sortable: true, render: (v) => <StatusBadge status={v} /> },
@@ -56,6 +68,12 @@ const columns: Column[] = [
 export default function InternalUsersPage() {
   const [items, setItems] = useState<InternalUserRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchInit, setSearchInit] = useState('');
+
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get('search');
+    if (q) setSearchInit(q);
+  }, []);
 
   useEffect(() => {
     fetch('/api/internal-users')
@@ -92,7 +110,7 @@ export default function InternalUsersPage() {
         <MetricCard title="Avg Utilization" value={fmtPct(avgUtilization)} icon={<BarChart3 className="w-4 h-4" />} color="signal" />
       </div>
 
-      <DataTable columns={columns} data={items} searchPlaceholder="Search staff..." />
+      <DataTable columns={columns} data={items} searchPlaceholder="Search staff..." initialSearch={searchInit} />
     </div>
   );
 }

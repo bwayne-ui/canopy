@@ -27,10 +27,17 @@ export interface Persona {
   capabilities: Capabilities;
   // Entity-level access: 'all' = full book, or array of client names this persona is permissioned to
   entityAccess: 'all' | string[];
+  // Toolbox access: 'all' = all tools, or array of tool IDs ('cap-call-recon' | 'waterfall' | 'diu-mapper' | 'positionbot')
+  toolAccess: 'all' | string[];
   placeholder: string;
   suggestedPrompts: string[];
   companyKpis: CompanyKpi[];
   widgets: string[];
+}
+
+export function canAccessTool(persona: Persona, toolId: string): boolean {
+  if (persona.toolAccess === 'all') return true;
+  return persona.toolAccess.includes(toolId);
 }
 
 // Company-wide KPI bank — we slice this per persona by seniority
@@ -57,6 +64,7 @@ export const PERSONAS: Persona[] = [
       write: ['fund-admin', 'clients', 'close', 'people'],
     },
     entityAccess: 'all',
+    toolAccess: 'all',
     placeholder: 'Ask about org health, escalations, close status, client risk…',
     suggestedPrompts: [
       'Which clients are at risk this quarter?',
@@ -79,6 +87,7 @@ export const PERSONAS: Persona[] = [
       write: ['fund-admin', 'clients', 'close'],
     },
     entityAccess: ['Walker Asset Management', 'Campbell Capital Partners', 'Sullivan Investments', 'Cruz Capital Management', 'Rodriguez Capital Management'],
+    toolAccess: ['waterfall', 'cap-call-recon', 'diu-mapper', 'positionbot'],
     placeholder: 'Ask about pod utilization, client health, SLA trend…',
     suggestedPrompts: [
       'Which pods are over 90% utilization?',
@@ -101,6 +110,7 @@ export const PERSONAS: Persona[] = [
       write: ['fund-admin', 'close'],
     },
     entityAccess: ['Walker Asset Management', 'Campbell Capital Partners', 'Sullivan Investments'],
+    toolAccess: ['waterfall', 'cap-call-recon'],
     placeholder: 'Ask about your team tasks, NAV close, utilization…',
     suggestedPrompts: [
       'Team task board for this week',
@@ -123,6 +133,7 @@ export const PERSONAS: Persona[] = [
       write: [],
     },
     entityAccess: ['Walker Asset Management', 'Campbell Capital Partners'],
+    toolAccess: ['cap-call-recon'],
     placeholder: 'Ask about your tasks, entities, timesheet…',
     suggestedPrompts: [
       'What do I owe today?',
@@ -145,6 +156,7 @@ export const PERSONAS: Persona[] = [
       write: ['bizops'],
     },
     entityAccess: 'all',
+    toolAccess: ['diu-mapper', 'positionbot'],
     placeholder: 'Ask about Jira projects, internal app adoption, tool spend…',
     suggestedPrompts: [
       'Open Jira by project',
@@ -167,6 +179,7 @@ export const PERSONAS: Persona[] = [
       write: ['recruiting'],
     },
     entityAccess: 'all',
+    toolAccess: [],
     placeholder: 'Ask about open reqs, pipeline, upcoming starts…',
     suggestedPrompts: [
       'Open reqs this week',
@@ -189,6 +202,7 @@ export const PERSONAS: Persona[] = [
       write: ['finance', 'close'],
     },
     entityAccess: 'all',
+    toolAccess: ['cap-call-recon', 'waterfall'],
     placeholder: 'Ask about month-end close, AP/AR, cash position…',
     suggestedPrompts: [
       'Month-end close checklist',
@@ -211,6 +225,7 @@ export const PERSONAS: Persona[] = [
       write: ['engineering'],
     },
     entityAccess: 'all',
+    toolAccess: 'all',
     placeholder: 'Ask about Jira velocity, bugs, deploys, on-call…',
     suggestedPrompts: [
       'Sprint velocity last 4 weeks',

@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import PageHeader from '@/components/PageHeader';
 import MetricCard from '@/components/MetricCard';
 import DataTable, { Column } from '@/components/DataTable';
@@ -29,11 +30,11 @@ const sellVol = sells.reduce((s, t) => s + t.amount, 0);
 const pending = trades.filter((t) => t.status === 'Pending Settlement').length;
 
 const columns: Column[] = [
-  { key: 'tradeDate', label: 'Trade Date', sortable: true, render: (v) => <span className="font-mono text-[11px]">{v}</span> },
-  { key: 'security', label: 'Security', sortable: true, render: (v) => <span className="font-medium text-gray-900">{v}</span> },
-  { key: 'type', label: 'Type', render: (v) => <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${v === 'Buy' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>{v}</span> },
-  { key: 'amount', label: 'Amount', align: 'right', sortable: true, render: (v) => <span className="font-mono text-[11px]">{fmtMoney(v)}</span> },
-  { key: 'broker', label: 'Broker', sortable: true },
+  { key: 'tradeDate', label: 'Trade Date', sortable: true, render: (v) => <span className="text-xs">{v}</span> },
+  { key: 'security', label: 'Security', sortable: true, render: (v: string) => <Link href={`/data-vault/security-master?search=${encodeURIComponent(v)}`} className="font-medium text-gray-900 hover:text-[#00C97B] transition-colors">{v}</Link> },
+  { key: 'type', label: 'Type', render: (v: string) => <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${v === 'Buy' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'}`}>{v}</span> },
+  { key: 'amount', label: 'Amount', align: 'right', sortable: true, render: (v: number) => <span className="text-xs">{fmtMoney(v)}</span> },
+  { key: 'broker', label: 'Broker', sortable: true, render: (v: string) => v === 'Direct' ? <span className="text-gray-500">{v}</span> : <Link href={`/data-vault/external-contacts?search=${encodeURIComponent(v)}`} className="text-[#00C97B] hover:underline hover:text-[#00A866] transition-colors">{v}</Link> },
   { key: 'status', label: 'Status', render: (v) => <StatusBadge status={v} /> },
 ];
 

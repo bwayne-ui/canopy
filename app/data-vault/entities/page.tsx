@@ -62,7 +62,7 @@ const typeBadge = (t: string) => {
 };
 
 const dqBar = (score: number | null) => {
-  if (score == null) return <span className="text-gray-400 text-[11px]">—</span>;
+  if (score == null) return <span className="text-gray-400 text-xs">—</span>;
   const pct = Math.round(score);
   const color = pct >= 90 ? 'bg-emerald-500' : pct >= 70 ? 'bg-amber-500' : 'bg-red-500';
   return (
@@ -70,7 +70,7 @@ const dqBar = (score: number | null) => {
       <div className="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden">
         <div className={`h-full rounded-full ${color}`} style={{ width: `${pct}%` }} />
       </div>
-      <span className="text-[11px] font-mono text-gray-600">{pct}%</span>
+      <span className="text-xs text-gray-600">{pct}%</span>
     </div>
   );
 };
@@ -81,7 +81,7 @@ function FilterChip({ label, active, onClick }: { label: string; active: boolean
   return (
     <button
       onClick={onClick}
-      className={`px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${
+      className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
         active
           ? 'bg-[#00C97B]/10 border-[#00C97B] text-[#00C97B]'
           : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
@@ -97,7 +97,13 @@ function FilterChip({ label, active, onClick }: { label: string; active: boolean
 export default function EntitiesPage() {
   const [allData, setAllData] = useState<EntityRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchInit, setSearchInit] = useState('');
   const [personaId, setPersonaId] = useState<string>(DEFAULT_PERSONA_ID);
+
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get('search');
+    if (q) setSearchInit(q);
+  }, []);
   const [filters, setFilters] = useState<Record<FilterKey, Set<string>>>({
     clientName: new Set(),
     entityType: new Set(),
@@ -209,28 +215,28 @@ export default function EntitiesPage() {
       label: 'Vintage',
       sortable: true,
       align: 'center',
-      render: (v: number | null) => <span className="font-mono text-gray-600">{v ?? '—'}</span>,
+      render: (v: number | null) => <span className="text-gray-600">{v ?? '—'}</span>,
     },
     {
       key: 'navMm',
-      label: 'NAV ($MM)',
+      label: 'NAV',
       sortable: true,
       align: 'right',
-      render: (v: number | null) => <span className="font-mono">{v != null ? fmtMoney(v) : '—'}</span>,
+      render: (v: number | null) => <span className="">{v != null ? fmtMoney(v) : '—'}</span>,
     },
     {
       key: 'investorCount',
       label: 'Investors',
       sortable: true,
       align: 'center',
-      render: (v: number) => <span className="font-mono text-gray-600">{v > 0 ? v : '—'}</span>,
+      render: (v: number) => <span className="text-gray-600">{v > 0 ? v : '—'}</span>,
     },
     {
       key: 'taskCount',
       label: 'Tasks',
       sortable: true,
       align: 'center',
-      render: (v: number) => <span className="font-mono text-gray-600">{v > 0 ? v : '—'}</span>,
+      render: (v: number) => <span className="text-gray-600">{v > 0 ? v : '—'}</span>,
     },
     {
       key: 'dataQualityScore',
@@ -258,13 +264,13 @@ export default function EntitiesPage() {
         actions={
           <div className="flex items-center gap-2">
             {/* persona indicator */}
-            <div className="flex items-center gap-1.5 text-[11px] text-gray-500 bg-gray-50 px-2.5 py-1.5 rounded-md border border-gray-200">
-              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-[#00C97B] to-[#1B3A4B] text-white flex items-center justify-center text-[8px] font-bold">
+            <div className="flex items-center gap-1.5 text-xs text-gray-500 bg-gray-50 px-2.5 py-1.5 rounded-md border border-gray-200">
+              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-[#00C97B] to-[#1B3A4B] text-white flex items-center justify-center text-[10px] font-bold">
                 {persona.avatarInitials}
               </div>
               <span className="font-semibold text-gray-700">{persona.name}</span>
               {persona.entityAccess !== 'all' && (
-                <span className="inline-flex items-center gap-0.5 text-[9px] text-amber-600">
+                <span className="inline-flex items-center gap-0.5 text-[10px] text-amber-600">
                   <Lock className="w-2.5 h-2.5" />{persona.entityAccess.length} clients
                 </span>
               )}
@@ -277,7 +283,7 @@ export default function EntitiesPage() {
                 if (typeof window !== 'undefined') localStorage.setItem('canopy.controlTower.personaId', e.target.value);
                 clearFilters();
               }}
-              className="text-[11px] border border-gray-200 rounded-md px-2 py-1.5 bg-white text-gray-700 focus:outline-none focus:border-[#00C97B]"
+              className="text-xs border border-gray-200 rounded-md px-2 py-1.5 bg-white text-gray-700 focus:outline-none focus:border-[#00C97B]"
             >
               {PERSONAS.map((p) => (
                 <option key={p.id} value={p.id}>{p.name} — {p.title}</option>
@@ -290,7 +296,7 @@ export default function EntitiesPage() {
       {/* ── filter bar ── */}
       <div className="bg-white rounded-lg shadow-sm p-2 mb-2">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
             <Filter className="w-3 h-3" /> Filters
           </span>
 
@@ -298,7 +304,7 @@ export default function EntitiesPage() {
             <div key={key} className="relative">
               <button
                 onClick={() => setExpandedFilter(expandedFilter === key ? null : key)}
-                className={`px-2.5 py-1 rounded-md text-[11px] font-medium border transition-colors ${
+                className={`px-2.5 py-1 rounded-md text-xs font-medium border transition-colors ${
                   filters[key].size > 0
                     ? 'bg-[#00C97B]/10 border-[#00C97B] text-[#00C97B]'
                     : expandedFilter === key
@@ -375,7 +381,7 @@ export default function EntitiesPage() {
       {loading ? (
         <div className="text-center py-12 text-gray-400">Loading entities...</div>
       ) : (
-        <DataTable columns={columns} data={filtered} searchPlaceholder="Search entities by name, type, strategy, client..." />
+        <DataTable columns={columns} data={filtered} searchPlaceholder="Search entities by name, type, strategy, client..." initialSearch={searchInit} />
       )}
     </div>
   );
