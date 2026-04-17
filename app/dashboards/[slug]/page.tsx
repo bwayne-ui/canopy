@@ -118,7 +118,7 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
 /* ═══════════════════════════════════════════════════════════════════
    DASHBOARD CONFIGS
    ═══════════════════════════════════════════════════════════════════ */
-interface MetricConfig { title: string; value: string; change?: string; changeType?: 'up' | 'down' | 'neutral'; color: 'green' | 'teal' | 'signal' | 'amber' | 'red'; icon: React.ReactNode }
+interface MetricConfig { title: string; value: string; change?: string; changeType?: 'up' | 'down' | 'neutral'; color: 'green' | 'teal' | 'signal' | 'amber' | 'red'; icon: React.ReactNode; href?: string }
 interface DashConfig { title: string; subtitle: string; metrics: MetricConfig[]; content: React.ReactNode }
 
 const dashboards: Record<string, DashConfig> = {
@@ -225,29 +225,84 @@ const dashboards: Record<string, DashConfig> = {
 
   /* ──────────── NAV ──────────── */
   nav: {
-    title: 'NAV Dashboard', subtitle: 'Fund net asset values and month-to-date changes',
+    title: 'NAV Dashboard', subtitle: 'Fund net asset values by partner class — GP · LP · SLP',
     metrics: [
-      { title: 'Aggregate NAV', value: '$3.94B', change: '+2.8% MTD', changeType: 'up', color: 'green', icon: <DollarSign className="w-4 h-4" /> },
-      { title: 'NAV Increases', value: '12 funds', change: 'Positive MTD', changeType: 'up', color: 'signal', icon: <TrendingUp className="w-4 h-4" /> },
-      { title: 'NAV Decreases', value: '3 funds', change: 'FX/market', changeType: 'down', color: 'red', icon: <AlertCircle className="w-4 h-4" /> },
-      { title: 'Pending Adj.', value: '4', change: 'Valuation updates', changeType: 'neutral', color: 'amber', icon: <Clock className="w-4 h-4" /> },
+      { title: 'Aggregate NAV', value: '$3.94B', change: '+2.8% MTD', changeType: 'up', color: 'green', icon: <DollarSign className="w-4 h-4" />, href: '/dashboards/nav' },
+      { title: 'GP NAV', value: '$78.8M', change: '2.0% of total', changeType: 'neutral', color: 'teal', icon: <Shield className="w-4 h-4" />, href: '/dashboards/nav' },
+      { title: 'LP NAV', value: '$3.52B', change: '89.3% of total', changeType: 'up', color: 'signal', icon: <Users className="w-4 h-4" />, href: '/dashboards/nav' },
+      { title: 'SLP NAV', value: '$341.2M', change: '8.7% — side letter terms', changeType: 'neutral', color: 'amber', icon: <FileText className="w-4 h-4" />, href: '/dashboards/nav' },
     ],
     content: (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        <Panel title="NAV Trend (6Q)" className="lg:col-span-2">
-          <ResponsiveContainer width="100%" height={220}>
+        {/* Stacked bar — NAV by class per quarter */}
+        <Panel title="NAV by Partner Class (7Q)" className="lg:col-span-2">
+          <ResponsiveContainer width="100%" height={240}>
             <BarChart data={[
-              { q: 'Q3 \'24', nav: 3280 }, { q: 'Q4 \'24', nav: 3410 }, { q: 'Q1 \'25', nav: 3530 },
-              { q: 'Q2 \'25', nav: 3350 }, { q: 'Q3 \'25', nav: 3650 }, { q: 'Q4 \'25', nav: 3820 }, { q: 'Q1 \'26', nav: 3940 },
+              { q: "Q3 '24", gp: 62, lp: 2930, slp: 288 },
+              { q: "Q4 '24", gp: 65, lp: 3040, slp: 305 },
+              { q: "Q1 '25", gp: 68, lp: 3150, slp: 312 },
+              { q: "Q2 '25", gp: 64, lp: 2990, slp: 296 },
+              { q: "Q3 '25", gp: 71, lp: 3260, slp: 319 },
+              { q: "Q4 '25", gp: 74, lp: 3410, slp: 336 },
+              { q: "Q1 '26", gp: 79, lp: 3520, slp: 341 },
             ]}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
               <XAxis dataKey="q" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => `$${(v / 1000).toFixed(1)}B`} />
               <Tooltip content={<ChartTooltip />} />
-              <Bar dataKey="nav" name="NAV ($M)" fill={C.teal} radius={[4, 4, 0, 0]} />
+              <Legend wrapperStyle={{ fontSize: 10 }} />
+              <Bar dataKey="lp" stackId="nav" name="LP" fill={C.teal} />
+              <Bar dataKey="slp" stackId="nav" name="SLP" fill={C.amber} />
+              <Bar dataKey="gp" stackId="nav" name="GP" fill={C.purple} radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Panel>
+
+        {/* Pie — class breakdown */}
+        <Panel title="Class Allocation">
+          <ResponsiveContainer width="100%" height={160}>
+            <PieChart>
+              <Pie data={[
+                { name: 'LP', value: 89.3 },
+                { name: 'SLP', value: 8.7 },
+                { name: 'GP', value: 2.0 },
+              ]} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={55} innerRadius={28}>
+                <Cell fill={C.teal} />
+                <Cell fill={C.amber} />
+                <Cell fill={C.purple} />
+              </Pie>
+              <Tooltip formatter={(v: number) => [`${v.toFixed(1)}%`, 'Share']} />
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="flex items-center justify-center gap-4 mt-1">
+            {[['LP', C.teal], ['SLP', C.amber], ['GP', C.purple]].map(([l, c]) => (
+              <div key={l as string} className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: c as string }} />
+                <span className="text-[10px] text-gray-500 font-medium">{l}</span>
+              </div>
+            ))}
+          </div>
+        </Panel>
+
+        {/* Fund-level class breakdown table */}
+        <DataRows
+          className="lg:col-span-2"
+          title="NAV by Fund & Class"
+          headers={['Fund', 'GP NAV', 'LP NAV', 'SLP NAV', 'Total', 'MTD %']}
+          rows={[
+            ['Walker III', '$16.2M', '$720M', '$72.8M', '$809M', <span key="w" className="text-emerald-600 font-semibold">+3.1%</span>],
+            ['Campbell IV', '$5.1M', '$228M', '$22.9M', '$256M', <span key="c" className="text-emerald-600 font-semibold">+2.4%</span>],
+            ['Sullivan Alpha', '$12.4M', '$558M', '$53.2M', '$623.6M', <span key="s" className="text-red-600 font-semibold">-1.2%</span>],
+            ['Cruz Ventures II', '$4.8M', '$216M', '$20.2M', '$241M', <span key="cr" className="text-emerald-600 font-semibold">+5.8%</span>],
+            ['Lopez RE III', '$7.2M', '$324M', '$32.4M', '$363.6M', <span key="l" className="text-emerald-600 font-semibold">+1.9%</span>],
+            ['White Credit V', '$9.6M', '$432M', '$42.4M', '$484M', <span key="wh" className="text-emerald-600 font-semibold">+0.8%</span>],
+            ['WFM Global FoF', '$10.8M', '$486M', '$47.2M', '$544M', <span key="wf" className="text-emerald-600 font-semibold">+2.1%</span>],
+            ['Rodriguez EM', '$4.2M', '$188M', '$18.8M', '$211M', <span key="r" className="text-red-600 font-semibold">-0.6%</span>],
+            [<span key="tot" className="font-bold text-gray-900">Total</span>, <span key="tg" className="font-bold">$78.8M</span>, <span key="tl" className="font-bold">$3.52B</span>, <span key="ts" className="font-bold">$341.2M</span>, <span key="tt" className="font-bold text-gray-900">$3.94B</span>, <span key="tc" className="text-emerald-600 font-bold">+2.8%</span>],
+          ]}
+        />
+
+        {/* Control check heatmap */}
         <Heatmap title="Control Check Matrix" items={[
           { label: 'Walker III', cells: [{ tip: 'Pricing ✓', s: 'g' }, { tip: 'Cash Rec ✓', s: 'g' }, { tip: 'Tolerance ✓', s: 'g' }, { tip: 'Side Letters ✓', s: 'g' }, { tip: 'FX ✓', s: 'g' }] },
           { label: 'Campbell IV', cells: [{ tip: 'Pricing ✓', s: 'g' }, { tip: 'Cash Rec ✓', s: 'g' }, { tip: 'Tolerance ✓', s: 'g' }, { tip: 'Side Letters ⚠', s: 'a' }, { tip: 'FX ✓', s: 'g' }] },
