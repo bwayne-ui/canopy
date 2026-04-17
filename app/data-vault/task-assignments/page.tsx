@@ -81,10 +81,10 @@ export default function TaskAssignmentsPage() {
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3\">
-        <MetricCard title="Total Assignments" value={String(total)} icon={<ClipboardCheck className="w-4 h-4" />} color="teal" />
-        <MetricCard title="Complete" value={String(complete)} icon={<CheckCircle2 className="w-4 h-4" />} color="green" />
-        <MetricCard title="In Progress" value={String(inProgress)} icon={<Loader className="w-4 h-4" />} color="signal" />
-        <MetricCard title="Overdue" value={String(overdue)} icon={<AlertTriangle className="w-4 h-4" />} color="red" />
+        <MetricCard title="Total Assignments" value={String(total)} icon={<ClipboardCheck className="w-4 h-4" />} color="teal" href="/data-vault/task-assignments" />
+        <MetricCard title="Complete" value={String(complete)} icon={<CheckCircle2 className="w-4 h-4" />} color="green" href="/data-vault/task-assignments" />
+        <MetricCard title="In Progress" value={String(inProgress)} icon={<Loader className="w-4 h-4" />} color="signal" href="/data-vault/task-assignments" />
+        <MetricCard title="Overdue" value={String(overdue)} icon={<AlertTriangle className="w-4 h-4" />} color="red" href="/data-vault/task-assignments" />
       </div>
 
       <DataTable columns={columns} data={items} searchPlaceholder="Search assignments..." />

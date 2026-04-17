@@ -88,10 +88,10 @@ export default function CommunicationsPage() {
       <PageHeader title="Communications" subtitle="Track all client and internal communications" />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard title="Total Communications" value={items.length} />
-        <MetricCard title="Open" value={open} color="signal" />
-        <MetricCard title="Urgent" value={urgent} color="red" />
-        <MetricCard title="With Attachments" value={withAttachments} />
+        <MetricCard title="Total Communications" value={items.length} href="/communications" />
+        <MetricCard title="Open" value={open} color="signal" href="/communications" />
+        <MetricCard title="Urgent" value={urgent} color="red" href="/communications" />
+        <MetricCard title="With Attachments" value={withAttachments} href="/communications" />
       </div>
 
       {loading ? (

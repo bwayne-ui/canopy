@@ -44,10 +44,10 @@ export default function GLPage() {
     <div className="space-y-5">
       <PageHeader title="General Ledger" subtitle="Journal entries and accounting activity" breadcrumbs={[{ label: 'Activity' }, { label: 'GL' }]} />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <MetricCard title="Total Entries" value={entries.length} icon={<BookOpen className="w-4 h-4" />} color="teal" />
-        <MetricCard title="Total Debits" value={fmtMoney(totalDebits)} icon={<ArrowUpRight className="w-4 h-4" />} color="green" />
-        <MetricCard title="Total Credits" value={fmtMoney(totalCredits)} icon={<ArrowDownRight className="w-4 h-4" />} color="signal" />
-        <MetricCard title="Unreconciled" value={unreconciled} icon={<AlertCircle className="w-4 h-4" />} color="amber" />
+        <MetricCard title="Total Entries" value={entries.length} icon={<BookOpen className="w-4 h-4" />} color="teal" href="/activity/gl" />
+        <MetricCard title="Total Debits" value={fmtMoney(totalDebits)} icon={<ArrowUpRight className="w-4 h-4" />} color="green" href="/activity/gl" />
+        <MetricCard title="Total Credits" value={fmtMoney(totalCredits)} icon={<ArrowDownRight className="w-4 h-4" />} color="signal" href="/activity/gl" />
+        <MetricCard title="Unreconciled" value={unreconciled} icon={<AlertCircle className="w-4 h-4" />} color="amber" href="/reports" />
       </div>
       <DataTable columns={columns} data={entries} searchPlaceholder="Search journal entries..." />
     </div>

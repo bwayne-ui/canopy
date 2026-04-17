@@ -82,10 +82,10 @@ export default function AISkillsPage() {
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
-        <MetricCard title="Total Skills" value={String(total)} icon={<Brain className="w-4 h-4" />} color="teal" />
-        <MetricCard title="Active" value={String(active)} icon={<Activity className="w-4 h-4" />} color="green" />
-        <MetricCard title="Avg Accuracy" value={fmtPct(avgAccuracy)} icon={<Target className="w-4 h-4" />} color="signal" />
-        <MetricCard title="Total Runs" value={totalRuns.toLocaleString()} icon={<Play className="w-4 h-4" />} color="teal" />
+        <MetricCard title="Total Skills" value={String(total)} icon={<Brain className="w-4 h-4" />} color="teal" href="/data-vault/ai-skills" />
+        <MetricCard title="Active" value={String(active)} icon={<Activity className="w-4 h-4" />} color="green" href="/data-vault/ai-skills" />
+        <MetricCard title="Avg Accuracy" value={fmtPct(avgAccuracy)} icon={<Target className="w-4 h-4" />} color="signal" href="/data-vault/ai-skills" />
+        <MetricCard title="Total Runs" value={totalRuns.toLocaleString()} icon={<Play className="w-4 h-4" />} color="teal" href="/data-vault/ai-skills" />
       </div>
 
       <DataTable columns={columns} data={items} searchPlaceholder="Search skills..." />

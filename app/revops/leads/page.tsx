@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import PageHeader from '@/components/PageHeader';
 import MetricCard from '@/components/MetricCard';
+import Link from 'next/link';
 import DataTable, { Column } from '@/components/DataTable';
 import StatusBadge from '@/components/StatusBadge';
 
@@ -64,7 +65,7 @@ export default function LeadsPage() {
       key: 'company',
       label: 'Company',
       sortable: true,
-      render: (v: string | null) => <span>{v ?? '—'}</span>,
+      render: (v: string | null) => v ? <Link href={`/revops/accounts?search=${encodeURIComponent(v)}`} className="font-semibold text-gray-900 hover:text-[#00C97B] transition-colors">{v}</Link> : <span>—</span>,
     },
     {
       key: 'title',
@@ -88,7 +89,7 @@ export default function LeadsPage() {
       key: 'ownerName',
       label: 'Owner',
       sortable: true,
-      render: (v: string | null) => <span>{v ?? '—'}</span>,
+      render: (v: string | null) => v ? <Link href={`/data-vault/internal-users?search=${encodeURIComponent(v)}`} className="font-semibold text-gray-900 hover:text-[#00C97B] transition-colors">{v}</Link> : <span>—</span>,
     },
     {
       key: 'createdAt',
@@ -134,13 +135,14 @@ export default function LeadsPage() {
       />
 
       <div className="grid grid-cols-4 gap-3 mb-4">
-        <MetricCard title="Total Leads" value={metrics.total} color="teal" />
-        <MetricCard title="New" value={metrics.newCount} color="green" />
-        <MetricCard title="Working" value={metrics.working} color="amber" />
+        <MetricCard title="Total Leads" value={metrics.total} color="teal" href="/revops/leads" />
+        <MetricCard title="New" value={metrics.newCount} color="green" href="/revops/leads" />
+        <MetricCard title="Working" value={metrics.working} color="amber" href="/revops/leads" />
         <MetricCard
           title="Converted"
           value={`${metrics.converted} / ${metrics.total}`}
           color="signal"
+          href="/revops/leads"
         />
       </div>
 

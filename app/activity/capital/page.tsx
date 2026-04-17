@@ -46,10 +46,10 @@ export default function CapitalPage() {
     <div className="space-y-5">
       <PageHeader title="Capital Activity" subtitle="Capital calls, distributions, and redemptions" breadcrumbs={[{ label: 'Activity' }, { label: 'Capital' }]} />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <MetricCard title="Total Activity" value={capitalActivity.length} icon={<BadgeDollarSign className="w-4 h-4" />} color="teal" />
-        <MetricCard title="Capital Called" value={fmtMoney(totalCalled)} icon={<ArrowUpRight className="w-4 h-4" />} color="green" />
-        <MetricCard title="Distributed" value={fmtMoney(totalDistributed)} icon={<ArrowDownRight className="w-4 h-4" />} color="signal" />
-        <MetricCard title="Unfunded" value={fmtMoney(totalCalled * 0.42)} icon={<Layers className="w-4 h-4" />} color="amber" />
+        <MetricCard title="Total Activity" value={capitalActivity.length} icon={<BadgeDollarSign className="w-4 h-4" />} color="teal" href="/activity/capital" />
+        <MetricCard title="Capital Called" value={fmtMoney(totalCalled)} icon={<ArrowUpRight className="w-4 h-4" />} color="green" href="/activity/capital" />
+        <MetricCard title="Distributed" value={fmtMoney(totalDistributed)} icon={<ArrowDownRight className="w-4 h-4" />} color="signal" href="/activity/capital" />
+        <MetricCard title="Unfunded" value={fmtMoney(totalCalled * 0.42)} icon={<Layers className="w-4 h-4" />} color="amber" href="/activity/capital" />
       </div>
       <DataTable columns={columns} data={capitalActivity} searchPlaceholder="Search capital activity..." />
     </div>

@@ -63,7 +63,7 @@ export default function ReportsPage() {
     { key: 'reportId', label: 'Report ID', sortable: true, render: (v: string, row: ReportRow) => (
       <Link href={`/reports/${row.reportId}`} className="text-xs text-[#00C97B] hover:underline">{v}</Link>
     )},
-    { key: 'name', label: 'Name', sortable: true, render: (v: string) => <span className="font-semibold text-gray-900">{v}</span> },
+    { key: 'name', label: 'Name', sortable: true, render: (v: string, row: ReportRow) => <Link href={`/reports/${row.reportId}`} className="font-semibold text-gray-900 hover:text-[#00C97B] transition-colors">{v}</Link> },
     { key: 'category', label: 'Category', sortable: true, render: (v: string) => (
       <span className="inline-block rounded-full bg-gray-100 text-gray-700 px-2 py-0.5 text-[10px] font-medium">{v}</span>
     )},
@@ -119,10 +119,10 @@ export default function ReportsPage() {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-        <MetricCard title="Total Reports" value={String(reports.length)} icon={<FileBarChart className="w-4 h-4" />} color="teal" />
-        <MetricCard title="Scheduled" value={String(scheduled)} color="green" />
-        <MetricCard title="On-Demand" value={String(onDemand)} color="amber" />
-        <MetricCard title="Skill-Backed" value={String(skillBacked)} color="signal" />
+        <MetricCard title="Total Reports" value={String(reports.length)} icon={<FileBarChart className="w-4 h-4" />} color="teal" href="/reports" />
+        <MetricCard title="Scheduled" value={String(scheduled)} color="green" href="/reports" />
+        <MetricCard title="On-Demand" value={String(onDemand)} color="amber" href="/reports" />
+        <MetricCard title="Skill-Backed" value={String(skillBacked)} color="signal" href="/reports" />
       </div>
 
       <DataTable columns={columns} data={reports} searchable searchPlaceholder="Search reports..." />

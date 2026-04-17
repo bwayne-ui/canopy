@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
+import Link from 'next/link';
 import PageHeader from '@/components/PageHeader';
 import MetricCard from '@/components/MetricCard';
 import DataTable, { Column } from '@/components/DataTable';
@@ -60,7 +61,7 @@ export default function ContractsPage() {
       key: 'accountName',
       label: 'Account',
       sortable: true,
-      render: (v: string) => <span>{v}</span>,
+      render: (v: string) => <Link href={`/revops/accounts?search=${encodeURIComponent(v)}`} className="font-semibold text-gray-900 hover:text-[#00C97B] transition-colors">{v}</Link>,
     },
     {
       key: 'contractType',
@@ -133,10 +134,10 @@ export default function ContractsPage() {
       />
 
       <div className="grid grid-cols-4 gap-3 mb-4">
-        <MetricCard title="Total Contracts" value={metrics.total} color="teal" />
-        <MetricCard title="Active" value={metrics.activeCount} color="green" />
-        <MetricCard title="Total ARR" value={fmtMoney(metrics.totalArr)} color="signal" />
-        <MetricCard title="Avg ARR" value={fmtMoney(metrics.avgArr)} color="amber" />
+        <MetricCard title="Total Contracts" value={metrics.total} color="teal" href="/revops/contracts" />
+        <MetricCard title="Active" value={metrics.activeCount} color="green" href="/revops/contracts" />
+        <MetricCard title="Total ARR" value={fmtMoney(metrics.totalArr)} color="signal" href="/revops/contracts" />
+        <MetricCard title="Avg ARR" value={fmtMoney(metrics.avgArr)} color="amber" href="/revops/contracts" />
       </div>
 
       <DataTable

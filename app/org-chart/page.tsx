@@ -518,18 +518,21 @@ export default function OrgChartPage() {
           value={allUsers.length}
           icon={<Users className="w-5 h-5" />}
           color="green"
+          href="/org-chart"
         />
         <MetricCard
           title="Avg Span of Control"
           value={avgSpan}
           icon={<UserCheck className="w-5 h-5" />}
           color="teal"
+          href="/org-chart"
         />
         <MetricCard
           title="Org Depth"
           value={`${maxTlLevel + 1} levels`}
           icon={<Shield className="w-5 h-5" />}
           color="signal"
+          href="/org-chart"
         />
       </div>
 

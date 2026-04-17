@@ -220,12 +220,12 @@ export default function TimeTrackingPage() {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3">
-        <MetricCard title="Total Sheets" value={String(sheets.length)} icon={<Clock className="w-4 h-4" />} color="teal" />
-        <MetricCard title="Draft" value={String(draft)} icon={<FileEdit className="w-4 h-4" />} color="amber" />
-        <MetricCard title="Submitted" value={String(submitted)} icon={<Send className="w-4 h-4" />} color="signal" />
-        <MetricCard title="Approved" value={String(approved)} icon={<CheckCircle2 className="w-4 h-4" />} color="green" />
-        <MetricCard title="Total Hours" value={totalHours.toFixed(0)} color="teal" />
-        <MetricCard title="Avg Util %" value={`${avgUtil.toFixed(1)}%`} change={`${totalBillable.toFixed(0)} billable`} changeType="up" color="green" />
+        <MetricCard title="Total Sheets" value={String(sheets.length)} icon={<Clock className="w-4 h-4" />} color="teal" href="/time-tracking" />
+        <MetricCard title="Draft" value={String(draft)} icon={<FileEdit className="w-4 h-4" />} color="amber" href="/time-tracking" />
+        <MetricCard title="Submitted" value={String(submitted)} icon={<Send className="w-4 h-4" />} color="signal" href="/time-tracking" />
+        <MetricCard title="Approved" value={String(approved)} icon={<CheckCircle2 className="w-4 h-4" />} color="green" href="/time-tracking" />
+        <MetricCard title="Total Hours" value={totalHours.toFixed(0)} color="teal" href="/time-tracking" />
+        <MetricCard title="Avg Util %" value={`${avgUtil.toFixed(1)}%`} change={`${totalBillable.toFixed(0)} billable`} changeType="up" color="green" href="/time-tracking" />
       </div>
 
       <DataTable columns={columns} data={sheets} searchable searchPlaceholder="Search by employee or status..." />

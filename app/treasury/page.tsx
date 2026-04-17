@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import PageHeader from '@/components/PageHeader';
 import MetricCard from '@/components/MetricCard';
 import DataTable, { Column } from '@/components/DataTable';
@@ -16,7 +17,7 @@ const accountColumns: Column[] = [
   { key: 'availableBalance', label: 'Available', align: 'right', render: (v: number) => <span className="">{fmtMoney(v)}</span> },
   { key: 'pendingInflows', label: 'Inflows', align: 'right', render: (v: number) => v > 0 ? <span className="text-emerald-600">{fmtMoney(v)}</span> : <span className="text-gray-300">—</span> },
   { key: 'pendingOutflows', label: 'Outflows', align: 'right', render: (v: number) => v > 0 ? <span className="text-red-600">{fmtMoney(v)}</span> : <span className="text-gray-300">—</span> },
-  { key: 'entityName', label: 'Entity', render: (v: string | null) => v || '—' },
+  { key: 'entityName', label: 'Entity', render: (v: string | null) => v ? <Link href={`/data-vault/entities?search=${encodeURIComponent(v)}`} className="font-semibold text-gray-900 hover:text-[#00C97B] transition-colors">{v}</Link> : '—' },
   { key: 'status', label: 'Status', render: (v: string) => <StatusBadge status={v} /> },
 ];
 
@@ -26,8 +27,8 @@ const cashFlowColumns: Column[] = [
   { key: 'category', label: 'Category', sortable: true },
   { key: 'amount', label: 'Amount', align: 'right', sortable: true, render: (v: number, row: any) => <span className={`font-medium ${row.flowType === 'Inflow' ? 'text-emerald-600' : 'text-red-600'}`}>{fmtMoney(Math.abs(v))}</span> },
   { key: 'accountName', label: 'Account', sortable: true },
-  { key: 'entityName', label: 'Entity', render: (v: string | null) => v || '—' },
-  { key: 'counterparty', label: 'Counterparty', render: (v: string | null) => v || '—' },
+  { key: 'entityName', label: 'Entity', render: (v: string | null) => v ? <Link href={`/data-vault/entities?search=${encodeURIComponent(v)}`} className="font-semibold text-gray-900 hover:text-[#00C97B] transition-colors">{v}</Link> : '—' },
+  { key: 'counterparty', label: 'Counterparty', render: (v: string | null) => v ? <Link href={`/data-vault/external-contacts?search=${encodeURIComponent(v)}`} className="font-semibold text-gray-900 hover:text-[#00C97B] transition-colors">{v}</Link> : '—' },
   { key: 'description', label: 'Description', render: (v: string | null) => v ? <span className="max-w-[200px] truncate block" title={v}>{v}</span> : '—' },
   { key: 'status', label: 'Status', render: (v: string) => <StatusBadge status={v} /> },
 ];
@@ -56,10 +57,10 @@ export default function TreasuryPage() {
       <PageHeader title="Treasury Center" subtitle="Cash management and treasury operations" />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <MetricCard title="Total Balance" value={fmtMoney(totalBalance)} color="green" />
-        <MetricCard title="Pending Inflows" value={fmtMoney(totalInflows)} color="signal" />
-        <MetricCard title="Pending Outflows" value={fmtMoney(totalOutflows)} color="red" />
-        <MetricCard title="Active Accounts" value={activeAccounts} color="teal" />
+        <MetricCard title="Total Balance" value={fmtMoney(totalBalance)} color="green" href="/treasury" />
+        <MetricCard title="Pending Inflows" value={fmtMoney(totalInflows)} color="signal" href="/treasury" />
+        <MetricCard title="Pending Outflows" value={fmtMoney(totalOutflows)} color="red" href="/dashboards/cash" />
+        <MetricCard title="Active Accounts" value={activeAccounts} color="teal" href="/treasury" />
       </div>
 
       <div>

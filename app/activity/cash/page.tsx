@@ -41,10 +41,10 @@ export default function CashActivityPage() {
     <div className="space-y-5">
       <PageHeader title="Cash Activity" subtitle="Cash movements and settlement tracking" breadcrumbs={[{ label: 'Activity' }, { label: 'Cash' }]} />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <MetricCard title="Total Movements" value={movements.length} icon={<Activity className="w-4 h-4" />} color="teal" />
-        <MetricCard title="Total Inflows" value={fmtMoney(inflows)} icon={<ArrowUpRight className="w-4 h-4" />} color="green" />
-        <MetricCard title="Total Outflows" value={fmtMoney(outflows)} icon={<ArrowDownRight className="w-4 h-4" />} color="red" />
-        <MetricCard title="Net Flow" value={fmtMoney(inflows - outflows)} icon={<Wallet className="w-4 h-4" />} color="signal" />
+        <MetricCard title="Total Movements" value={movements.length} icon={<Activity className="w-4 h-4" />} color="teal" href="/activity/cash" />
+        <MetricCard title="Total Inflows" value={fmtMoney(inflows)} icon={<ArrowUpRight className="w-4 h-4" />} color="green" href="/activity/cash" />
+        <MetricCard title="Total Outflows" value={fmtMoney(outflows)} icon={<ArrowDownRight className="w-4 h-4" />} color="red" href="/activity/cash" />
+        <MetricCard title="Net Flow" value={fmtMoney(inflows - outflows)} icon={<Wallet className="w-4 h-4" />} color="signal" href="/dashboards/cash" />
       </div>
       <DataTable columns={columns} data={movements} searchPlaceholder="Search cash movements..." />
     </div>

@@ -333,10 +333,10 @@ export default function RelationshipsPage() {
 
       {/* ── Metrics ────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-        <MetricCard title="Relationships" value={metrics.total.toLocaleString()} icon={<Link2 className="w-4 h-4" />} color="teal" />
-        <MetricCard title="Active" value={metrics.active.toLocaleString()} icon={<CheckCircle className="w-4 h-4" />} color="green" />
-        <MetricCard title="Types" value={metrics.types.toLocaleString()} icon={<Tags className="w-4 h-4" />} color="signal" />
-        <MetricCard title="Entities" value={metrics.entities.toLocaleString()} icon={<Users className="w-4 h-4" />} color="amber" />
+        <MetricCard title="Relationships" value={metrics.total.toLocaleString()} icon={<Link2 className="w-4 h-4" />} color="teal" href="/relationships" />
+        <MetricCard title="Active" value={metrics.active.toLocaleString()} icon={<CheckCircle className="w-4 h-4" />} color="green" href="/relationships" />
+        <MetricCard title="Types" value={metrics.types.toLocaleString()} icon={<Tags className="w-4 h-4" />} color="signal" href="/relationships" />
+        <MetricCard title="Entities" value={metrics.entities.toLocaleString()} icon={<Users className="w-4 h-4" />} color="amber" href="/data-vault/entities" />
       </div>
 
       {/* ── View Toggle ────────────────────────────────────────── */}

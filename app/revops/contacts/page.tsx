@@ -61,16 +61,16 @@ export default function ContactsPage() {
       key: 'accountName',
       label: 'Account',
       sortable: true,
-      render: (v: string | null, row: ContactRow) =>
-        row.accountId ? (
+      render: (v: string | null) =>
+        v ? (
           <Link
-            href={`/revops/accounts/${row.accountId}`}
-            className="text-[#00C97B] hover:underline"
+            href={`/revops/accounts?search=${encodeURIComponent(v)}`}
+            className="font-semibold text-gray-900 hover:text-[#00C97B] transition-colors"
           >
-            {v ?? '—'}
+            {v}
           </Link>
         ) : (
-          <span>{v ?? '—'}</span>
+          <span>—</span>
         ),
     },
     {
@@ -119,9 +119,9 @@ export default function ContactsPage() {
       />
 
       <div className="grid grid-cols-3 gap-3 mb-4">
-        <MetricCard title="Total Contacts" value={metrics.total} color="teal" />
-        <MetricCard title="Decision Makers" value={metrics.decisionMakers} color="green" />
-        <MetricCard title="Champions" value={metrics.champions} color="signal" />
+        <MetricCard title="Total Contacts" value={metrics.total} color="teal" href="/revops/contacts" />
+        <MetricCard title="Decision Makers" value={metrics.decisionMakers} color="green" href="/revops/contacts" />
+        <MetricCard title="Champions" value={metrics.champions} color="signal" href="/revops/contacts" />
       </div>
 
       <DataTable

@@ -17,7 +17,7 @@ const priorityStyles: Record<string, string> = {
 
 const columns: Column[] = [
   { key: 'projectId', label: 'Project ID', render: (v: string) => <span>{v}</span> },
-  { key: 'name', label: 'Name', sortable: true, render: (v: string) => <span className="font-medium text-gray-900">{v}</span> },
+  { key: 'name', label: 'Name', sortable: true, render: (v: string, row: any) => <Link href={`/projects/${row.projectId}`} className="font-semibold text-gray-900 hover:text-[#00C97B] transition-colors">{v}</Link> },
   { key: 'projectType', label: 'Type', sortable: true },
   { key: 'clientName', label: 'Client', sortable: true, render: (v: string | null) => v ? <Link href={`/data-vault/clients?search=${encodeURIComponent(v)}`} className="text-[#00C97B] hover:underline hover:text-[#00A866] transition-colors">{v}</Link> : '—' },
   { key: 'status', label: 'Status', render: (v: string) => <StatusBadge status={v} /> },
@@ -52,10 +52,10 @@ export default function ProjectsPage() {
     <div className="space-y-5">
       <PageHeader title="Projects" subtitle="Project tracking and management" />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <MetricCard title="Total Projects" value={items.length} color="teal" />
-        <MetricCard title="In Progress" value={inProgress} color="signal" />
-        <MetricCard title="Complete" value={complete} color="green" />
-        <MetricCard title="Avg Completion" value={`${avgCompletion}%`} />
+        <MetricCard title="Total Projects" value={items.length} color="teal" href="/projects" />
+        <MetricCard title="In Progress" value={inProgress} color="signal" href="/projects" />
+        <MetricCard title="Complete" value={complete} color="green" href="/projects" />
+        <MetricCard title="Avg Completion" value={`${avgCompletion}%`} href="/projects" />
       </div>
       <DataTable columns={columns} data={items} searchPlaceholder="Search projects..." />
     </div>

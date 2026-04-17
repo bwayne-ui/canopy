@@ -43,10 +43,10 @@ export default function PortfolioTransactionsPage() {
     <div className="space-y-5">
       <PageHeader title="Portfolio Transactions" subtitle="Investment trade activity and settlement" breadcrumbs={[{ label: 'Activity' }, { label: 'Portfolio Transactions' }]} />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <MetricCard title="Total Trades" value={trades.length} icon={<ArrowLeftRight className="w-4 h-4" />} color="teal" />
-        <MetricCard title="Buy Volume" value={fmtMoney(buyVol)} icon={<TrendingUp className="w-4 h-4" />} color="green" />
-        <MetricCard title="Sell Volume" value={fmtMoney(sellVol)} icon={<TrendingDown className="w-4 h-4" />} color="red" />
-        <MetricCard title="Pending Settlement" value={pending} icon={<Clock className="w-4 h-4" />} color="amber" />
+        <MetricCard title="Total Trades" value={trades.length} icon={<ArrowLeftRight className="w-4 h-4" />} color="teal" href="/activity/portfolio-transactions" />
+        <MetricCard title="Buy Volume" value={fmtMoney(buyVol)} icon={<TrendingUp className="w-4 h-4" />} color="green" href="/dashboards/portfolio-summary" />
+        <MetricCard title="Sell Volume" value={fmtMoney(sellVol)} icon={<TrendingDown className="w-4 h-4" />} color="red" href="/dashboards/portfolio-summary" />
+        <MetricCard title="Pending Settlement" value={pending} icon={<Clock className="w-4 h-4" />} color="amber" href="/dashboards/portfolio-summary" />
       </div>
       <DataTable columns={columns} data={trades} searchPlaceholder="Search trades..." />
     </div>
