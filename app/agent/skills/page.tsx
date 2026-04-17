@@ -30,58 +30,6 @@ interface AgentSkill {
   description: string;
 }
 
-// ---------------------------------------------------------------------------
-// Connected platform config
-// ---------------------------------------------------------------------------
-
-const PLATFORMS = [
-  {
-    id: 'claude',
-    name: 'Claude',
-    provider: 'Anthropic',
-    description: 'Sync your skill layer and persistent memory with Claude across all sessions.',
-    color: 'from-orange-50 to-amber-50',
-    border: 'border-orange-200',
-    badge: 'bg-orange-100 text-orange-700',
-    dot: 'bg-orange-400',
-    logo: (
-      <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor">
-        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'openai',
-    name: 'OpenAI',
-    provider: 'OpenAI',
-    description: 'Connect GPT-4o skills and share learned preferences with your OpenAI workspace.',
-    color: 'from-gray-50 to-slate-50',
-    border: 'border-gray-200',
-    badge: 'bg-gray-100 text-gray-700',
-    dot: 'bg-gray-400',
-    logo: (
-      <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor">
-        <path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464z"/>
-      </svg>
-    ),
-  },
-  {
-    id: 'gemini',
-    name: 'Gemini',
-    provider: 'Google',
-    description: 'Extend skills to Gemini and sync context across Google Workspace integrations.',
-    color: 'from-blue-50 to-indigo-50',
-    border: 'border-blue-200',
-    badge: 'bg-blue-100 text-blue-700',
-    dot: 'bg-blue-400',
-    logo: (
-      <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor">
-        <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
-      </svg>
-    ),
-  },
-];
-
 const CATEGORY_COLORS: Record<string, string> = {
   'Data Extraction':     'bg-violet-50 text-violet-700',
   'Analytics':           'bg-blue-50 text-blue-700',
@@ -210,7 +158,6 @@ export default function AISkillsPage() {
   const [agentSkills, setAgentSkills] = useState<AgentSkill[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<FilterTab>('all');
-  const [connected, setConnected] = useState<Record<string, boolean>>({ claude: false, openai: false, gemini: false });
   const [pinnedIds, setPinnedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -229,10 +176,6 @@ export default function AISkillsPage() {
       if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
-  }
-
-  function toggleConnect(platformId: string) {
-    setConnected((prev) => ({ ...prev, [platformId]: !prev[platformId] }));
   }
 
   const filtered = (() => {
@@ -274,47 +217,6 @@ export default function AISkillsPage() {
         <MetricCard title="Active"         value={String(activeCount)}            icon={<CheckCircle2 className="w-4 h-4" />}  color="green" />
         <MetricCard title="My Skills"      value={String(pinnedIds.size)}         icon={<Activity className="w-4 h-4" />}      color="signal" />
         <MetricCard title="Categories"     value={String(categories.length)}      icon={<Zap className="w-4 h-4" />}           color="teal" />
-      </div>
-
-      {/* Connected Platforms */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4">
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">Connected AI Platforms</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {PLATFORMS.map((p) => {
-            const isConnected = connected[p.id];
-            return (
-              <div key={p.id} className={`rounded-xl border bg-gradient-to-br ${p.color} ${p.border} p-4 flex flex-col gap-3`}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${p.badge}`}>
-                      {p.logo}
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-gray-900">{p.name}</p>
-                      <p className="text-[10px] text-gray-400">{p.provider}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-emerald-400' : 'bg-gray-300'}`} />
-                    <span className="text-[10px] text-gray-500">{isConnected ? 'Connected' : 'Not connected'}</span>
-                  </div>
-                </div>
-                <p className="text-[10px] text-gray-500 leading-relaxed">{p.description}</p>
-                <button
-                  type="button"
-                  onClick={() => toggleConnect(p.id)}
-                  className={`w-full text-[10px] font-semibold rounded-md py-1.5 transition-colors ${
-                    isConnected
-                      ? 'bg-white border border-gray-200 text-gray-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200'
-                      : `bg-white border ${p.border} text-gray-700 hover:bg-[#00C97B]/5 hover:border-[#00C97B] hover:text-[#00835A]`
-                  }`}
-                >
-                  {isConnected ? 'Disconnect' : `Connect ${p.name}`}
-                </button>
-              </div>
-            );
-          })}
-        </div>
       </div>
 
       {/* Agent skills from filesystem */}
