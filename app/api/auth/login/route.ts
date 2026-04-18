@@ -27,7 +27,7 @@ export async function POST(req: Request) {
           userAgent,
         },
       })
-      .catch(() => {});
+      .catch((e) => console.error('[login] log failed_attempt write failed:', e));
     return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 });
   }
 
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
         userAgent,
       },
     })
-    .catch(() => {});
+    .catch((e) => console.error('[login] log success write failed:', e));
 
   const res = NextResponse.json({ ok: true });
   res.cookies.set(ACCESS_COOKIE, ACCESS_VALUE, {
