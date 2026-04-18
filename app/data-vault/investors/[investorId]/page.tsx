@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
+import ActivityFeed from '@/components/ActivityFeed';
 
 function FieldRow({ label, value }: { label: string; value: any }) {
   return (
@@ -58,6 +59,7 @@ export default function InvestorDetailPage() {
   if (!data?.investor) return <div className="text-center py-16 text-red-400">Investor not found.</div>;
 
   const inv = data.investor;
+  const recentActivity: any[] = data.recentActivity ?? [];
 
   return (
     <div>
@@ -95,26 +97,31 @@ export default function InvestorDetailPage() {
       </div>
 
       {tab === 'Profile' && (
-        <div className="bg-white rounded-lg shadow-sm p-4 max-w-xl">
-          <FieldSection title="Investor Details">
-            <FieldRow label="Investor ID" value={inv.investorId} />
-            <FieldRow label="Name" value={inv.name} />
-            <FieldRow label="Type" value={inv.investorType} />
-            <FieldRow label="Domicile" value={inv.domicile} />
-            <FieldRow label="Status" value={inv.status} />
-          </FieldSection>
-          <FieldSection title="Contact">
-            <FieldRow label="Contact Name" value={inv.contactName} />
-            <FieldRow label="Contact Email" value={inv.contactEmail} />
-          </FieldSection>
-          {inv.entityName && (
-            <FieldSection title="Fund">
-              <div className="py-1.5">
-                <span className="text-xs text-gray-500 font-medium w-44 inline-block">Entity</span>
-                <Link href={`/data-vault/entities/${inv.entityName}`} className="text-xs text-[#00C97B] font-semibold hover:underline">{inv.entityName}</Link>
-              </div>
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-2 items-start">
+          <div className="xl:col-span-3 bg-white rounded-lg shadow-sm p-4 max-w-xl">
+            <FieldSection title="Investor Details">
+              <FieldRow label="Investor ID" value={inv.investorId} />
+              <FieldRow label="Name" value={inv.name} />
+              <FieldRow label="Type" value={inv.investorType} />
+              <FieldRow label="Domicile" value={inv.domicile} />
+              <FieldRow label="Status" value={inv.status} />
             </FieldSection>
-          )}
+            <FieldSection title="Contact">
+              <FieldRow label="Contact Name" value={inv.contactName} />
+              <FieldRow label="Contact Email" value={inv.contactEmail} />
+            </FieldSection>
+            {inv.entityName && (
+              <FieldSection title="Fund">
+                <div className="py-1.5">
+                  <span className="text-xs text-gray-500 font-medium w-44 inline-block">Entity</span>
+                  <Link href={`/data-vault/entities/${inv.entityName}`} className="text-xs text-[#00C97B] font-semibold hover:underline">{inv.entityName}</Link>
+                </div>
+              </FieldSection>
+            )}
+          </div>
+          <div className="space-y-2">
+            {recentActivity.length > 0 && <ActivityFeed items={recentActivity} />}
+          </div>
         </div>
       )}
 

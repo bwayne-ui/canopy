@@ -23,10 +23,22 @@ import type { NextRequest } from 'next/server';
 // Development passthrough (no auth required)
 // ---------------------------------------------------------------------------
 
-export function middleware(_req: NextRequest) {
-  // Passthrough — all routes accessible in dev mode.
-  // Billy Wayne (SYSTEM_ADMIN) is the mock current user via lib/auth.ts getSession().
-  return NextResponse.next();
+const ACCESS_COOKIE = 'canopy_access';
+const ACCESS_VALUE = 'granted';
+
+export function middleware(req: NextRequest) {
+  const { pathname, search } = req.nextUrl;
+
+  if (pathname === '/login' || pathname.startsWith('/api/auth/')) {
+    return NextResponse.next();
+  }
+
+  const granted = req.cookies.get(ACCESS_COOKIE)?.value === ACCESS_VALUE;
+  if (granted) return NextResponse.next();
+
+  const loginUrl = new URL('/login', req.url);
+  if (pathname !== '/') loginUrl.searchParams.set('next', pathname + search);
+  return NextResponse.redirect(loginUrl);
 }
 
 export const config = {

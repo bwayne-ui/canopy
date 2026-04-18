@@ -7,6 +7,8 @@ import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
 import { fmtMoney, fmtPct } from '@/lib/utils';
 import { Building2, Users, ClipboardCheck, ArrowLeft, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
+import ActivityFeed from '@/components/ActivityFeed';
+import type { ActivityItem } from '@/types';
 
 /* ─── types ────────────────────────────────────────────────────────── */
 
@@ -218,6 +220,7 @@ export default function EntityDetailPage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [investors, setInvestors] = useState<Investor[]>([]);
   const [taskSummary, setTaskSummary] = useState<TaskSummary>({ total: 0, completed: 0, overdue: 0 });
+  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<TabKey>('general');
   const [expandedEmployees, setExpandedEmployees] = useState<Set<string>>(new Set());
@@ -243,6 +246,7 @@ export default function EntityDetailPage() {
         setEmployees(res.employees ?? []);
         setInvestors(res.investors ?? []);
         setTaskSummary(res.taskSummary ?? { total: 0, completed: 0, overdue: 0 });
+        setRecentActivity(res.recentActivity ?? []);
       })
       .finally(() => setLoading(false));
   }, [entityId]);
@@ -913,6 +917,8 @@ export default function EntityDetailPage() {
               </div>
             )}
           </div>
+
+          {recentActivity.length > 0 && <ActivityFeed items={recentActivity} />}
         </div>
       </div>
     </div>

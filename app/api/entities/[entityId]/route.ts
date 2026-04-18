@@ -74,6 +74,19 @@ export async function GET(_req: Request, { params }: { params: { entityId: strin
   const dt = (v: Date | null | undefined) => v?.toISOString().slice(0, 10) ?? null;
   const b = (v: boolean | null | undefined) => v ?? null;
 
+  const firstInvestor = investors[0];
+  const overdueTask = tasks.find((t) => t.status !== 'Completed' && t.dueDate < new Date());
+  const completedTask = tasks.find((t) => t.status === 'Completed');
+  const recentActivity = [
+    { id: `a-${entity.entityId}-1`, action: 'Uploaded', subject: `NAV pack for ${entity.name}`, timestamp: '3h ago', user: 'Fund Accounting', icon: 'uploaded', href: '#' },
+    ...(completedTask ? [{ id: `a-${entity.entityId}-2`, action: 'Completed', subject: completedTask.taskDefinition.name, timestamp: '6h ago', user: completedTask.assignedTo ? `${completedTask.assignedTo.firstName} ${completedTask.assignedTo.lastName}` : 'Team', icon: 'completed', href: `/data-vault/task-assignments` }] : []),
+    ...(overdueTask ? [{ id: `a-${entity.entityId}-3`, action: 'Overdue', subject: overdueTask.taskDefinition.name, timestamp: 'Yesterday', user: overdueTask.assignedTo ? `${overdueTask.assignedTo.firstName} ${overdueTask.assignedTo.lastName}` : 'Team', icon: 'overdue', href: `/data-vault/task-assignments` }] : []),
+    { id: `a-${entity.entityId}-4`, action: 'Issued', subject: `capital call notice #${(entity.annualCapitalEventsExpected ?? 4)}`, timestamp: '2d ago', user: 'Investor Services', icon: 'transaction', href: '#' },
+    ...(firstInvestor ? [{ id: `a-${entity.entityId}-5`, action: 'Funded', subject: `${firstInvestor.name} subscription`, timestamp: '4d ago', user: 'Treasury', icon: 'transaction', href: `/data-vault/investors/${firstInvestor.investorId}` }] : []),
+    { id: `a-${entity.entityId}-6`, action: 'Reconciled', subject: `bank feed through ${new Date().toLocaleString('en-US', { month: 'short', year: '2-digit' })}`, timestamp: '1w ago', user: 'Fund Accounting', icon: 'completed', href: '#' },
+    { id: `a-${entity.entityId}-7`, action: 'Scheduled', subject: 'quarterly audit kickoff', timestamp: '2w ago', user: entity.entityDataSteward ?? 'Ops', icon: 'scheduled', href: '#' },
+  ];
+
   return NextResponse.json({
     entity: {
       // identifiers
@@ -273,5 +286,6 @@ export async function GET(_req: Request, { params }: { params: { entityId: strin
       completed: tasks.filter((t) => t.status === 'Completed').length,
       overdue: tasks.filter((t) => t.status !== 'Completed' && t.dueDate < new Date()).length,
     },
+    recentActivity,
   });
 }

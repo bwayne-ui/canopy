@@ -1970,3 +1970,22 @@ model DcfIntegration {
   createdAt       DateTime      @default(now())
   submission      DcfSubmission @relation(fields: [dcfSubmissionId], references: [id], onDelete: Cascade)
 }
+
+// ──────────────────────────────────────────────
+// LOGIN GATE (prototype access control)
+// ──────────────────────────────────────────────
+
+model LoginAttempt {
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
+  emailLower    String
+  domain        String
+  domainAllowed Boolean
+  outcome       String
+  ipAddress     String?
+  userAgent     String?
+
+  @@index([createdAt])
+  @@index([outcome])
+  @@index([domainAllowed])
+}

@@ -24,6 +24,17 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   const d = (v: any) => v ? toNum(v) : null;
   const dt = (v: Date | null | undefined) => v?.toISOString().slice(0, 10) ?? null;
 
+  const firstEntity = client.entities[0];
+  const recentActivity = [
+    { id: `a-${client.id}-1`, action: 'Uploaded', subject: `${client.name} Q1 investor letter`, timestamp: '2h ago', user: client.teamLead ?? 'Team Lead', icon: 'uploaded', href: '#' },
+    { id: `a-${client.id}-2`, action: 'Scheduled', subject: `quarterly review with ${client.name}`, timestamp: 'Yesterday', user: client.teamLead ?? 'Team Lead', icon: 'scheduled', href: '#' },
+    { id: `a-${client.id}-3`, action: 'Completed', subject: `KYC refresh for ${client.name}`, timestamp: '2d ago', user: 'Compliance', icon: 'completed', href: '#' },
+    ...(firstEntity ? [{ id: `a-${client.id}-4`, action: 'Added entity', subject: firstEntity.name, timestamp: '4d ago', user: 'Ops', icon: 'created', href: `/data-vault/entities/${firstEntity.entityId}` }] : []),
+    { id: `a-${client.id}-5`, action: 'Logged call', subject: `with ${client.teamLead ?? 'primary contact'}`, timestamp: '1w ago', user: client.teamLead ?? 'Team Lead', icon: 'communication', href: '#' },
+    { id: `a-${client.id}-6`, action: 'Assigned', subject: `new pod lead to ${client.name}`, timestamp: '2w ago', user: 'Admin', icon: 'assigned', href: '#' },
+    { id: `a-${client.id}-7`, action: 'Recorded', subject: `fee invoice for ${client.name}`, timestamp: '3w ago', user: 'Finance', icon: 'transaction', href: '#' },
+  ];
+
   return NextResponse.json({
     client: {
       id: client.id,
@@ -84,5 +95,6 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
       description: (r as any).description ?? null,
       strength: (r as any).strength ?? null,
     })),
+    recentActivity,
   });
 }

@@ -6,6 +6,7 @@ import { ArrowLeft, Eye, BookOpen, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
+import ActivityFeed from '@/components/ActivityFeed';
 
 /* ─── helpers ──────────────────────────────────────────── */
 function FieldRow({ label, value }: { label: string; value: any }) {
@@ -175,6 +176,7 @@ export default function SecurityDetailPage() {
 
   const s = data.security;
   const links: any[] = data.entityLinks ?? [];
+  const recentActivity: any[] = data.recentActivity ?? [];
   const gainPositive = (s.unrealizedGain ?? 0) >= 0;
 
   return (
@@ -220,16 +222,21 @@ export default function SecurityDetailPage() {
 
       {/* ── Overview ── */}
       {tab === 'Overview' && (
-        <div className="bg-white rounded-[14px] border border-[#e5e7eb] shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-5 max-w-xl">
-          <FieldSection title="Security Details">
-            <FieldRow label="Security ID" value={<span className="">{s.securityId}</span>} />
-            <FieldRow label="Name" value={s.name} />
-            <FieldRow label="Type" value={s.securityType} />
-            <FieldRow label="Issuer" value={s.issuer} />
-            <FieldRow label="Sector" value={s.sector} />
-            <FieldRow label="Country" value={s.country} />
-            <FieldRow label="Currency" value={s.currency} />
-          </FieldSection>
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-2 items-start">
+          <div className="xl:col-span-3 bg-white rounded-[14px] border border-[#e5e7eb] shadow-[0_1px_3px_rgba(0,0,0,0.04)] p-5 max-w-xl">
+            <FieldSection title="Security Details">
+              <FieldRow label="Security ID" value={<span className="">{s.securityId}</span>} />
+              <FieldRow label="Name" value={s.name} />
+              <FieldRow label="Type" value={s.securityType} />
+              <FieldRow label="Issuer" value={s.issuer} />
+              <FieldRow label="Sector" value={s.sector} />
+              <FieldRow label="Country" value={s.country} />
+              <FieldRow label="Currency" value={s.currency} />
+            </FieldSection>
+          </div>
+          <div className="space-y-2">
+            {recentActivity.length > 0 && <ActivityFeed items={recentActivity} />}
+          </div>
         </div>
       )}
 

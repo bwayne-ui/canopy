@@ -7,6 +7,7 @@ import Link from 'next/link';
 import PageHeader from '@/components/PageHeader';
 import StatusBadge from '@/components/StatusBadge';
 import DataTable, { Column } from '@/components/DataTable';
+import ActivityFeed from '@/components/ActivityFeed';
 import { fmtMoney } from '@/lib/utils';
 
 /* ─── local helpers ───────────────────────────────────────────────── */
@@ -78,6 +79,7 @@ export default function ClientDetailPage() {
   const entities: any[] = data.entities ?? [];
   const comms: any[] = data.communications ?? [];
   const rels: any[] = data.relationships ?? [];
+  const recentActivity: any[] = data.recentActivity ?? [];
 
   const entityColumns: Column[] = [
     {
@@ -187,6 +189,7 @@ export default function ClientDetailPage() {
               <div className="flex justify-between text-xs"><span className="text-gray-500">Revenue L12M</span><span className="font-semibold text-gray-800">{fmtMoney(c.revenueL12m ?? 0)}</span></div>
               <div className="flex justify-between text-xs"><span className="text-gray-500">Margin</span><span className="font-semibold text-gray-800">{(c.marginPct ?? 0).toFixed(1)}%</span></div>
             </div>
+            {recentActivity.length > 0 && <ActivityFeed items={recentActivity} />}
           </div>
         </div>
       )}

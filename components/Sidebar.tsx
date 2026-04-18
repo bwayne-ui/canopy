@@ -58,7 +58,6 @@ const opportunitiesItems: NavItem[] = [
 ];
 
 const relationshipItems: NavItem[] = [
-  { label: 'Entity Map', href: '/relationships', icon: Network },
   { label: 'Task Assignments', href: '/data-vault/task-assignments', icon: ClipboardCheck },
   { label: 'Employee Assignments', href: '/relationships/employee-assignments', icon: UserCog },
   { label: 'Org Chart', href: '/org-chart', icon: Users },
