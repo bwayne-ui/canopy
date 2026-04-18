@@ -41,8 +41,9 @@ export async function POST(req: Request) {
   try {
     await sendCodeEmail(email, code);
   } catch (err) {
-    console.error('[request-code] send failed', err);
-    return NextResponse.json({ error: 'Could not send code' }, { status: 500 });
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('[request-code] send failed:', msg);
+    return NextResponse.json({ error: 'Could not send code', detail: msg }, { status: 500 });
   }
 
   await prisma.loginAttempt.create({

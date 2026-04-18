@@ -81,7 +81,7 @@ export async function sendCodeEmail(to: string, code: string): Promise<void> {
     return;
   }
   const resend = new Resend(apiKey);
-  await resend.emails.send({
+  const result = await resend.emails.send({
     from: FROM_EMAIL,
     to,
     subject: `Canopy access code: ${code}`,
@@ -93,6 +93,9 @@ export async function sendCodeEmail(to: string, code: string): Promise<void> {
   <p style="font-size: 13px; color: #6b7280; margin-top: 16px;">This code expires in 10 minutes. If you didn't request this, you can ignore this email.</p>
 </div>`,
   });
+  if (result.error) {
+    throw new Error(`Resend: ${result.error.name ?? 'error'} — ${result.error.message ?? 'unknown'}`);
+  }
 }
 
 export function getClientIp(headers: Headers): string | null {

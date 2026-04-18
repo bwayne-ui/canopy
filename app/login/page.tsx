@@ -27,7 +27,8 @@ function LoginForm() {
         body: JSON.stringify({ email }),
       });
       if (!res.ok) {
-        setError('Could not send code. Try again in a moment.');
+        const body = await res.json().catch(() => ({}));
+        setError(body?.detail ? `Could not send code: ${body.detail}` : 'Could not send code. Try again in a moment.');
         return;
       }
       setStep('code');
