@@ -19,7 +19,7 @@ model Client {
   hqCity            String
   hqCountry         String
   region            String
-  relationshipStart DateTime
+  relationshipStart DateTime?
   status            String   @default("Active")
   totalEntities     Int      @default(0)
   totalNavMm        Decimal  @default(0)
@@ -33,6 +33,63 @@ model Client {
   employeeCount     Int?
   website           String?
   notes             String?
+
+  // ── STRATEGY & AUM ──
+  aumMm                 Float?
+  strategyMix           String?   // comma-separated, e.g. "Buyout,Growth,Credit"
+  portfolioCompanyCount Int?
+  typicalDealSizeMm     Float?
+  firstFundVintage      Int?
+  latestFundVintage     Int?
+
+  // ── FUND STRUCTURE DEFAULTS ──
+  waterfallType         String?   // "European" | "American"
+  hurdleRatePct         Float?
+  mgmtFeePct            Float?
+  carriedInterestPct    Float?
+  gpCommitPct           Float?
+
+  // ── OPERATIONAL PARTNERS ──
+  auditFirm             String?
+  legalCounsel          String?
+  primaryCustodian      String?
+  taxAdvisor            String?
+  bankingRelationship   String?
+  dataRoomPlatform      String?
+
+  // ── COMPLIANCE ──
+  secRegistered         Boolean?
+  advFilingDate         DateTime?
+  formPfRequired        Boolean?
+  amlRiskTier           String?   // "Low" | "Medium" | "High"
+
+  // ── RELATIONSHIP / CRM ──
+  relationshipStage     String?   // prospect stage: "Qualified" | "Proposal" | "Negotiation" | "Verbal"
+  churnDate             DateTime?
+  churnReason           String?
+  lastContactAt         DateTime?
+  nextMeetingAt         DateTime?
+  accountExecutive      String?
+  nps                   Int?
+
+  // ── SERVICE MIX ──
+  usesFundAdmin         Boolean?
+  usesInvestorPortal    Boolean?
+  usesTaxServices       Boolean?
+  usesComplianceSupport Boolean?
+  usesTreasuryServices  Boolean?
+
+  // ── BILLING ──
+  billingFrequency      String?   // "Monthly" | "Quarterly" | "Annually"
+  arAgingDays           Int?
+  lastInvoiceAt         DateTime?
+  paymentMethod         String?   // "ACH" | "Wire" | "Check"
+
+  // ── ESG ──
+  esgPolicy             Boolean?
+  diversityReporting    Boolean?
+  sasbAligned           Boolean?
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   entities          Entity[]

@@ -37,6 +37,28 @@ function FieldSection({ title, children }: { title: string; children: React.Reac
   );
 }
 
+function anyPopulated(values: any[]): boolean {
+  return values.some((v) => v != null && v !== '' && v !== false);
+}
+
+function ServicePill({ label, on }: { label: string; on: any }) {
+  const isOn = on === true;
+  const isOff = on === false;
+  return (
+    <span
+      className={`px-2 py-1 rounded-md text-[10px] font-semibold border ${
+        isOn
+          ? 'bg-[#F0FBF6] text-[#00AA6C] border-[#00AA6C]/30'
+          : isOff
+            ? 'bg-gray-50 text-gray-400 border-gray-200'
+            : 'bg-white text-gray-300 border-gray-100'
+      }`}
+    >
+      {isOn ? '✓ ' : isOff ? '✗ ' : '— '}{label}
+    </span>
+  );
+}
+
 function StatBox({ label, value, sub, color = 'teal' }: { label: string; value: string; sub?: string; color?: string }) {
   const colors: Record<string, string> = {
     teal: 'bg-teal-50 border-teal-100',
@@ -172,6 +194,155 @@ export default function ClientDetailPage() {
                 </div>
               )}
             </div>
+
+            {/* ── Strategy & AUM ── */}
+            {anyPopulated([c.aumMm, c.strategyMix, c.portfolioCompanyCount, c.typicalDealSizeMm, c.firstFundVintage, c.latestFundVintage]) && (
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <div className="grid grid-cols-2 gap-6">
+                  <FieldSection title="Strategy & AUM">
+                    <FieldRow label="AUM" value={c.aumMm} format="money" />
+                    <div className="flex items-start py-1.5 border-b border-gray-50">
+                      <span className="w-40 flex-shrink-0 text-xs text-gray-500 font-medium">Strategy Mix</span>
+                      <div className="flex flex-wrap gap-1">
+                        {c.strategyMix ? c.strategyMix.split(',').map((s: string) => (
+                          <span key={s} className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#F0FBF6] text-[#00AA6C]">{s.trim()}</span>
+                        )) : <span className="text-xs text-gray-300">—</span>}
+                      </div>
+                    </div>
+                    <FieldRow label="Portfolio Co. Count" value={c.portfolioCompanyCount} />
+                  </FieldSection>
+                  <FieldSection title="Deal & Vintage">
+                    <FieldRow label="Typical Deal Size" value={c.typicalDealSizeMm} format="money" />
+                    <FieldRow label="First Fund Vintage" value={c.firstFundVintage} />
+                    <FieldRow label="Latest Fund Vintage" value={c.latestFundVintage} />
+                  </FieldSection>
+                </div>
+              </div>
+            )}
+
+            {/* ── Fund Structure Defaults ── */}
+            {anyPopulated([c.waterfallType, c.hurdleRatePct, c.mgmtFeePct, c.carriedInterestPct, c.gpCommitPct]) && (
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <FieldSection title="Fund Structure Defaults">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <FieldRow label="Waterfall Type" value={c.waterfallType} />
+                      <FieldRow label="Hurdle Rate" value={c.hurdleRatePct} format="pct" />
+                      <FieldRow label="Mgmt Fee" value={c.mgmtFeePct} format="pct" />
+                    </div>
+                    <div>
+                      <FieldRow label="Carried Interest" value={c.carriedInterestPct} format="pct" />
+                      <FieldRow label="GP Commit" value={c.gpCommitPct} format="pct" />
+                    </div>
+                  </div>
+                </FieldSection>
+              </div>
+            )}
+
+            {/* ── Operational Partners ── */}
+            {anyPopulated([c.auditFirm, c.legalCounsel, c.primaryCustodian, c.taxAdvisor, c.bankingRelationship, c.dataRoomPlatform]) && (
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <FieldSection title="Operational Partners">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <FieldRow label="Audit Firm" value={c.auditFirm} />
+                      <FieldRow label="Legal Counsel" value={c.legalCounsel} />
+                      <FieldRow label="Primary Custodian" value={c.primaryCustodian} />
+                    </div>
+                    <div>
+                      <FieldRow label="Tax Advisor" value={c.taxAdvisor} />
+                      <FieldRow label="Banking" value={c.bankingRelationship} />
+                      <FieldRow label="Data Room" value={c.dataRoomPlatform} />
+                    </div>
+                  </div>
+                </FieldSection>
+              </div>
+            )}
+
+            {/* ── Compliance ── */}
+            {anyPopulated([c.secRegistered, c.advFilingDate, c.formPfRequired, c.amlRiskTier]) && (
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <FieldSection title="Compliance">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <FieldRow label="SEC Registered" value={c.secRegistered} format="bool" />
+                      <FieldRow label="ADV Filing Date" value={c.advFilingDate} />
+                    </div>
+                    <div>
+                      <FieldRow label="Form PF Required" value={c.formPfRequired} format="bool" />
+                      <FieldRow label="AML Risk Tier" value={c.amlRiskTier} />
+                    </div>
+                  </div>
+                </FieldSection>
+              </div>
+            )}
+
+            {/* ── Relationship (stage or churn) ── */}
+            {anyPopulated([c.relationshipStage, c.churnDate, c.churnReason, c.lastContactAt, c.nextMeetingAt, c.accountExecutive, c.nps]) && (
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <FieldSection title={c.status === 'Churned' ? 'Churn Details' : 'Relationship'}>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      {c.relationshipStage && <FieldRow label="Pipeline Stage" value={c.relationshipStage} />}
+                      {c.churnDate && <FieldRow label="Churn Date" value={c.churnDate} />}
+                      {c.churnReason && <FieldRow label="Churn Reason" value={c.churnReason} />}
+                      <FieldRow label="Account Executive" value={c.accountExecutive} />
+                    </div>
+                    <div>
+                      <FieldRow label="Last Contact" value={c.lastContactAt} />
+                      <FieldRow label="Next Meeting" value={c.nextMeetingAt} />
+                      {c.nps != null && <FieldRow label="NPS" value={c.nps} />}
+                    </div>
+                  </div>
+                </FieldSection>
+              </div>
+            )}
+
+            {/* ── Service Mix ── */}
+            {anyPopulated([c.usesFundAdmin, c.usesInvestorPortal, c.usesTaxServices, c.usesComplianceSupport, c.usesTreasuryServices]) && (
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <FieldSection title="Service Mix">
+                  <div className="flex flex-wrap gap-2">
+                    <ServicePill label="Fund Admin" on={c.usesFundAdmin} />
+                    <ServicePill label="Investor Portal" on={c.usesInvestorPortal} />
+                    <ServicePill label="Tax Services" on={c.usesTaxServices} />
+                    <ServicePill label="Compliance Support" on={c.usesComplianceSupport} />
+                    <ServicePill label="Treasury" on={c.usesTreasuryServices} />
+                  </div>
+                </FieldSection>
+              </div>
+            )}
+
+            {/* ── Billing (active clients only) ── */}
+            {anyPopulated([c.billingFrequency, c.arAgingDays, c.lastInvoiceAt, c.paymentMethod]) && (
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <FieldSection title="Billing">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <FieldRow label="Billing Frequency" value={c.billingFrequency} />
+                      <FieldRow label="AR Aging (days)" value={c.arAgingDays} />
+                    </div>
+                    <div>
+                      <FieldRow label="Last Invoice" value={c.lastInvoiceAt} />
+                      <FieldRow label="Payment Method" value={c.paymentMethod} />
+                    </div>
+                  </div>
+                </FieldSection>
+              </div>
+            )}
+
+            {/* ── ESG ── */}
+            {anyPopulated([c.esgPolicy, c.diversityReporting, c.sasbAligned]) && (
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <FieldSection title="ESG & Reporting">
+                  <div className="flex flex-wrap gap-2">
+                    <ServicePill label="ESG Policy" on={c.esgPolicy} />
+                    <ServicePill label="Diversity Reporting" on={c.diversityReporting} />
+                    <ServicePill label="SASB Aligned" on={c.sasbAligned} />
+                  </div>
+                </FieldSection>
+              </div>
+            )}
           </div>
 
           {/* right 1/4 */}

@@ -22,10 +22,14 @@ interface ClientRow {
   status: string;
 }
 
+const STATUS_FILTERS = ['All', 'Active', 'Prospect', 'Churned', 'Onboarding'] as const;
+type StatusFilter = typeof STATUS_FILTERS[number];
+
 export default function ClientsPage() {
   const [data, setData] = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchInit, setSearchInit] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('All');
 
   useEffect(() => {
     const q = new URLSearchParams(window.location.search).get('search');
@@ -39,10 +43,20 @@ export default function ClientsPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const filteredData = statusFilter === 'All' ? data : data.filter((r) => r.status === statusFilter);
+
   const totalClients = data.length;
   const totalAum = data.reduce((s, r) => s + (r.totalNavMm ?? 0), 0);
   const avgMargin = totalClients > 0 ? data.reduce((s, r) => s + (r.marginPct ?? 0), 0) / totalClients : 0;
   const activeClients = data.filter((r) => r.status === 'Active').length;
+
+  const countsByStatus: Record<string, number> = {
+    All: data.length,
+    Active: data.filter((r) => r.status === 'Active').length,
+    Prospect: data.filter((r) => r.status === 'Prospect').length,
+    Churned: data.filter((r) => r.status === 'Churned').length,
+    Onboarding: data.filter((r) => r.status === 'Onboarding').length,
+  };
 
   const columns: Column[] = [
     { key: 'name', label: 'Name', sortable: true, render: (v: string, row: any) => (
@@ -101,10 +115,31 @@ export default function ClientsPage() {
         <MetricCard title="Active Clients" value={activeClients.toLocaleString()} icon={<UserCheck className="w-4 h-4" />} color="amber" />
       </div>
 
+      {/* Status filter pills */}
+      <div className="flex items-center gap-1 mb-3">
+        {STATUS_FILTERS.map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => setStatusFilter(s)}
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+              statusFilter === s
+                ? 'bg-[#00AA6C] text-white'
+                : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+            }`}
+          >
+            {s}
+            <span className={`ml-1.5 text-[10px] font-semibold ${statusFilter === s ? 'text-white/80' : 'text-gray-400'}`}>
+              {countsByStatus[s] ?? 0}
+            </span>
+          </button>
+        ))}
+      </div>
+
       {loading ? (
         <div className="text-center py-12 text-gray-400">Loading clients...</div>
       ) : (
-        <DataTable columns={columns} data={data} searchPlaceholder="Search clients..." initialSearch={searchInit} />
+        <DataTable columns={columns} data={filteredData} searchPlaceholder="Search clients..." initialSearch={searchInit} />
       )}
     </div>
   );
