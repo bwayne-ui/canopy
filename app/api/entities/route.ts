@@ -22,6 +22,7 @@ export async function GET() {
       grossIrrPct: e.grossIrrPct ? toNum(e.grossIrrPct) : null,
       netIrrPct: e.netIrrPct ? toNum(e.netIrrPct) : null,
       lifecycleStatus: e.lifecycleStatus,
+      scopeStatus: e.scopeStatus,
       dataQualityScore: e.dataQualityScore ? toNum(e.dataQualityScore) : null,
       investorCount: investorCounts[e.name] ?? 0,
       taskCount: taskCounts[e.name] ?? 0,

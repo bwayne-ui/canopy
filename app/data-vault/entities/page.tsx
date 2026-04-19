@@ -26,6 +26,7 @@ interface EntityRow {
   navMm: number | null;
   grossIrrPct: number | null;
   lifecycleStatus: string;
+  scopeStatus: string | null;
   dataQualityScore: number | null;
   investorCount: number;
   taskCount: number;
@@ -33,15 +34,24 @@ interface EntityRow {
 
 /* ─── filter types ─────────────────────────────────────────────────── */
 
-type FilterKey = 'clientName' | 'entityType' | 'strategy' | 'lifecycleStatus' | 'assetClass';
+type FilterKey = 'clientName' | 'entityType' | 'strategy' | 'lifecycleStatus' | 'assetClass' | 'scopeStatus';
 
 const FILTER_DEFS: { key: FilterKey; label: string }[] = [
   { key: 'clientName',      label: 'Client' },
   { key: 'entityType',      label: 'Type' },
   { key: 'assetClass',      label: 'Asset Class' },
   { key: 'strategy',        label: 'Strategy' },
-  { key: 'lifecycleStatus', label: 'Status' },
+  { key: 'lifecycleStatus', label: 'Lifecycle' },
+  { key: 'scopeStatus',     label: 'Scope' },
 ];
+
+const SCOPE_STATUS_STYLES: Record<string, string> = {
+  Identified:  'bg-gray-100 text-gray-600',
+  Scoped:      'bg-blue-50 text-blue-700',
+  Contracted:  'bg-[#F0FBF6] text-[#00AA6C]',
+  Terminated:  'bg-red-50 text-red-600',
+  'De-scoped': 'bg-amber-50 text-amber-700',
+};
 
 /* ─── render helpers ───────────────────────────────────────────────── */
 
@@ -110,6 +120,7 @@ export default function EntitiesPage() {
     assetClass: new Set(),
     strategy: new Set(),
     lifecycleStatus: new Set(),
+    scopeStatus: new Set(),
   });
   const [expandedFilter, setExpandedFilter] = useState<FilterKey | null>(null);
 
@@ -144,7 +155,8 @@ export default function EntitiesPage() {
   const filtered = useMemo(() => {
     return permissioned.filter((e) => {
       for (const { key } of FILTER_DEFS) {
-        if (filters[key].size > 0 && !filters[key].has(e[key])) return false;
+        const v = (e as any)[key] as string | null;
+        if (filters[key].size > 0 && (v == null || !filters[key].has(v))) return false;
       }
       return true;
     });
@@ -152,7 +164,7 @@ export default function EntitiesPage() {
 
   // distinct values for filter chips (from permissioned set, not allData)
   const distinctValues = useMemo(() => {
-    const out: Record<FilterKey, string[]> = { clientName: [], entityType: [], assetClass: [], strategy: [], lifecycleStatus: [] };
+    const out: Record<FilterKey, string[]> = { clientName: [], entityType: [], assetClass: [], strategy: [], lifecycleStatus: [], scopeStatus: [] };
     for (const { key } of FILTER_DEFS) {
       out[key] = Array.from(new Set(permissioned.map((e) => e[key] as string))).filter(Boolean).sort();
     }
@@ -169,7 +181,7 @@ export default function EntitiesPage() {
   };
 
   const clearFilters = () => {
-    setFilters({ clientName: new Set(), entityType: new Set(), assetClass: new Set(), strategy: new Set(), lifecycleStatus: new Set() });
+    setFilters({ clientName: new Set(), entityType: new Set(), assetClass: new Set(), strategy: new Set(), lifecycleStatus: new Set(), scopeStatus: new Set() });
     setExpandedFilter(null);
   };
 
@@ -246,9 +258,19 @@ export default function EntitiesPage() {
     },
     {
       key: 'lifecycleStatus',
-      label: 'Status',
+      label: 'Lifecycle',
       sortable: true,
       render: (v: string) => <StatusBadge status={v} />,
+    },
+    {
+      key: 'scopeStatus',
+      label: 'Scope',
+      sortable: true,
+      render: (v: string | null) => v ? (
+        <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap ${SCOPE_STATUS_STYLES[v] ?? 'bg-gray-100 text-gray-500'}`}>
+          {v}
+        </span>
+      ) : <span className="text-gray-300">—</span>,
     },
   ];
 

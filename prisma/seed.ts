@@ -91,6 +91,384 @@ function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function pick<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function pickWeighted<T>(items: { value: T; weight: number }[]): T {
+  const total = items.reduce((s, i) => s + i.weight, 0);
+  let r = Math.random() * total;
+  for (const item of items) {
+    r -= item.weight;
+    if (r <= 0) return item.value;
+  }
+  return items[items.length - 1].value;
+}
+
+function romanNumeral(n: number): string {
+  const map: [number, string][] = [[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']];
+  let out = '';
+  for (const [v, sym] of map) {
+    while (n >= v) { out += sym; n -= v; }
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// GP enrichment — produces v2 expansion fields derived from status + AUM
+// ---------------------------------------------------------------------------
+
+function gpEnrichment(c: { status: string; aumMm?: number | null; strategyMix?: string | null; primaryStrategy?: string }): Record<string, any> {
+  const isActive = c.status === 'Active';
+  const isProspect = c.status === 'Prospect';
+  const isChurned = c.status === 'Churned';
+  const isOnboarding = c.status === 'Onboarding';
+  const aum = c.aumMm ?? 0;
+  const isLarge = aum >= 5000;
+  const isMid = aum >= 1000 && aum < 5000;
+
+  // Skew values per status
+  return {
+    // ── IR & FUNDRAISING ──
+    activeFundraise: isChurned ? false : Math.random() < 0.55,
+    currentFundTargetMm: isChurned ? null : Math.round(aum * 0.15 + randomInt(100, 500)),
+    currentFundRaisedMm: isChurned ? null : Math.round(aum * 0.15 * (isProspect ? 0.2 : 0.75)),
+    currentFundCloseDate: isChurned ? null : randomDate(new Date('2026-06-01'), new Date('2027-09-30')),
+    fundraisingCycle: pick(['Continuous', 'Cyclical 3yr', 'Cyclical 5yr']),
+    placementAgent: pick(['Park Hill', 'Lazard', 'Monument Group', 'Credit Suisse PFG', 'Evercore PCA', null, null]),
+    subscriptionDocsVersion: isProspect ? 'v3.1-draft' : 'v4.2-current',
+    avgLpCommitmentMm: isProspect ? null : Math.round(aum / Math.max(randomInt(20, 80), 1)),
+    lpCount: isProspect ? randomInt(10, 30) : isChurned ? randomInt(20, 60) : randomInt(40, 180),
+    institutionalLpPct: randomInt(55, 92),
+
+    // ── PORTFOLIO ANALYTICS ──
+    grossIrrAggregatePct: isProspect ? randomInt(14, 24) : randomInt(11, 22),
+    netIrrAggregatePct: isProspect ? randomInt(10, 19) : randomInt(8, 17),
+    tvpiAggregate: Number((1.3 + Math.random() * 1.2).toFixed(2)),
+    dpiAggregate: Number((0.3 + Math.random() * 1.1).toFixed(2)),
+    moicAggregate: Number((1.4 + Math.random() * 1.3).toFixed(2)),
+    realizedPctOfCapital: isProspect ? randomInt(5, 25) : randomInt(20, 70),
+    writeoffCount: isProspect ? 0 : randomInt(0, 6),
+    impairmentCount: isProspect ? 0 : randomInt(0, 4),
+    topQuartilePerformer: Math.random() < (isLarge ? 0.6 : 0.35),
+    benchmarkPercentile: randomInt(25, 95),
+
+    // ── LP BASE ──
+    lpBaseDiversity: isLarge ? 'Highly Diversified' : isMid ? 'Diversified' : 'Concentrated',
+    top3LpConcentrationPct: isLarge ? randomInt(8, 22) : randomInt(20, 55),
+    pensionLpPct: randomInt(15, 45),
+    endowmentLpPct: randomInt(8, 25),
+    sovereignWealthLpPct: randomInt(0, 20),
+    insuranceLpPct: randomInt(5, 18),
+    familyOfficeLpPct: randomInt(5, 22),
+    fofLpPct: randomInt(3, 15),
+    individualHnwLpPct: randomInt(0, 12),
+    reupRatePct: isChurned ? 0 : randomInt(45, 92),
+
+    // ── RISK SCORING ──
+    creditRiskTier: isChurned ? 'High' : pick(['Low', 'Low', 'Medium']),
+    concentrationRiskTier: isLarge ? 'Low' : pick(['Low', 'Medium', 'Medium']),
+    operationalRiskTier: pick(['Low', 'Medium']),
+    cyberRiskTier: pick(['Low', 'Medium']),
+    regulatoryRiskTier: pick(['Low', 'Low', 'Medium']),
+    litigationPending: Math.random() < 0.1,
+    litigationCount: Math.random() < 0.1 ? randomInt(1, 3) : 0,
+    sanctionsExposure: false,
+    keyPersonRiskFlag: Math.random() < 0.2,
+    reputationRiskTier: isChurned ? 'Medium' : 'Low',
+
+    // ── TECH STACK ──
+    accountingSystemPref: pick(['Investran', 'eFront', 'Allvue', 'Yardi', 'QuickBooks Enterprise']),
+    crmSystem: pick(['Salesforce', 'HubSpot', 'DealCloud', 'Affinity']),
+    portalProvider: pick(['Canopy', 'Juniper Square', 'iLevel', 'Backstop']),
+    reportingPlatform: pick(['Tableau', 'Power BI', 'Chronograph', 'Dynamo', 'Internal']),
+    dataWarehouse: pick(['Snowflake', 'BigQuery', 'Redshift', 'Databricks', null]),
+    workflowTools: JSON.stringify(['Asana', 'Jira'].slice(0, randomInt(1, 2))),
+    docMgmtPlatform: pick(['Box', 'SharePoint', 'NetDocuments', 'iManage']),
+    emailPlatform: pick(['Google Workspace', 'Microsoft 365']),
+    apiIntegrations: JSON.stringify(['Intralinks', 'DocuSign', 'Plaid'].slice(0, randomInt(1, 3))),
+    techModernizationScore: isLarge ? randomInt(6, 10) : randomInt(3, 8),
+
+    // ── FUND ECONOMICS DETAIL ──
+    crystallizationFrequency: pick(['Annually', 'Semi-Annually', 'Quarterly']),
+    europeanHurdleType: pick(['Hard', 'Soft', null]),
+    catchUpType: pick(['None', 'Full', 'Full', 'Partial']),
+    catchUpPct: pick([0, 50, 80, 100]),
+    clawbackProvision: Math.random() < 0.7,
+    keyPersonProvision: Math.random() < 0.85,
+    noFaultDivorce: Math.random() < 0.4,
+    mgmtFeeDiscountPct: randomInt(0, 15),
+    preferredReturnCompounding: pick(['Simple', 'Compound']),
+    gpCommitSource: pick(['Cash', 'Cash', 'Mgmt Fee Waiver', 'Mix']),
+
+    // ── SERVICE SLA ──
+    quarterlyReportingSlaDays: isProspect ? null : randomInt(30, 60),
+    annualAuditSlaDays: isProspect ? null : randomInt(90, 150),
+    capitalCallTurnaroundHours: isProspect ? null : randomInt(24, 72),
+    distributionProcessingDays: isProspect ? null : randomInt(2, 10),
+    navDeliveryDays: isProspect ? null : randomInt(10, 25),
+    k1DeliveryTarget: isProspect ? null : pick(['March 15', 'April 1', 'Late Filer (Sept)']),
+    investorInquiryResponseHours: isProspect ? null : randomInt(12, 48),
+    onboardingTimelineWeeks: isProspect ? randomInt(8, 16) : null,
+    slaBreachCountYtd: isChurned ? randomInt(3, 12) : isProspect ? null : randomInt(0, 3),
+    slaOnTimePct: isChurned ? randomInt(70, 90) : isProspect ? null : randomInt(92, 100),
+
+    // ── JSQ FINANCIALS (internal-only) ──
+    arrContractedMm: isChurned ? 0 : isProspect ? 0 : Math.round(aum * 0.004 + randomInt(10, 60)),
+    pipelineValueMm: isProspect ? Math.round(aum * 0.003 + randomInt(5, 40)) : isChurned ? 0 : null,
+    lifetimeRevenueMm: isProspect ? 0 : Math.round(aum * 0.015 + randomInt(20, 200)),
+    lifetimeValueMm: isChurned ? Math.round(aum * 0.015) : Math.round(aum * 0.04 + randomInt(50, 500)),
+    costToServiceMm: isChurned ? 0 : Math.round((aum * 0.002 + randomInt(5, 40)) * (isProspect ? 0 : 1)),
+    grossMarginPct: isProspect ? null : isChurned ? 0 : randomInt(25, 48),
+    profitabilityTier: isChurned ? 'Loss-Making' : isProspect ? null : isLarge ? 'High' : pick(['High', 'Medium']),
+    upsellOpportunityMm: isChurned ? 0 : isProspect ? null : Math.round(randomInt(5, 50)),
+    discountPct: isProspect ? null : randomInt(0, 15),
+    contractValueMm: isChurned ? 0 : isProspect ? null : Math.round(aum * 0.004 * (isLarge ? 3 : 2) + randomInt(20, 100)),
+
+    // ── RELATIONSHIP HISTORY ──
+    firstMeetingDate: isProspect ? randomDate(new Date('2025-09-01'), new Date('2026-02-01')) : null,
+    contractSignedDate: isProspect ? null : isChurned ? randomDate(new Date('2016-01-01'), new Date('2022-01-01')) : randomDate(new Date('2016-01-01'), new Date('2024-01-01')),
+    lastContractRenewalDate: isProspect || isChurned ? null : randomDate(new Date('2024-01-01'), new Date('2025-12-31')),
+    nextContractRenewalDate: isProspect || isChurned ? null : randomDate(new Date('2026-06-01'), new Date('2027-12-31')),
+    contractAutoRenew: isProspect ? null : Math.random() < 0.55,
+    prevAdminBeforeJsq: pick(['SS&C', 'Citco', 'Alter Domus', 'State Street', 'In-house', 'Gen II', null, null]),
+    referralSource: pick(['LP introduction', 'Placement agent', 'Inbound', 'Referral partner', 'Conference', 'Outbound']),
+    advocacyScore: isChurned ? randomInt(1, 4) : randomInt(5, 10),
+    relationshipOwnerTenureMonths: randomInt(6, 60),
+    renewalRiskScore: isChurned ? 100 : isProspect ? null : randomInt(5, 45),
+
+    // ── DEI / CULTURE ──
+    womenOwnedPct: randomInt(0, 55),
+    minorityOwnedPct: randomInt(0, 40),
+    diverseLeadershipPct: randomInt(15, 55),
+    diversityHiringPledge: Math.random() < 0.4,
+    ilpaDiversityMetrics: Math.random() < 0.5,
+    boardIndependencePct: randomInt(25, 70),
+    governanceCertification: pick(['ISO 27001', 'SOC 2 Type II', 'Both', null, null]),
+    paritySignatory: Math.random() < 0.3,
+    rockefellerPrinciples: Math.random() < 0.15,
+    pcpSignatory: Math.random() < 0.45,
+
+    // ── REGULATORY DETAIL ──
+    formAdvPart1Date: isProspect ? null : randomDate(new Date('2024-06-01'), new Date('2025-06-30')),
+    formAdvPart2Date: isProspect ? null : randomDate(new Date('2024-06-01'), new Date('2025-06-30')),
+    mifidApplicable: Math.random() < 0.25,
+    aifmdApplicable: Math.random() < 0.4,
+    uboRegistryFiled: Math.random() < 0.8,
+    beneficialOwnershipDisclosed: Math.random() < 0.95,
+    ccoOnStaff: isLarge ? true : Math.random() < 0.55,
+    ccoName: pick(['Linda Park', 'Marcus Chen', 'Sarah Williams', 'David Kim', 'Elena Rodriguez', null]),
+    mostRecentSecExamDate: isProspect ? null : randomDate(new Date('2022-01-01'), new Date('2025-06-30')),
+    secExamDeficiencies: isProspect ? null : randomInt(0, 3),
+
+    // ── COMMUNICATION PREFS ──
+    preferredReportingFormat: pick(['PDF', 'Excel', 'Portal', 'API']),
+    preferredCommunicationChannel: pick(['Email', 'Slack', 'Phone', 'Teams']),
+    mainContactFrequency: pick(['Weekly', 'Monthly', 'Quarterly']),
+    escalationPath: pick(['AE → VP → Head of Svc', 'Direct to Partner', 'Standard support tiers']),
+    boardMeetingCadence: pick(['Quarterly', 'Semi-Annually', 'Annually']),
+    lpAdvisoryCommitteeCount: randomInt(5, 15),
+    monthlyInvestorUpdateEnabled: Math.random() < 0.5,
+    privateIrPortalEnabled: isProspect ? false : Math.random() < 0.8,
+    investorDayCadence: pick(['Annually', 'Semi-Annually', 'Biannually']),
+    roadshowFrequency: pick(['Annually', 'Semi-Annually', 'As Needed']),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Entity generator — produces a full complex for a Client
+// ---------------------------------------------------------------------------
+
+type EntitySeedInput = { clientId: string; entityId: string; name: string; entityType: string; structureType: string; domicile: string; strategy: string; lifecycleStatus: string; scopeStatus: string; vintage?: number | null; navMm?: number | null; commitmentMm?: number | null; calledCapitalMm?: number | null; prefRatePct?: number | null; carryPct?: number | null; mgmtFeePct?: number | null; waterfallType?: string | null; currency?: string; inceptionDate?: Date | null; assetClass?: string | null; fundComplexName?: string | null; sponsorGpOrg?: string | null; dataQualityScore?: number | null; confidenceScore?: number | null; shortName?: string | null; entityRole?: string | null; fundStructure?: string | null; domicileCountry?: string | null; region?: string | null; hqCity?: string | null; };
+
+function generateEntitiesForClient(
+  client: { id: string; name: string; shortName: string | null; primaryStrategy: string; status: string; aumMm?: number | null; hqCity: string; hqCountry: string; region: string; yearFounded: number | null; firstFundVintage?: number | null; latestFundVintage?: number | null; waterfallType?: string | null; hurdleRatePct?: number | null; mgmtFeePct?: number | null; carriedInterestPct?: number | null; gpCommitPct?: number | null; },
+  startIdx: number,
+): EntitySeedInput[] {
+  const shortName = client.shortName ?? client.name.split(' ')[0];
+  const complex = `${shortName} Complex`;
+  const status = client.status;
+  const aum = client.aumMm ?? 1000;
+
+  // scope status mix by client status
+  const scopeMix = (overrides?: string[]): string => {
+    if (status === 'Churned') return 'Terminated';
+    if (status === 'Prospect') return pickWeighted([{ value: 'Identified', weight: 7 }, { value: 'Scoped', weight: 3 }]);
+    if (status === 'Onboarding') return pickWeighted([{ value: 'Contracted', weight: 6 }, { value: 'Scoped', weight: 4 }]);
+    // Active
+    return overrides ? pick(overrides) : pickWeighted([{ value: 'Contracted', weight: 75 }, { value: 'Scoped', weight: 15 }, { value: 'De-scoped', weight: 10 }]);
+  };
+
+  // fund lifecycle (for Prospects, no funds are "Active" yet — they're identified on paper only)
+  const fundLifecycle = status === 'Churned' ? 'Winding Down' : status === 'Prospect' ? pick(['Active', 'Fundraising']) : pick(['Active', 'Active', 'Active', 'Fundraising']);
+
+  const baseVintage = client.firstFundVintage ?? client.yearFounded ?? 2010;
+  const latestVintage = client.latestFundVintage ?? 2024;
+
+  const wf = client.waterfallType ?? 'American';
+  const hurdle = client.hurdleRatePct ?? 8.0;
+  const mgmt = client.mgmtFeePct ?? 2.0;
+  const carry = client.carriedInterestPct ?? 20.0;
+
+  const entities: EntitySeedInput[] = [];
+  let i = 0;
+  const nextId = () => `ENT-${String(startIdx + ++i).padStart(6, '0')}`;
+
+  // Helper to build an entity with sensible defaults
+  const make = (spec: Partial<EntitySeedInput> & { name: string; entityType: string; structureType: string; strategy: string }): EntitySeedInput => ({
+    clientId: client.id,
+    entityId: nextId(),
+    name: spec.name,
+    entityType: spec.entityType,
+    structureType: spec.structureType,
+    domicile: spec.domicile ?? (client.hqCountry === 'United States' ? 'Delaware' : 'Cayman Islands'),
+    strategy: spec.strategy,
+    lifecycleStatus: spec.lifecycleStatus ?? fundLifecycle,
+    scopeStatus: spec.scopeStatus ?? scopeMix(),
+    vintage: spec.vintage,
+    navMm: spec.navMm,
+    commitmentMm: spec.commitmentMm,
+    calledCapitalMm: spec.calledCapitalMm,
+    prefRatePct: spec.prefRatePct ?? hurdle,
+    carryPct: spec.carryPct ?? carry,
+    mgmtFeePct: spec.mgmtFeePct ?? mgmt,
+    waterfallType: spec.waterfallType ?? wf,
+    currency: spec.currency ?? 'USD',
+    inceptionDate: spec.inceptionDate,
+    assetClass: spec.assetClass ?? client.primaryStrategy,
+    fundComplexName: complex,
+    sponsorGpOrg: client.name,
+    dataQualityScore: spec.dataQualityScore ?? randomInt(65, 95),
+    confidenceScore: spec.confidenceScore ?? Number((0.6 + Math.random() * 0.35).toFixed(2)),
+    shortName: spec.shortName,
+    entityRole: spec.entityRole,
+    fundStructure: spec.fundStructure,
+    domicileCountry: spec.domicileCountry ?? client.hqCountry,
+    region: spec.region ?? client.region,
+    hqCity: spec.hqCity ?? client.hqCity,
+  });
+
+  // ── 1. ManCo ──
+  entities.push(make({
+    name: `${shortName} Management LLC`,
+    entityType: 'Management Company',
+    structureType: 'LLC',
+    strategy: client.primaryStrategy,
+    lifecycleStatus: status === 'Churned' ? 'Winding Down' : 'Active',
+    domicile: client.hqCountry === 'United States' ? 'Delaware' : 'Luxembourg',
+    inceptionDate: new Date(`${client.yearFounded ?? 2010}-01-01`),
+    entityRole: 'Management Co',
+    fundStructure: 'LLC',
+    shortName: `${shortName} Mgmt`,
+  }));
+
+  // ── 2. GP Carry Vehicle ──
+  if (status !== 'Prospect') {
+    entities.push(make({
+      name: `${shortName} GP Carry LP`,
+      entityType: 'GP Entity',
+      structureType: 'LP',
+      strategy: 'Carried Interest',
+      lifecycleStatus: status === 'Churned' ? 'Winding Down' : 'Active',
+      domicile: client.hqCountry === 'United States' ? 'Delaware' : 'Cayman Islands',
+      inceptionDate: new Date(`${(client.yearFounded ?? 2010) + 3}-01-01`),
+      navMm: Math.round(aum * 0.02),
+      entityRole: 'GP Entity',
+      fundStructure: 'Limited Partnership',
+      shortName: `${shortName} GP Carry`,
+    }));
+  }
+
+  // ── 3. Funds (2-4 per GP) ──
+  const fundCount = status === 'Prospect' ? randomInt(1, 3) : status === 'Onboarding' ? randomInt(2, 3) : randomInt(3, 4);
+  const vintageSpan = Math.max(1, latestVintage - baseVintage);
+  for (let f = 1; f <= fundCount; f++) {
+    const fundVintage = baseVintage + Math.floor((vintageSpan * (f - 1)) / Math.max(fundCount - 1, 1));
+    const isLatest = f === fundCount;
+    const fundCommitment = Math.round((aum / fundCount) * (0.7 + Math.random() * 0.6));
+    const fundCalledPct = isLatest && status !== 'Churned' ? 0.3 + Math.random() * 0.4 : 0.75 + Math.random() * 0.2;
+    const fundNav = Math.round(fundCommitment * fundCalledPct * (0.9 + Math.random() * 0.4));
+    const lifecycle = status === 'Churned' ? 'Winding Down' : (isLatest && Math.random() < 0.5 ? 'Fundraising' : 'Active');
+    entities.push(make({
+      name: `${shortName} Fund ${romanNumeral(f)} LP`,
+      entityType: f === 1 ? 'Flagship Fund' : 'Fund',
+      structureType: 'LP',
+      strategy: client.primaryStrategy,
+      lifecycleStatus: lifecycle,
+      scopeStatus: scopeMix(),
+      vintage: fundVintage,
+      inceptionDate: new Date(`${fundVintage}-${String(randomInt(1, 12)).padStart(2, '0')}-${String(randomInt(1, 28)).padStart(2, '0')}`),
+      navMm: fundNav,
+      commitmentMm: fundCommitment,
+      calledCapitalMm: Math.round(fundCommitment * fundCalledPct),
+      entityRole: f === 1 ? 'Flagship Fund' : 'Fund',
+      fundStructure: 'Limited Partnership',
+      shortName: `${shortName} ${romanNumeral(f)}`,
+    }));
+  }
+
+  // ── 4. Offshore Feeder (only for Active / Churned / Onboarding) ──
+  if (status !== 'Prospect' && Math.random() < 0.85) {
+    entities.push(make({
+      name: `${shortName} Offshore Feeder Fund Ltd`,
+      entityType: 'Feeder Fund',
+      structureType: 'Limited Company',
+      strategy: client.primaryStrategy,
+      lifecycleStatus: status === 'Churned' ? 'Winding Down' : 'Active',
+      domicile: 'Cayman Islands',
+      domicileCountry: 'Cayman Islands',
+      region: 'APAC',
+      inceptionDate: new Date(`${latestVintage - 1}-06-15`),
+      navMm: Math.round(aum * 0.15),
+      commitmentMm: Math.round(aum * 0.2),
+      calledCapitalMm: Math.round(aum * 0.15 * 0.8),
+      entityRole: 'Feeder Fund',
+      fundStructure: 'Limited Company',
+      shortName: `${shortName} Offshore`,
+    }));
+  }
+
+  // ── 5. US Blocker (only for Active / Churned) ──
+  if ((status === 'Active' || status === 'Churned') && Math.random() < 0.7) {
+    entities.push(make({
+      name: `${shortName} Blocker Corp`,
+      entityType: 'Blocker Corp',
+      structureType: 'C-Corp',
+      strategy: client.primaryStrategy,
+      lifecycleStatus: status === 'Churned' ? 'Winding Down' : 'Active',
+      domicile: 'Delaware',
+      domicileCountry: 'United States',
+      inceptionDate: new Date(`${latestVintage - 2}-03-01`),
+      navMm: Math.round(aum * 0.04),
+      entityRole: 'Blocker',
+      fundStructure: 'C-Corp',
+      shortName: `${shortName} Blocker`,
+    }));
+  }
+
+  // ── 6. Co-Invest SPV (0-1 per Active GP) ──
+  if (status === 'Active' && Math.random() < 0.6) {
+    entities.push(make({
+      name: `${shortName} Co-Invest ${latestVintage} SPV LP`,
+      entityType: 'Co-Invest Vehicle',
+      structureType: 'LP',
+      strategy: client.primaryStrategy,
+      lifecycleStatus: 'Active',
+      domicile: 'Delaware',
+      vintage: latestVintage,
+      inceptionDate: new Date(`${latestVintage}-02-01`),
+      navMm: Math.round(aum * 0.03),
+      commitmentMm: Math.round(aum * 0.04),
+      calledCapitalMm: Math.round(aum * 0.03 * 0.75),
+      entityRole: 'Co-Invest',
+      fundStructure: 'Limited Partnership',
+      shortName: `${shortName} CoInv ${latestVintage}`,
+    }));
+  }
+
+  return entities;
+}
+
 async function main() {
   // Clear existing data
   await prisma.timesheetEntry.deleteMany();
@@ -659,6 +1037,13 @@ async function main() {
   ]);
   console.log(`Created ${clients.length} clients (8 existing + 30 new: 22 Active, 10 Prospect, 5 Churned, 1 Onboarding)`);
 
+  // ── v2 enrichment: apply 120 derived fields to all 38 clients ──
+  await Promise.all(clients.map((c) => prisma.client.update({
+    where: { id: c.id },
+    data: gpEnrichment({ status: c.status, aumMm: c.aumMm, strategyMix: c.strategyMix, primaryStrategy: c.primaryStrategy }),
+  })));
+  console.log(`Enriched ${clients.length} clients with v2 profile fields`);
+
   // ═══════════════════════════════════════════════
   // ENTITIES (15)
   // ═══════════════════════════════════════════════
@@ -1165,7 +1550,35 @@ async function main() {
       fundComplexName: 'Walker Enterprise Complex', sponsorGpOrg: 'Walker Asset Management',
     }}),
   ]);
-  console.log(`Created ${entities.length} entities`);
+  console.log(`Created ${entities.length} existing hand-crafted entities`);
+
+  // Backfill scopeStatus on existing 19 entities — they're all actively admined
+  await prisma.entity.updateMany({
+    where: { scopeStatus: null },
+    data: { scopeStatus: 'Contracted' },
+  });
+
+  // ── v2 entity generator: create full complex for each client ──
+  // Each GP gets ManCo + GP Carry + Funds + Feeders + Blockers + SPVs with scopeStatus reflecting sale stage
+  const entitySpecs: EntitySeedInput[] = [];
+  let entityIdCounter = 1000; // start generated IDs at ENT-001001 to avoid collision with existing ENT-000001..19
+  for (const c of clients) {
+    const specs = generateEntitiesForClient(
+      {
+        id: c.id, name: c.name, shortName: c.shortName, primaryStrategy: c.primaryStrategy,
+        status: c.status, aumMm: c.aumMm, hqCity: c.hqCity, hqCountry: c.hqCountry, region: c.region,
+        yearFounded: c.yearFounded, firstFundVintage: c.firstFundVintage, latestFundVintage: c.latestFundVintage,
+        waterfallType: c.waterfallType, hurdleRatePct: c.hurdleRatePct, mgmtFeePct: c.mgmtFeePct,
+        carriedInterestPct: c.carriedInterestPct, gpCommitPct: c.gpCommitPct,
+      },
+      entityIdCounter,
+    );
+    entitySpecs.push(...specs);
+    entityIdCounter += specs.length;
+  }
+
+  await Promise.all(entitySpecs.map((spec) => prisma.entity.create({ data: spec })));
+  console.log(`Generated ${entitySpecs.length} additional entities across ${clients.length} GPs (ManCo + GP Carry + Funds + Feeders + Blockers + SPVs)`);
 
   // ═══════════════════════════════════════════════
   // DOMAIN-SPECIFIC FIELDS

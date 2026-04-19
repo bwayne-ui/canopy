@@ -14,7 +14,7 @@ import type { ActivityItem } from '@/types';
 
 interface EntityDetail {
   entityId: string; name: string; entityType: string; structureType: string;
-  lifecycleStatus: string; clientName: string; domicile: string; strategy: string;
+  lifecycleStatus: string; scopeStatus: string | null; clientName: string; domicile: string; strategy: string;
   vintage: number | null; currency: string; openEnded: boolean;
   inceptionDate: string | null; hqCity: string | null; region: string | null;
   dataQualityScore: number | null; confidenceScore: number | null;
@@ -286,6 +286,17 @@ export default function EntityDetailPage() {
       <div className="flex items-center justify-between mb-2 flex-wrap">
         <div className="flex items-center gap-3">
           <StatusBadge status={e.lifecycleStatus} size="sm" />
+          {e.scopeStatus && (
+            <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap ${
+              e.scopeStatus === 'Contracted' ? 'bg-[#F0FBF6] text-[#00AA6C]' :
+              e.scopeStatus === 'Scoped' ? 'bg-blue-50 text-blue-700' :
+              e.scopeStatus === 'Identified' ? 'bg-gray-100 text-gray-600' :
+              e.scopeStatus === 'Terminated' ? 'bg-red-50 text-red-600' :
+              e.scopeStatus === 'De-scoped' ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-500'
+            }`}>
+              Scope: {e.scopeStatus}
+            </span>
+          )}
           <div className="flex items-center gap-3 text-xs text-gray-500">
             <span className="flex items-center gap-1"><Building2 className="w-3 h-3" /> {e.domicile}</span>
             <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {e.investorCount} investors</span>

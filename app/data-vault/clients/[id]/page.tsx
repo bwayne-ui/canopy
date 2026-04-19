@@ -59,6 +59,37 @@ function ServicePill({ label, on }: { label: string; on: any }) {
   );
 }
 
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2">
+      <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-0.5">{label}</div>
+      <div className="text-sm font-bold text-gray-900">{value}</div>
+    </div>
+  );
+}
+
+function LpSegment({ pct, color }: { pct: any; color: string; label: string }) {
+  const p = typeof pct === 'number' ? pct : 0;
+  if (p <= 0) return null;
+  return <div className="h-full" style={{ width: `${p}%`, backgroundColor: color }} title={`${p.toFixed(0)}%`} />;
+}
+
+function RiskPill({ label, tier }: { label: string; tier: any }) {
+  const t = tier as string | null;
+  const styles: Record<string, string> = {
+    Low: 'bg-[#F0FBF6] text-[#00AA6C] border-[#00AA6C]/30',
+    Medium: 'bg-[#fffbeb] text-[#b45309] border-[#d97706]/30',
+    High: 'bg-[#fef2f2] text-[#b91c1c] border-[#b91c1c]/30',
+    Critical: 'bg-[#7f1d1d] text-white border-[#7f1d1d]',
+  };
+  const style = (t && styles[t]) || 'bg-gray-50 text-gray-400 border-gray-200';
+  return (
+    <span className={`px-2 py-1 rounded-md text-[10px] font-semibold border ${style}`}>
+      {label}: {t ?? '—'}
+    </span>
+  );
+}
+
 function StatBox({ label, value, sub, color = 'teal' }: { label: string; value: string; sub?: string; color?: string }) {
   const colors: Record<string, string> = {
     teal: 'bg-teal-50 border-teal-100',
@@ -339,6 +370,340 @@ export default function ClientDetailPage() {
                     <ServicePill label="ESG Policy" on={c.esgPolicy} />
                     <ServicePill label="Diversity Reporting" on={c.diversityReporting} />
                     <ServicePill label="SASB Aligned" on={c.sasbAligned} />
+                  </div>
+                </FieldSection>
+              </div>
+            )}
+
+            {/* ───────────────────────────────────────────── */}
+            {/* v2 EXPANSION — 12 new theme cards */}
+            {/* ───────────────────────────────────────────── */}
+
+            {/* ── IR & Fundraising ── */}
+            {anyPopulated([c.activeFundraise, c.currentFundTargetMm, c.lpCount, c.placementAgent]) && (
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <FieldSection title="IR & Fundraising">
+                  {c.activeFundraise && c.currentFundTargetMm != null && (
+                    <div className="mb-3">
+                      <div className="flex justify-between mb-1">
+                        <span className="text-[10px] font-bold text-[#00AA6C] uppercase tracking-widest">Current Raise</span>
+                        <span className="text-[10px] text-gray-500">{fmtMoney(c.currentFundRaisedMm ?? 0)} / {fmtMoney(c.currentFundTargetMm)}</span>
+                      </div>
+                      <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-[#00AA6C]" style={{ width: `${Math.min(100, Math.round(((c.currentFundRaisedMm ?? 0) / c.currentFundTargetMm) * 100))}%` }} />
+                      </div>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <FieldRow label="Active Fundraise" value={c.activeFundraise} format="bool" />
+                      <FieldRow label="Close Date" value={c.currentFundCloseDate} />
+                      <FieldRow label="Cycle" value={c.fundraisingCycle} />
+                      <FieldRow label="Placement Agent" value={c.placementAgent} />
+                      <FieldRow label="Sub Docs" value={c.subscriptionDocsVersion} />
+                    </div>
+                    <div>
+                      <FieldRow label="LP Count" value={c.lpCount} />
+                      <FieldRow label="Avg LP Commit" value={c.avgLpCommitmentMm} format="money" />
+                      <FieldRow label="Institutional %" value={c.institutionalLpPct} format="pct" />
+                    </div>
+                  </div>
+                </FieldSection>
+              </div>
+            )}
+
+            {/* ── Portfolio Analytics ── */}
+            {anyPopulated([c.grossIrrAggregatePct, c.netIrrAggregatePct, c.tvpiAggregate, c.moicAggregate, c.dpiAggregate]) && (
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <FieldSection title="Portfolio Analytics">
+                  <div className="grid grid-cols-5 gap-2 mb-3">
+                    <Metric label="Gross IRR" value={c.grossIrrAggregatePct != null ? `${c.grossIrrAggregatePct.toFixed(1)}%` : '—'} />
+                    <Metric label="Net IRR" value={c.netIrrAggregatePct != null ? `${c.netIrrAggregatePct.toFixed(1)}%` : '—'} />
+                    <Metric label="TVPI" value={c.tvpiAggregate?.toFixed(2) ?? '—'} />
+                    <Metric label="DPI" value={c.dpiAggregate?.toFixed(2) ?? '—'} />
+                    <Metric label="MOIC" value={c.moicAggregate?.toFixed(2) ?? '—'} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <FieldRow label="Realized % of Capital" value={c.realizedPctOfCapital} format="pct" />
+                      <FieldRow label="Write-offs" value={c.writeoffCount} />
+                      <FieldRow label="Impairments" value={c.impairmentCount} />
+                    </div>
+                    <div>
+                      <FieldRow label="Top Quartile" value={c.topQuartilePerformer} format="bool" />
+                      <FieldRow label="Benchmark %ile" value={c.benchmarkPercentile} />
+                    </div>
+                  </div>
+                </FieldSection>
+              </div>
+            )}
+
+            {/* ── LP Base Composition ── */}
+            {anyPopulated([c.lpBaseDiversity, c.pensionLpPct, c.endowmentLpPct, c.top3LpConcentrationPct]) && (
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <FieldSection title="LP Base Composition">
+                  <div className="mb-3">
+                    <div className="text-[10px] text-gray-500 font-semibold uppercase tracking-widest mb-1">Breakdown</div>
+                    <div className="w-full h-3 bg-gray-100 rounded overflow-hidden flex">
+                      <LpSegment pct={c.pensionLpPct} color="#00AA6C" label="Pension" />
+                      <LpSegment pct={c.endowmentLpPct} color="#2563eb" label="Endowment" />
+                      <LpSegment pct={c.sovereignWealthLpPct} color="#7c3aed" label="Sovereign" />
+                      <LpSegment pct={c.insuranceLpPct} color="#d97706" label="Insurance" />
+                      <LpSegment pct={c.familyOfficeLpPct} color="#db2777" label="Family Office" />
+                      <LpSegment pct={c.fofLpPct} color="#0891b2" label="FoF" />
+                      <LpSegment pct={c.individualHnwLpPct} color="#65a30d" label="HNW" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <FieldRow label="Diversity" value={c.lpBaseDiversity} />
+                      <FieldRow label="Top 3 LP Concentration" value={c.top3LpConcentrationPct} format="pct" />
+                      <FieldRow label="Pension %" value={c.pensionLpPct} format="pct" />
+                      <FieldRow label="Endowment %" value={c.endowmentLpPct} format="pct" />
+                      <FieldRow label="Sovereign %" value={c.sovereignWealthLpPct} format="pct" />
+                    </div>
+                    <div>
+                      <FieldRow label="Insurance %" value={c.insuranceLpPct} format="pct" />
+                      <FieldRow label="Family Office %" value={c.familyOfficeLpPct} format="pct" />
+                      <FieldRow label="FoF %" value={c.fofLpPct} format="pct" />
+                      <FieldRow label="HNW Individual %" value={c.individualHnwLpPct} format="pct" />
+                      <FieldRow label="Re-up Rate" value={c.reupRatePct} format="pct" />
+                    </div>
+                  </div>
+                </FieldSection>
+              </div>
+            )}
+
+            {/* ── Risk Scoring ── */}
+            {anyPopulated([c.creditRiskTier, c.operationalRiskTier, c.cyberRiskTier, c.litigationPending, c.keyPersonRiskFlag]) && (
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <FieldSection title="Risk Scoring">
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <RiskPill label="Credit" tier={c.creditRiskTier} />
+                    <RiskPill label="Concentration" tier={c.concentrationRiskTier} />
+                    <RiskPill label="Operational" tier={c.operationalRiskTier} />
+                    <RiskPill label="Cyber" tier={c.cyberRiskTier} />
+                    <RiskPill label="Regulatory" tier={c.regulatoryRiskTier} />
+                    <RiskPill label="Reputation" tier={c.reputationRiskTier} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <FieldRow label="Litigation Pending" value={c.litigationPending} format="bool" />
+                      <FieldRow label="Litigation Count" value={c.litigationCount} />
+                    </div>
+                    <div>
+                      <FieldRow label="Sanctions Exposure" value={c.sanctionsExposure} format="bool" />
+                      <FieldRow label="Key-Person Risk Flag" value={c.keyPersonRiskFlag} format="bool" />
+                    </div>
+                  </div>
+                </FieldSection>
+              </div>
+            )}
+
+            {/* ── Tech Stack ── */}
+            {anyPopulated([c.accountingSystemPref, c.crmSystem, c.reportingPlatform, c.techModernizationScore]) && (
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <FieldSection title="Tech Stack">
+                  {c.techModernizationScore != null && (
+                    <div className="mb-3 flex items-center gap-2">
+                      <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">Modernization Score</span>
+                      <span className="text-sm font-bold text-[#00AA6C]">{c.techModernizationScore}/10</span>
+                      <div className="flex-1 h-2 bg-gray-100 rounded overflow-hidden">
+                        <div className="h-full bg-[#00AA6C]" style={{ width: `${(c.techModernizationScore / 10) * 100}%` }} />
+                      </div>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <FieldRow label="Accounting System" value={c.accountingSystemPref} />
+                      <FieldRow label="CRM" value={c.crmSystem} />
+                      <FieldRow label="Portal" value={c.portalProvider} />
+                      <FieldRow label="Reporting" value={c.reportingPlatform} />
+                      <FieldRow label="Data Warehouse" value={c.dataWarehouse} />
+                    </div>
+                    <div>
+                      <FieldRow label="Doc Mgmt" value={c.docMgmtPlatform} />
+                      <FieldRow label="Email" value={c.emailPlatform} />
+                      <FieldRow label="Workflow Tools" value={c.workflowTools} />
+                      <FieldRow label="API Integrations" value={c.apiIntegrations} />
+                    </div>
+                  </div>
+                </FieldSection>
+              </div>
+            )}
+
+            {/* ── Fund Economics Detail ── */}
+            {anyPopulated([c.crystallizationFrequency, c.catchUpType, c.clawbackProvision, c.keyPersonProvision]) && (
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <FieldSection title="Fund Economics Detail">
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <ServicePill label="Clawback" on={c.clawbackProvision} />
+                    <ServicePill label="Key-Person" on={c.keyPersonProvision} />
+                    <ServicePill label="No-Fault Divorce" on={c.noFaultDivorce} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <FieldRow label="Crystallization" value={c.crystallizationFrequency} />
+                      <FieldRow label="European Hurdle" value={c.europeanHurdleType} />
+                      <FieldRow label="Catch-Up Type" value={c.catchUpType} />
+                      <FieldRow label="Catch-Up %" value={c.catchUpPct} format="pct" />
+                    </div>
+                    <div>
+                      <FieldRow label="Mgmt Fee Discount" value={c.mgmtFeeDiscountPct} format="pct" />
+                      <FieldRow label="Pref Compounding" value={c.preferredReturnCompounding} />
+                      <FieldRow label="GP Commit Source" value={c.gpCommitSource} />
+                    </div>
+                  </div>
+                </FieldSection>
+              </div>
+            )}
+
+            {/* ── Service SLA ── */}
+            {anyPopulated([c.quarterlyReportingSlaDays, c.navDeliveryDays, c.slaOnTimePct]) && (
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <FieldSection title="Service SLA">
+                  {c.slaOnTimePct != null && (
+                    <div className="mb-3 flex items-center gap-2">
+                      <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">On-Time Rate</span>
+                      <span className={`text-sm font-bold ${c.slaOnTimePct >= 95 ? 'text-[#00AA6C]' : c.slaOnTimePct >= 90 ? 'text-[#d97706]' : 'text-[#b91c1c]'}`}>{c.slaOnTimePct.toFixed(1)}%</span>
+                      {(c.slaBreachCountYtd ?? 0) > 0 && (
+                        <span className="text-[10px] bg-[#fef2f2] text-[#b91c1c] px-1.5 py-0.5 rounded font-semibold">{c.slaBreachCountYtd} breaches YTD</span>
+                      )}
+                    </div>
+                  )}
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <FieldRow label="Quarterly Reporting (days)" value={c.quarterlyReportingSlaDays} />
+                      <FieldRow label="Annual Audit (days)" value={c.annualAuditSlaDays} />
+                      <FieldRow label="Cap Call Turnaround (hrs)" value={c.capitalCallTurnaroundHours} />
+                      <FieldRow label="Distribution Processing (days)" value={c.distributionProcessingDays} />
+                      <FieldRow label="NAV Delivery (days)" value={c.navDeliveryDays} />
+                    </div>
+                    <div>
+                      <FieldRow label="K-1 Target" value={c.k1DeliveryTarget} />
+                      <FieldRow label="Investor Inquiry (hrs)" value={c.investorInquiryResponseHours} />
+                      <FieldRow label="Onboarding (weeks)" value={c.onboardingTimelineWeeks} />
+                    </div>
+                  </div>
+                </FieldSection>
+              </div>
+            )}
+
+            {/* ── JSQ Financials (internal-only) ── */}
+            {anyPopulated([c.arrContractedMm, c.lifetimeRevenueMm, c.pipelineValueMm, c.profitabilityTier]) && (
+              <div className="bg-white rounded-lg shadow-sm p-4 border-l-4 border-[#005868]">
+                <FieldSection title="JSQ Financials · Internal">
+                  <div className="grid grid-cols-4 gap-2 mb-3">
+                    <Metric label="ARR" value={c.arrContractedMm != null ? fmtMoney(c.arrContractedMm) : '—'} />
+                    <Metric label="LTV" value={c.lifetimeValueMm != null ? fmtMoney(c.lifetimeValueMm) : '—'} />
+                    <Metric label="Gross Margin" value={c.grossMarginPct != null ? `${c.grossMarginPct.toFixed(1)}%` : '—'} />
+                    <Metric label="Tier" value={c.profitabilityTier ?? '—'} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <FieldRow label="Pipeline Value" value={c.pipelineValueMm} format="money" />
+                      <FieldRow label="Lifetime Revenue" value={c.lifetimeRevenueMm} format="money" />
+                      <FieldRow label="Cost to Service" value={c.costToServiceMm} format="money" />
+                    </div>
+                    <div>
+                      <FieldRow label="Upsell Opportunity" value={c.upsellOpportunityMm} format="money" />
+                      <FieldRow label="Discount %" value={c.discountPct} format="pct" />
+                      <FieldRow label="Contract Value" value={c.contractValueMm} format="money" />
+                    </div>
+                  </div>
+                </FieldSection>
+              </div>
+            )}
+
+            {/* ── Relationship History ── */}
+            {anyPopulated([c.firstMeetingDate, c.contractSignedDate, c.prevAdminBeforeJsq, c.advocacyScore]) && (
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <FieldSection title="Relationship History">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <FieldRow label="First Meeting" value={c.firstMeetingDate} />
+                      <FieldRow label="Contract Signed" value={c.contractSignedDate} />
+                      <FieldRow label="Last Renewal" value={c.lastContractRenewalDate} />
+                      <FieldRow label="Next Renewal" value={c.nextContractRenewalDate} />
+                      <FieldRow label="Auto-Renew" value={c.contractAutoRenew} format="bool" />
+                    </div>
+                    <div>
+                      <FieldRow label="Prior Admin" value={c.prevAdminBeforeJsq} />
+                      <FieldRow label="Referral Source" value={c.referralSource} />
+                      <FieldRow label="Advocacy Score" value={c.advocacyScore != null ? `${c.advocacyScore}/10` : null} />
+                      <FieldRow label="Owner Tenure" value={c.relationshipOwnerTenureMonths != null ? `${c.relationshipOwnerTenureMonths} mo` : null} />
+                      <FieldRow label="Renewal Risk" value={c.renewalRiskScore != null ? `${c.renewalRiskScore}/100` : null} />
+                    </div>
+                  </div>
+                </FieldSection>
+              </div>
+            )}
+
+            {/* ── DEI / Culture ── */}
+            {anyPopulated([c.womenOwnedPct, c.minorityOwnedPct, c.diverseLeadershipPct, c.diversityHiringPledge]) && (
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <FieldSection title="DEI & Culture">
+                  <div className="grid grid-cols-3 gap-3 mb-3">
+                    <Metric label="Women-Owned" value={c.womenOwnedPct != null ? `${c.womenOwnedPct.toFixed(0)}%` : '—'} />
+                    <Metric label="Minority-Owned" value={c.minorityOwnedPct != null ? `${c.minorityOwnedPct.toFixed(0)}%` : '—'} />
+                    <Metric label="Diverse Leadership" value={c.diverseLeadershipPct != null ? `${c.diverseLeadershipPct.toFixed(0)}%` : '—'} />
+                  </div>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <ServicePill label="Hiring Pledge" on={c.diversityHiringPledge} />
+                    <ServicePill label="ILPA Diversity Metrics" on={c.ilpaDiversityMetrics} />
+                    <ServicePill label="Parity Signatory" on={c.paritySignatory} />
+                    <ServicePill label="Rockefeller Principles" on={c.rockefellerPrinciples} />
+                    <ServicePill label="PRI Signatory" on={c.pcpSignatory} />
+                  </div>
+                  <FieldRow label="Board Independence" value={c.boardIndependencePct} format="pct" />
+                  <FieldRow label="Governance Cert" value={c.governanceCertification} />
+                </FieldSection>
+              </div>
+            )}
+
+            {/* ── Regulatory Detail ── */}
+            {anyPopulated([c.formAdvPart1Date, c.ccoOnStaff, c.mostRecentSecExamDate]) && (
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <FieldSection title="Regulatory Detail">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <FieldRow label="Form ADV Part 1" value={c.formAdvPart1Date} />
+                      <FieldRow label="Form ADV Part 2" value={c.formAdvPart2Date} />
+                      <FieldRow label="MiFID II" value={c.mifidApplicable} format="bool" />
+                      <FieldRow label="AIFMD" value={c.aifmdApplicable} format="bool" />
+                      <FieldRow label="UBO Registry" value={c.uboRegistryFiled} format="bool" />
+                    </div>
+                    <div>
+                      <FieldRow label="Beneficial Owners Disclosed" value={c.beneficialOwnershipDisclosed} format="bool" />
+                      <FieldRow label="CCO on Staff" value={c.ccoOnStaff} format="bool" />
+                      <FieldRow label="CCO Name" value={c.ccoName} />
+                      <FieldRow label="Most Recent SEC Exam" value={c.mostRecentSecExamDate} />
+                      <FieldRow label="Exam Deficiencies" value={c.secExamDeficiencies} />
+                    </div>
+                  </div>
+                </FieldSection>
+              </div>
+            )}
+
+            {/* ── Communication Preferences ── */}
+            {anyPopulated([c.preferredReportingFormat, c.preferredCommunicationChannel, c.boardMeetingCadence]) && (
+              <div className="bg-white rounded-lg shadow-sm p-4">
+                <FieldSection title="Communication Preferences">
+                  <div className="grid grid-cols-2 gap-6">
+                    <div>
+                      <FieldRow label="Reporting Format" value={c.preferredReportingFormat} />
+                      <FieldRow label="Channel" value={c.preferredCommunicationChannel} />
+                      <FieldRow label="Contact Frequency" value={c.mainContactFrequency} />
+                      <FieldRow label="Escalation Path" value={c.escalationPath} />
+                      <FieldRow label="Board Cadence" value={c.boardMeetingCadence} />
+                    </div>
+                    <div>
+                      <FieldRow label="LPAC Count" value={c.lpAdvisoryCommitteeCount} />
+                      <FieldRow label="Monthly Updates" value={c.monthlyInvestorUpdateEnabled} format="bool" />
+                      <FieldRow label="Private IR Portal" value={c.privateIrPortalEnabled} format="bool" />
+                      <FieldRow label="Investor Day" value={c.investorDayCadence} />
+                      <FieldRow label="Roadshow Frequency" value={c.roadshowFrequency} />
+                    </div>
                   </div>
                 </FieldSection>
               </div>

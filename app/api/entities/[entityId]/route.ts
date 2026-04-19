@@ -95,6 +95,7 @@ export async function GET(_req: Request, { params }: { params: { entityId: strin
       entityType: entity.entityType,
       structureType: entity.structureType,
       lifecycleStatus: entity.lifecycleStatus,
+      scopeStatus: entity.scopeStatus,
       clientName: entity.client.name,
       // general
       domicile: entity.domicile,

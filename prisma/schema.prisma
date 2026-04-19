@@ -90,6 +90,154 @@ model Client {
   diversityReporting    Boolean?
   sasbAligned           Boolean?
 
+  // ─────────────────────────────────────────────────────
+  // v2 EXPANSION — 12 themes × 10 fields = +120 fields
+  // ─────────────────────────────────────────────────────
+
+  // ── IR & FUNDRAISING ──
+  activeFundraise            Boolean?
+  currentFundTargetMm        Float?
+  currentFundRaisedMm        Float?
+  currentFundCloseDate       DateTime?
+  fundraisingCycle           String?   // "Continuous" | "Cyclical 3yr" | "Cyclical 5yr"
+  placementAgent             String?
+  subscriptionDocsVersion    String?
+  avgLpCommitmentMm          Float?
+  lpCount                    Int?
+  institutionalLpPct         Float?
+
+  // ── PORTFOLIO ANALYTICS ──
+  grossIrrAggregatePct       Float?
+  netIrrAggregatePct         Float?
+  tvpiAggregate              Float?
+  dpiAggregate               Float?
+  moicAggregate              Float?
+  realizedPctOfCapital       Float?
+  writeoffCount              Int?
+  impairmentCount            Int?
+  topQuartilePerformer       Boolean?
+  benchmarkPercentile        Int?
+
+  // ── LP BASE COMPOSITION ──
+  lpBaseDiversity            String?   // "Concentrated" | "Diversified" | "Highly Diversified"
+  top3LpConcentrationPct     Float?
+  pensionLpPct               Float?
+  endowmentLpPct             Float?
+  sovereignWealthLpPct       Float?
+  insuranceLpPct             Float?
+  familyOfficeLpPct          Float?
+  fofLpPct                   Float?
+  individualHnwLpPct         Float?
+  reupRatePct                Float?
+
+  // ── RISK SCORING ──
+  creditRiskTier             String?   // "Low" | "Medium" | "High" | "Critical"
+  concentrationRiskTier      String?
+  operationalRiskTier        String?
+  cyberRiskTier              String?
+  regulatoryRiskTier         String?
+  litigationPending          Boolean?
+  litigationCount            Int?
+  sanctionsExposure          Boolean?
+  keyPersonRiskFlag          Boolean?
+  reputationRiskTier         String?
+
+  // ── TECH STACK ──
+  accountingSystemPref       String?   // "Investran" | "eFront" | "Allvue" | "Yardi" | "QuickBooks"
+  crmSystem                  String?
+  portalProvider             String?
+  reportingPlatform          String?
+  dataWarehouse              String?
+  workflowTools              String?   // JSON array string
+  docMgmtPlatform            String?
+  emailPlatform              String?
+  apiIntegrations            String?   // JSON array string
+  techModernizationScore     Int?      // 1-10
+
+  // ── FUND ECONOMICS DETAIL ──
+  crystallizationFrequency   String?   // "Annually" | "Semi-Annually" | "Quarterly"
+  europeanHurdleType         String?
+  catchUpType                String?   // "None" | "Full" | "Partial"
+  catchUpPct                 Float?
+  clawbackProvision          Boolean?
+  keyPersonProvision         Boolean?
+  noFaultDivorce             Boolean?
+  mgmtFeeDiscountPct         Float?
+  preferredReturnCompounding String?   // "Simple" | "Compound"
+  gpCommitSource             String?   // "Cash" | "Mgmt Fee Waiver" | "Mix"
+
+  // ── SERVICE SLA ──
+  quarterlyReportingSlaDays  Int?
+  annualAuditSlaDays         Int?
+  capitalCallTurnaroundHours Int?
+  distributionProcessingDays Int?
+  navDeliveryDays            Int?
+  k1DeliveryTarget           String?   // "March 15" | "April 1" | "Late Filer"
+  investorInquiryResponseHours Int?
+  onboardingTimelineWeeks    Int?
+  slaBreachCountYtd          Int?
+  slaOnTimePct               Float?
+
+  // ── JSQ FINANCIALS (internal-only) ──
+  arrContractedMm            Float?
+  pipelineValueMm            Float?
+  lifetimeRevenueMm          Float?
+  lifetimeValueMm            Float?
+  costToServiceMm            Float?
+  grossMarginPct             Float?
+  profitabilityTier          String?   // "High" | "Medium" | "Low" | "Loss-Making"
+  upsellOpportunityMm        Float?
+  discountPct                Float?
+  contractValueMm            Float?
+
+  // ── RELATIONSHIP HISTORY ──
+  firstMeetingDate           DateTime?
+  contractSignedDate         DateTime?
+  lastContractRenewalDate    DateTime?
+  nextContractRenewalDate    DateTime?
+  contractAutoRenew          Boolean?
+  prevAdminBeforeJsq         String?
+  referralSource             String?
+  advocacyScore              Int?      // 1-10
+  relationshipOwnerTenureMonths Int?
+  renewalRiskScore           Int?      // 0-100
+
+  // ── DEI / CULTURE ──
+  womenOwnedPct              Float?
+  minorityOwnedPct           Float?
+  diverseLeadershipPct       Float?
+  diversityHiringPledge      Boolean?
+  ilpaDiversityMetrics       Boolean?
+  boardIndependencePct       Float?
+  governanceCertification    String?
+  paritySignatory            Boolean?
+  rockefellerPrinciples      Boolean?
+  pcpSignatory               Boolean?  // Principles for Responsible Investment
+
+  // ── REGULATORY DETAIL ──
+  formAdvPart1Date           DateTime?
+  formAdvPart2Date           DateTime?
+  mifidApplicable            Boolean?
+  aifmdApplicable            Boolean?
+  uboRegistryFiled           Boolean?
+  beneficialOwnershipDisclosed Boolean?
+  ccoOnStaff                 Boolean?
+  ccoName                    String?
+  mostRecentSecExamDate      DateTime?
+  secExamDeficiencies        Int?
+
+  // ── COMMUNICATION PREFS ──
+  preferredReportingFormat   String?   // "PDF" | "Excel" | "Portal" | "API"
+  preferredCommunicationChannel String? // "Email" | "Slack" | "Phone" | "Teams"
+  mainContactFrequency       String?   // "Weekly" | "Monthly" | "Quarterly"
+  escalationPath             String?
+  boardMeetingCadence        String?
+  lpAdvisoryCommitteeCount   Int?
+  monthlyInvestorUpdateEnabled Boolean?
+  privateIrPortalEnabled     Boolean?
+  investorDayCadence         String?   // "Annually" | "Semi-Annually"
+  roadshowFrequency          String?
+
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   entities          Entity[]
@@ -106,6 +254,7 @@ model Entity {
   vintage              Int?
   openEnded            Boolean  @default(false)
   lifecycleStatus      String
+  scopeStatus          String?  // "Identified" | "Scoped" | "Contracted" | "Terminated" | "De-scoped"
   clientId             String
   client               Client   @relation(fields: [clientId], references: [id])
   commitmentMm         Decimal?
