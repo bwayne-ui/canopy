@@ -97,13 +97,13 @@ export default function DataTable({
         </div>
       )}
       <div className="overflow-x-auto">
-        <table className="w-full text-xs">
+        <table className="min-w-max w-full text-xs">
           <thead>
             <tr className="bg-gray-50/80 border-b border-gray-200">
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className={`px-3 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider ${alignClass(col.align)} ${col.width || ''} ${
+                  className={`px-3 py-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap ${alignClass(col.align)} ${col.width || ''} ${
                     col.sortable ? 'cursor-pointer select-none hover:text-gray-900' : ''
                   }`}
                   onClick={() => col.sortable && handleSort(col.key)}

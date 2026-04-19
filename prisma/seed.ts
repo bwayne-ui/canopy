@@ -1708,6 +1708,50 @@ async function main() {
   await Promise.all(entitySpecs.map((spec) => prisma.entity.create({ data: spec })));
   console.log(`Generated ${entitySpecs.length} additional entities across ${clients.length} GPs (ManCo + GP Carry + Funds + Feeders + Blockers + SPVs)`);
 
+  // ── Contracted - Backlog: signed new-manager mandates, service not yet started (9-12 month lag) ──
+  const backlogSpecs: Array<{ clientName: string; fund: string; targetMm: number; domicile: string; country: string }> = [
+    { clientName: 'Rodriguez Capital Management', fund: 'Fund II',  targetMm: 400, domicile: 'Cayman Islands', country: 'Cayman Islands' },
+    { clientName: 'Park Venture Partners',        fund: 'Fund V',   targetMm: 600, domicile: 'Delaware',       country: 'United States' },
+    { clientName: 'Osei Private Equity',          fund: 'Fund III', targetMm: 350, domicile: 'Cayman Islands', country: 'Cayman Islands' },
+    { clientName: 'Chen Growth Fund',             fund: 'Fund IV',  targetMm: 800, domicile: 'Cayman Islands', country: 'China' },
+  ];
+  let backlogIdCounter = 9000;
+  for (const spec of backlogSpecs) {
+    const client = clients.find((c) => c.name === spec.clientName);
+    if (!client) continue;
+    const shortName = client.shortName ?? client.name;
+    await prisma.entity.create({ data: {
+      clientId: client.id,
+      entityId: `ENT-${String(++backlogIdCounter).padStart(6, '0')}`,
+      name: `${shortName} ${spec.fund} LP`,
+      entityType: 'Flagship Fund',
+      structureType: 'LP',
+      domicile: spec.domicile,
+      domicileCountry: spec.country,
+      strategy: client.primaryStrategy,
+      lifecycleStatus: 'Fundraising',
+      scopeStatus: 'Contracted - Backlog',
+      vintage: 2025,
+      inceptionDate: null,
+      navMm: null,
+      commitmentMm: spec.targetMm,
+      calledCapitalMm: 0,
+      prefRatePct: client.hurdleRatePct ? Number(client.hurdleRatePct) : 8.0,
+      carryPct: client.carriedInterestPct ? Number(client.carriedInterestPct) : 20.0,
+      mgmtFeePct: client.mgmtFeePct ? Number(client.mgmtFeePct) : 2.0,
+      waterfallType: client.waterfallType ?? 'American',
+      currency: 'USD',
+      fundComplexName: `${shortName} ${spec.fund}`,
+      sponsorGpOrg: client.name,
+      dataQualityScore: 40,
+      confidenceScore: 0.68,
+      assetClass: client.primaryStrategy,
+      region: client.region,
+      hqCity: client.hqCity,
+    }});
+  }
+  console.log(`Created ${backlogSpecs.length} Contracted - Backlog entities (new-manager funds signed, service pending)`);
+
   // ── Recompute client-level totals from actual entities so numbers tie out ──
   await Promise.all(clients.map(async (c) => {
     const ents = await prisma.entity.findMany({ where: { clientId: c.id }, select: { commitmentMm: true, navMm: true } });
