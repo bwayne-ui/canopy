@@ -35,7 +35,7 @@ interface EntityRow {
 
 /* ─── filter types ─────────────────────────────────────────────────── */
 
-type FilterKey = 'clientName' | 'entityType' | 'strategy' | 'domicile' | 'lifecycleStatus' | 'scopeStatus';
+type FilterKey = 'clientName' | 'entityType' | 'strategy' | 'domicile' | 'lifecycleStatus';
 
 const FILTER_DEFS: { key: FilterKey; label: string }[] = [
   { key: 'clientName',      label: 'Client' },
@@ -43,15 +43,19 @@ const FILTER_DEFS: { key: FilterKey; label: string }[] = [
   { key: 'strategy',        label: 'Strategy' },
   { key: 'domicile',        label: 'Domicile' },
   { key: 'lifecycleStatus', label: 'Lifecycle' },
-  { key: 'scopeStatus',     label: 'Scope' },
 ];
 
+const SCOPE_FILTERS = ['All', 'Identified', 'Scoped', 'Contracted - Backlog', 'Contracted - Onboarding', 'Contracted - In Service', 'Contracted - Churning', 'Churned'] as const;
+
 const SCOPE_STATUS_STYLES: Record<string, string> = {
-  Identified:  'bg-gray-100 text-gray-600',
-  Scoped:      'bg-blue-50 text-blue-700',
-  Contracted:  'bg-[#F0FBF6] text-[#00AA6C]',
-  Terminated:  'bg-red-50 text-red-600',
-  'De-scoped': 'bg-amber-50 text-amber-700',
+  'Identified':             'bg-gray-100 text-gray-600',
+  'Scoped':                 'bg-blue-50 text-blue-700',
+  'Contracted - Backlog':   'bg-amber-50 text-amber-700',
+  'Contracted - Onboarding':'bg-sky-50 text-sky-700',
+  'Contracted - In Service':'bg-[#F0FBF6] text-[#00AA6C]',
+  'Contracted - Churning':  'bg-orange-50 text-orange-700',
+  'Churned':                'bg-red-50 text-red-600',
+  'De-scoped':              'bg-amber-50 text-amber-700',
 };
 
 /* ─── render helpers ───────────────────────────────────────────────── */
@@ -115,13 +119,13 @@ export default function EntitiesPage() {
     const q = new URLSearchParams(window.location.search).get('search');
     if (q) setSearchInit(q);
   }, []);
+  const [scopeFilter, setScopeFilter] = useState<string>('All');
   const [filters, setFilters] = useState<Record<FilterKey, Set<string>>>({
     clientName: new Set(),
     entityType: new Set(),
     strategy: new Set(),
     domicile: new Set(),
     lifecycleStatus: new Set(),
-    scopeStatus: new Set(),
   });
   const [expandedFilter, setExpandedFilter] = useState<FilterKey | null>(null);
 
@@ -155,17 +159,18 @@ export default function EntitiesPage() {
   // Step 2: tag filters on top of permissions
   const filtered = useMemo(() => {
     return permissioned.filter((e) => {
+      if (scopeFilter !== 'All' && e.scopeStatus !== scopeFilter) return false;
       for (const { key } of FILTER_DEFS) {
         const v = (e as any)[key] as string | null;
         if (filters[key].size > 0 && (v == null || !filters[key].has(v))) return false;
       }
       return true;
     });
-  }, [permissioned, filters]);
+  }, [permissioned, filters, scopeFilter]);
 
   // distinct values for filter chips (from permissioned set, not allData)
   const distinctValues = useMemo(() => {
-    const out: Record<FilterKey, string[]> = { clientName: [], entityType: [], strategy: [], domicile: [], lifecycleStatus: [], scopeStatus: [] };
+    const out: Record<FilterKey, string[]> = { clientName: [], entityType: [], strategy: [], domicile: [], lifecycleStatus: [] };
     for (const { key } of FILTER_DEFS) {
       out[key] = Array.from(new Set(permissioned.map((e) => e[key] as string))).filter(Boolean).sort();
     }
@@ -182,7 +187,8 @@ export default function EntitiesPage() {
   };
 
   const clearFilters = () => {
-    setFilters({ clientName: new Set(), entityType: new Set(), strategy: new Set(), domicile: new Set(), lifecycleStatus: new Set(), scopeStatus: new Set() });
+    setFilters({ clientName: new Set(), entityType: new Set(), strategy: new Set(), domicile: new Set(), lifecycleStatus: new Set() });
+    setScopeFilter('All');
     setExpandedFilter(null);
   };
 
@@ -322,6 +328,30 @@ export default function EntitiesPage() {
           </div>
         }
       />
+
+      {/* ── scope status pills ── */}
+      <div className="flex items-center gap-2 flex-wrap mb-2">
+        {SCOPE_FILTERS.map((s) => {
+          const count = s === 'All' ? allData.length : allData.filter((e) => e.scopeStatus === s).length;
+          return (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setScopeFilter(s)}
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
+                scopeFilter === s
+                  ? 'bg-[#00AA6C] text-white'
+                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+              }`}
+            >
+              {s}
+              <span className={`ml-1.5 text-[10px] font-semibold ${scopeFilter === s ? 'text-white/80' : 'text-gray-400'}`}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
       {/* ── filter bar ── */}
       <div className="bg-white rounded-lg shadow-sm p-2 mb-2">

@@ -288,10 +288,13 @@ export default function EntityDetailPage() {
           <StatusBadge status={e.lifecycleStatus} size="sm" />
           {e.scopeStatus && (
             <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold whitespace-nowrap ${
-              e.scopeStatus === 'Contracted' ? 'bg-[#F0FBF6] text-[#00AA6C]' :
+              e.scopeStatus === 'Contracted - In Service' ? 'bg-[#F0FBF6] text-[#00AA6C]' :
+              e.scopeStatus === 'Contracted - Onboarding' ? 'bg-sky-50 text-sky-700' :
+              e.scopeStatus === 'Contracted - Backlog' ? 'bg-amber-50 text-amber-700' :
+              e.scopeStatus === 'Contracted - Churning' ? 'bg-orange-50 text-orange-700' :
               e.scopeStatus === 'Scoped' ? 'bg-blue-50 text-blue-700' :
               e.scopeStatus === 'Identified' ? 'bg-gray-100 text-gray-600' :
-              e.scopeStatus === 'Terminated' ? 'bg-red-50 text-red-600' :
+              e.scopeStatus === 'Churned' ? 'bg-red-50 text-red-600' :
               e.scopeStatus === 'De-scoped' ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-500'
             }`}>
               Scope: {e.scopeStatus}

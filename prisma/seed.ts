@@ -381,12 +381,21 @@ function generateEntitiesForClient(
   const aum = client.aumMm ?? 1000;
 
   // scope status mix by client status
-  const scopeMix = (overrides?: string[]): string => {
-    if (status === 'Churned') return 'Terminated';
+  const scopeMix = (): string => {
+    if (status === 'Churned') return 'Churned';
     if (status === 'Prospect') return pickWeighted([{ value: 'Identified', weight: 7 }, { value: 'Scoped', weight: 3 }]);
-    if (status === 'Onboarding') return pickWeighted([{ value: 'Contracted', weight: 6 }, { value: 'Scoped', weight: 4 }]);
+    if (status === 'Onboarding') return pickWeighted([
+      { value: 'Contracted - Onboarding', weight: 5 },
+      { value: 'Contracted - Backlog', weight: 3 },
+      { value: 'Scoped', weight: 2 },
+    ]);
     // Active
-    return overrides ? pick(overrides) : pickWeighted([{ value: 'Contracted', weight: 75 }, { value: 'Scoped', weight: 15 }, { value: 'De-scoped', weight: 10 }]);
+    return pickWeighted([
+      { value: 'Contracted - In Service', weight: 75 },
+      { value: 'Contracted - Churning', weight: 5 },
+      { value: 'Scoped', weight: 15 },
+      { value: 'De-scoped', weight: 5 },
+    ]);
   };
 
   // fund lifecycle (for Prospects, no funds are "Active" yet — they're identified on paper only)
@@ -1674,7 +1683,7 @@ async function main() {
   // Backfill scopeStatus on existing 19 entities — they're all actively admined
   await prisma.entity.updateMany({
     where: { scopeStatus: null },
-    data: { scopeStatus: 'Contracted' },
+    data: { scopeStatus: 'Contracted - In Service' },
   });
 
   // ── v2 entity generator: create full complex for each client ──
