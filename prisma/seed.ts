@@ -115,10 +115,96 @@ function romanNumeral(n: number): string {
 }
 
 // ---------------------------------------------------------------------------
+// Per-client website + notes lookups (ensures every GP has full profile data)
+// ---------------------------------------------------------------------------
+
+const CLIENT_WEBSITES: Record<string, string> = {
+  'Walker Asset Management': 'https://walkerasset.com',
+  'Campbell Capital Partners': 'https://campbellcp.com',
+  'Sullivan Investments': 'https://sullivaninvestments.com',
+  'Cruz Capital Management': 'https://cruzcap.com',
+  'Lopez Asset Partners': 'https://lopezassetpartners.co.uk',
+  'White Advisors': 'https://whiteadvisors.com',
+  'White Fund Management': 'https://wfm.nl',
+  'Rodriguez Capital Management': 'https://rodriguezcap.ch',
+  'Mitchell Capital': 'https://mitchellcap.com',
+  'Cohen Private Equity': 'https://cohenpe.com',
+  'Bennett Ventures': 'https://bennettvc.com',
+  'Harper Growth Partners': 'https://harpergrowth.com',
+  'Patel Infrastructure Partners': 'https://patelinfra.co.uk',
+  'Nguyen Credit Partners': 'https://nguyencredit.sg',
+  'Okafor Venture Capital': 'https://okaforvc.ng',
+  'Andersen Real Estate Group': 'https://andersenre.dk',
+  'Romano Capital': 'https://romanocap.it',
+  'Schultz Fund Partners': 'https://schultzfp.de',
+  'Kim Strategic Partners': 'https://kimstrategic.kr',
+  'Delgado Private Credit': 'https://delgadocredit.mx',
+  'Thompson Growth Equity': 'https://thompsongrowth.ca',
+  'Reeves Infrastructure Partners': 'https://reevesinfra.com.au',
+  'Barrett Capital Management': 'https://barrettcm.com',
+  'Castellanos Real Assets': 'https://castellanosra.es',
+  'Park Venture Partners': 'https://parkvc.com',
+  'Yamamoto Asset Management': 'https://yamamotoam.jp',
+  'Abramson Credit Partners': 'https://abramsoncredit.com',
+  'Ferreira Capital': 'https://ferreiracap.com.br',
+  'Ito Private Equity': 'https://itope.hk',
+  'Chen Growth Fund': 'https://chengrowth.cn',
+  'Weiss Hedge Fund': 'https://weisshf.co.il',
+  'Osei Private Equity': 'https://oseipe.com.gh',
+  'Hartman Real Estate': 'https://hartmanre.com',
+  'McBride Asset Management': 'https://mcbrideam.com',
+  'Bauer Capital Partners': 'https://bauercap.at',
+  'Ishikawa Private Equity': 'https://ishikawape.jp',
+  'Navarro Venture Capital': 'https://navarrovc.com.ar',
+  'Desai Credit': 'https://desaicredit.in',
+};
+
+const CLIENT_NOTES: Record<string, string> = {
+  'Walker Asset Management': 'Top-quartile PE shop; 2015 flagship returned 22% net IRR. Complex waterfall — multi-tier European with deal-by-deal crystallization on two funds.',
+  'Campbell Capital Partners': 'Emerging-manager pedigree (spun from Apollo 2012). Fund IV hit target in 6 months. Heavy co-invest activity.',
+  'Sullivan Investments': 'Long-tenured hedge fund; multi-PM platform. Daily NAV required across all mandates. Side pockets on two feeders.',
+  'Cruz Capital Management': 'West Coast tech-focused growth equity. 25% carry is structure is aggressive but LP base accepted on track record.',
+  'Lopez Asset Partners': 'UK/EU core-plus RE. Leveraged vehicles with quarterly appraisals. AIFMD-regulated across all funds.',
+  'White Advisors': 'Private credit specialist; direct lending + distressed. Form PF required on all funds >$150M.',
+  'White Fund Management': 'Multi-strategy FoF based in Amsterdam; secondary market activity accounts for 30% of AUM.',
+  'Rodriguez Capital Management': 'Emerging-manager FoF launched 2020. Still in migration; 3 mandates contracted to date, rest in discovery.',
+  'Mitchell Capital': 'Lower-middle-market buyout sponsor; partner group spun from Sun Capital. Seeking new admin due to legacy Excel-based process.',
+  'Cohen Private Equity': 'Healthcare specialist; Fund III raising $2B. ILPA template mandate.',
+  'Bennett Ventures': 'Early-stage VC; heavy SAFE note activity. Looking for portfolio tracking + cap table support.',
+  'Harper Growth Partners': 'Late-stage growth; vintage 2014 had 3 unicorn exits. Sophisticated side-letter workflow required.',
+  'Patel Infrastructure Partners': 'Renewables-focused infra. Fund IV $6B target. Complex sub-facility structure on Luxembourg parallel fund.',
+  'Nguyen Credit Partners': 'APAC direct lending; covenant-lite heavy portfolio. Multi-currency (SGD/USD/HKD) reporting.',
+  'Okafor Venture Capital': 'Pan-African fintech VC. Needs USD ledger reporting for DFI LPs while local books in NGN.',
+  'Andersen Real Estate Group': 'Nordic logistics & residential; ESG-forward. SFDR Article 8 disclosures on all funds.',
+  'Romano Capital': 'Italian middle-market buyout; family-office heavy LP base. Multi-jurisdictional tax planning required.',
+  'Schultz Fund Partners': 'German FoF; institutional pension focus. LP advisory board very active — quarterly deep-dive reports.',
+  'Kim Strategic Partners': 'Korean buyout; carve-out strategy. Won best deal of 2023 award for LG Chem battery carve-out.',
+  'Delgado Private Credit': 'LatAm direct lending; peso-denominated with USD hedge. FX reporting overlay adds complexity.',
+  'Thompson Growth Equity': 'Canadian growth; Toronto + Vancouver offices. Crown corp mandate influences governance.',
+  'Reeves Infrastructure Partners': 'Australian infrastructure with Asia-Pacific reach. Long-duration assets; 12-year fund life.',
+  'Barrett Capital Management': 'Multi-strat + macro hedge fund. High-water-mark tracking across 4 share classes.',
+  'Castellanos Real Assets': 'Iberian logistics RE. Portfolio-level debt at holdco; complex waterfall at property level.',
+  'Park Venture Partners': 'AI-focused seed/Series A. Fast-moving; portfolio company additions every 2-3 weeks.',
+  'Yamamoto Asset Management': 'Flagship Japanese PE; corporate carve-out specialist. Mix of yen and USD funds.',
+  'Abramson Credit Partners': 'Distressed + special situations. Workout activity heavy; debt restructuring expertise a must.',
+  'Ferreira Capital': 'Brazilian consumer-focused PE. Real-denominated with USD reporting. Historical FX volatility a factor.',
+  'Ito Private Equity': 'Asia growth; HK base with Singapore arm. Pan-regional SPV structures.',
+  'Chen Growth Fund': 'China growth equity; consumer + internet. Renminbi and offshore USD dual structure.',
+  'Weiss Hedge Fund': 'Quantitative Israeli fund; Tel Aviv base. Daily reporting; systematic strategies.',
+  'Osei Private Equity': 'West Africa focused; GP spun from SEAF in 2019. Emerging-manager network active.',
+  'Hartman Real Estate': 'US residential + core-plus; distributed property management across 9 states.',
+  'McBride Asset Management': 'Churned in 2025 — acquired by SS&C; all mandates transferred over 6 months.',
+  'Bauer Capital Partners': 'Brought fund admin in-house after 8-year relationship; legacy data handed off cleanly.',
+  'Ishikawa Private Equity': 'Moved to a regional admin offering 40% price discount; transition was rocky.',
+  'Navarro Venture Capital': 'Fund wind-down — LatAm LP base exited region after peso volatility.',
+  'Desai Credit': 'Left for India-specialized admin citing service quality concerns; renewal discussions ongoing.',
+};
+
+// ---------------------------------------------------------------------------
 // GP enrichment — produces v2 expansion fields derived from status + AUM
 // ---------------------------------------------------------------------------
 
-function gpEnrichment(c: { status: string; aumMm?: number | null; strategyMix?: string | null; primaryStrategy?: string }): Record<string, any> {
+function gpEnrichment(c: { name: string; status: string; aumMm?: number | null; strategyMix?: string | null; primaryStrategy?: string; website?: string | null; notes?: string | null }): Record<string, any> {
   const isActive = c.status === 'Active';
   const isProspect = c.status === 'Prospect';
   const isChurned = c.status === 'Churned';
@@ -272,6 +358,10 @@ function gpEnrichment(c: { status: string; aumMm?: number | null; strategyMix?: 
     privateIrPortalEnabled: isProspect ? false : Math.random() < 0.8,
     investorDayCadence: pick(['Annually', 'Semi-Annually', 'Biannually']),
     roadshowFrequency: pick(['Annually', 'Semi-Annually', 'As Needed']),
+
+    // ── Website + Notes lookup (backfill any missing from client creates) ──
+    website: c.website ?? CLIENT_WEBSITES[c.name] ?? null,
+    notes: c.notes ?? CLIENT_NOTES[c.name] ?? null,
   };
 }
 
@@ -379,19 +469,45 @@ function generateEntitiesForClient(
     }));
   }
 
-  // ── 3. Funds (2-4 per GP) ──
-  const fundCount = status === 'Prospect' ? randomInt(1, 3) : status === 'Onboarding' ? randomInt(2, 3) : randomInt(3, 4);
+  // ── 3. Funds (2-4 per GP) — sized so commitments sum to ~aumMm and each fund is ≥$100M ──
+  // Allocate budget by flagship-weighted distribution so larger GPs have $1B+ flagships.
+  const MIN_FUND_MM = 100;
+  // Choose fund count based on AUM so every fund can clear the $100M floor
+  let fundCount: number;
+  if (status === 'Prospect') {
+    fundCount = aum >= 2000 ? randomInt(2, 3) : aum >= 800 ? 2 : aum >= MIN_FUND_MM ? 1 : 0;
+  } else if (status === 'Onboarding') {
+    fundCount = aum >= 1500 ? 3 : aum >= 800 ? 2 : 1;
+  } else {
+    // Active / Churned — scale count with AUM but ensure the per-fund average ≥ $400M ideally
+    fundCount = aum >= 8000 ? randomInt(3, 4) : aum >= 3000 ? randomInt(3, 4) : aum >= 1500 ? 3 : aum >= 800 ? 2 : 2;
+  }
+  // Weights: flagship gets 40-55% of AUM, subsequent funds split the remainder
+  const flagshipWeight = 0.40 + Math.random() * 0.15; // 0.40–0.55
+  const weights: number[] = [];
+  if (fundCount >= 1) weights.push(flagshipWeight);
+  for (let f = 2; f <= fundCount; f++) {
+    // Older funds (higher f) are smaller because flagship is newest and biggest
+    weights.push((1 - flagshipWeight) / (fundCount - 1) * (0.8 + Math.random() * 0.4));
+  }
+  // Normalize weights so they sum to 1
+  const weightTotal = weights.reduce((s, w) => s + w, 0);
+  const normalizedWeights = weights.map((w) => w / weightTotal);
+
   const vintageSpan = Math.max(1, latestVintage - baseVintage);
   for (let f = 1; f <= fundCount; f++) {
     const fundVintage = baseVintage + Math.floor((vintageSpan * (f - 1)) / Math.max(fundCount - 1, 1));
+    const isFlagship = f === 1;
     const isLatest = f === fundCount;
-    const fundCommitment = Math.round((aum / fundCount) * (0.7 + Math.random() * 0.6));
+    let fundCommitment = Math.round(aum * normalizedWeights[f - 1]);
+    // Enforce minimum floor: no main fund under $100M
+    if (fundCommitment < MIN_FUND_MM) fundCommitment = MIN_FUND_MM + randomInt(0, 40);
     const fundCalledPct = isLatest && status !== 'Churned' ? 0.3 + Math.random() * 0.4 : 0.75 + Math.random() * 0.2;
     const fundNav = Math.round(fundCommitment * fundCalledPct * (0.9 + Math.random() * 0.4));
     const lifecycle = status === 'Churned' ? 'Winding Down' : (isLatest && Math.random() < 0.5 ? 'Fundraising' : 'Active');
     entities.push(make({
       name: `${shortName} Fund ${romanNumeral(f)} LP`,
-      entityType: f === 1 ? 'Flagship Fund' : 'Fund',
+      entityType: isFlagship ? 'Flagship Fund' : 'Fund',
       structureType: 'LP',
       strategy: client.primaryStrategy,
       lifecycleStatus: lifecycle,
@@ -401,14 +517,16 @@ function generateEntitiesForClient(
       navMm: fundNav,
       commitmentMm: fundCommitment,
       calledCapitalMm: Math.round(fundCommitment * fundCalledPct),
-      entityRole: f === 1 ? 'Flagship Fund' : 'Fund',
+      entityRole: isFlagship ? 'Flagship Fund' : 'Fund',
       fundStructure: 'Limited Partnership',
       shortName: `${shortName} ${romanNumeral(f)}`,
     }));
   }
 
-  // ── 4. Offshore Feeder (only for Active / Churned / Onboarding) ──
+  // ── 4. Offshore Feeder (sub-vehicle, can be below floor) — only for Active / Churned / Onboarding ──
+  // Feeders are typically sized as a slice of the flagship — ~12-20% of AUM
   if (status !== 'Prospect' && Math.random() < 0.85) {
+    const feederCommit = Math.max(75, Math.round(aum * (0.12 + Math.random() * 0.08)));
     entities.push(make({
       name: `${shortName} Offshore Feeder Fund Ltd`,
       entityType: 'Feeder Fund',
@@ -419,16 +537,16 @@ function generateEntitiesForClient(
       domicileCountry: 'Cayman Islands',
       region: 'APAC',
       inceptionDate: new Date(`${latestVintage - 1}-06-15`),
-      navMm: Math.round(aum * 0.15),
-      commitmentMm: Math.round(aum * 0.2),
-      calledCapitalMm: Math.round(aum * 0.15 * 0.8),
+      navMm: Math.round(feederCommit * 0.75),
+      commitmentMm: feederCommit,
+      calledCapitalMm: Math.round(feederCommit * 0.6),
       entityRole: 'Feeder Fund',
       fundStructure: 'Limited Company',
       shortName: `${shortName} Offshore`,
     }));
   }
 
-  // ── 5. US Blocker (only for Active / Churned) ──
+  // ── 5. US Blocker Corp (tax vehicle; small NAV for offshore LPs investing through blocker) ──
   if ((status === 'Active' || status === 'Churned') && Math.random() < 0.7) {
     entities.push(make({
       name: `${shortName} Blocker Corp`,
@@ -439,15 +557,16 @@ function generateEntitiesForClient(
       domicile: 'Delaware',
       domicileCountry: 'United States',
       inceptionDate: new Date(`${latestVintage - 2}-03-01`),
-      navMm: Math.round(aum * 0.04),
+      navMm: Math.max(25, Math.round(aum * 0.03)),
       entityRole: 'Blocker',
       fundStructure: 'C-Corp',
       shortName: `${shortName} Blocker`,
     }));
   }
 
-  // ── 6. Co-Invest SPV (0-1 per Active GP) ──
+  // ── 6. Co-Invest SPV (0-1 per Active GP) — deal-specific vehicle ──
   if (status === 'Active' && Math.random() < 0.6) {
+    const spvCommit = Math.max(50, Math.round(aum * (0.03 + Math.random() * 0.04)));
     entities.push(make({
       name: `${shortName} Co-Invest ${latestVintage} SPV LP`,
       entityType: 'Co-Invest Vehicle',
@@ -457,9 +576,9 @@ function generateEntitiesForClient(
       domicile: 'Delaware',
       vintage: latestVintage,
       inceptionDate: new Date(`${latestVintage}-02-01`),
-      navMm: Math.round(aum * 0.03),
-      commitmentMm: Math.round(aum * 0.04),
-      calledCapitalMm: Math.round(aum * 0.03 * 0.75),
+      navMm: Math.round(spvCommit * 0.75),
+      commitmentMm: spvCommit,
+      calledCapitalMm: Math.round(spvCommit * 0.6),
       entityRole: 'Co-Invest',
       fundStructure: 'Limited Partnership',
       shortName: `${shortName} CoInv ${latestVintage}`,
@@ -666,7 +785,7 @@ async function main() {
       hqCity: 'Austin', hqCountry: 'United States', region: 'Americas', relationshipStart: null,
       status: 'Prospect', totalEntities: 0, totalNavMm: 0, totalCommitmentMm: 0, revenueL12m: 0, marginPct: 0,
       teamLead: 'Megan Moore', serviceLine: 'Fund Accounting', yearFounded: 2019, employeeCount: 18,
-      aumMm: 420, strategyMix: 'Early-Stage VC,SaaS', portfolioCompanyCount: 34, typicalDealSizeMm: 8, firstFundVintage: 2020, latestFundVintage: 2024,
+      aumMm: 580, strategyMix: 'Early-Stage VC,SaaS', portfolioCompanyCount: 34, typicalDealSizeMm: 8, firstFundVintage: 2020, latestFundVintage: 2024,
       relationshipStage: 'Negotiation', nextMeetingAt: new Date('2026-04-22'), accountExecutive: 'Nathan Bradley',
     }}),
     prisma.client.create({ data: {
@@ -698,7 +817,7 @@ async function main() {
       hqCity: 'Lagos', hqCountry: 'Nigeria', region: 'EMEA', relationshipStart: null,
       status: 'Prospect', totalEntities: 0, totalNavMm: 0, totalCommitmentMm: 0, revenueL12m: 0, marginPct: 0,
       teamLead: 'Jason Cooper', serviceLine: 'Fund Accounting', yearFounded: 2020, employeeCount: 12,
-      aumMm: 180, strategyMix: 'Africa Tech VC', portfolioCompanyCount: 22, typicalDealSizeMm: 3, firstFundVintage: 2021, latestFundVintage: 2024,
+      aumMm: 650, strategyMix: 'Africa Tech VC', portfolioCompanyCount: 22, typicalDealSizeMm: 8, firstFundVintage: 2021, latestFundVintage: 2024,
       relationshipStage: 'Qualified', nextMeetingAt: new Date('2026-05-05'), accountExecutive: 'Elena Vasquez',
     }}),
     prisma.client.create({ data: {
@@ -1037,12 +1156,12 @@ async function main() {
   ]);
   console.log(`Created ${clients.length} clients (8 existing + 30 new: 22 Active, 10 Prospect, 5 Churned, 1 Onboarding)`);
 
-  // ── v2 enrichment: apply 120 derived fields to all 38 clients ──
+  // ── v2 enrichment: apply 120 derived fields + website + notes to all 38 clients ──
   await Promise.all(clients.map((c) => prisma.client.update({
     where: { id: c.id },
-    data: gpEnrichment({ status: c.status, aumMm: c.aumMm, strategyMix: c.strategyMix, primaryStrategy: c.primaryStrategy }),
+    data: gpEnrichment({ name: c.name, status: c.status, aumMm: (c as any).aumMm, strategyMix: (c as any).strategyMix, primaryStrategy: c.primaryStrategy, website: c.website, notes: c.notes }),
   })));
-  console.log(`Enriched ${clients.length} clients with v2 profile fields`);
+  console.log(`Enriched ${clients.length} clients with v2 profile fields (websites + notes included)`);
 
   // ═══════════════════════════════════════════════
   // ENTITIES (15)
@@ -1580,6 +1699,25 @@ async function main() {
   await Promise.all(entitySpecs.map((spec) => prisma.entity.create({ data: spec })));
   console.log(`Generated ${entitySpecs.length} additional entities across ${clients.length} GPs (ManCo + GP Carry + Funds + Feeders + Blockers + SPVs)`);
 
+  // ── Recompute client-level totals from actual entities so numbers tie out ──
+  await Promise.all(clients.map(async (c) => {
+    const ents = await prisma.entity.findMany({ where: { clientId: c.id }, select: { commitmentMm: true, navMm: true } });
+    const totalCommitment = ents.reduce((s, e) => s + (e.commitmentMm ? Number(e.commitmentMm) : 0), 0);
+    const totalNav = ents.reduce((s, e) => s + (e.navMm ? Number(e.navMm) : 0), 0);
+    await prisma.client.update({
+      where: { id: c.id },
+      data: {
+        totalEntities: ents.length,
+        totalCommitmentMm: Math.round(totalCommitment),
+        totalNavMm: Math.round(totalNav),
+        aumMm: Math.round(totalCommitment),
+      },
+    });
+  }));
+  console.log(`Recomputed client totals from entity rollups`);
+
+  // (podId assignment moved to after internal user CSV seeding below)
+
   // ═══════════════════════════════════════════════
   // DOMAIN-SPECIFIC FIELDS
   // ═══════════════════════════════════════════════
@@ -1843,6 +1981,24 @@ async function main() {
   }
   const users = await prisma.internalUser.findMany({ orderBy: { employeeId: 'asc' } });
   console.log(`Created ${users.length} internal users from CSV`);
+
+  // ── Assign podId to a sampling of InternalUsers so Pod analysis page has team data ──
+  const eligibleUsers = await prisma.internalUser.findMany({
+    where: {
+      department: { in: ['FA - Fund Accounting', 'FA - Onboarding', 'FA - Capital Events', 'FA - Core IS', 'FA - Fundraising', 'FA - Strategy & Ops'] },
+    },
+    select: { id: true, department: true },
+    take: 90,
+  });
+  for (const u of eligibleUsers) {
+    const pod = u.department === 'FA - Fund Accounting' ? pick(['POD-A', 'POD-A', 'POD-B', 'POD-C']) :
+                u.department === 'FA - Onboarding' ? pick(['POD-B', 'POD-C']) :
+                u.department === 'FA - Capital Events' ? pick(['POD-A', 'POD-B']) :
+                u.department === 'FA - Core IS' ? pick(['POD-A', 'POD-B', 'POD-C']) :
+                pick(['POD-A', 'POD-C']);
+    await prisma.internalUser.update({ where: { id: u.id }, data: { podId: pod } });
+  }
+  console.log(`Assigned podId to ${eligibleUsers.length} internal users across POD-A/B/C`);
 
   // ──── end of InternalUser CSV section ────
 

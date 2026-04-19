@@ -177,7 +177,7 @@ export default function ClientDetailPage() {
         <span className="text-xs text-gray-600 font-semibold">{entities.length} Entities</span>
         <div className="h-3 w-px bg-gray-200" />
         <span className="text-xs text-gray-500">Lead: <span className="font-semibold text-gray-700">{c.teamLead}</span></span>
-        {c.podId && <><div className="h-3 w-px bg-gray-200" /><span className="text-xs text-gray-500">Pod: <span className="font-semibold text-gray-700">{c.podId}</span></span></>}
+        {c.podId && <><div className="h-3 w-px bg-gray-200" /><span className="text-xs text-gray-500">Pod: <Link href={`/data-vault/pods/${c.podId}`} className="font-semibold text-[#00AA6C] hover:underline">{c.podId}</Link></span></>}
         <span className="ml-auto text-[10px] text-gray-400">Client since {c.relationshipStart?.slice(0, 4)}</span>
       </div>
 
@@ -715,7 +715,14 @@ export default function ClientDetailPage() {
             <div className="bg-white rounded-lg shadow-sm p-3">
               <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Team</div>
               <FieldRow label="Lead" value={c.teamLead} />
-              <FieldRow label="Pod" value={c.podId} />
+              <div className="flex items-start py-1.5 border-b border-gray-50">
+                <span className="w-40 flex-shrink-0 text-xs text-gray-500 font-medium">Pod</span>
+                {c.podId ? (
+                  <Link href={`/data-vault/pods/${c.podId}`} className="text-xs text-[#00AA6C] font-semibold hover:underline">
+                    {c.podId}
+                  </Link>
+                ) : <span className="text-xs text-gray-400">—</span>}
+              </div>
               <FieldRow label="Service Line" value={c.serviceLine} />
             </div>
             <div className="bg-white rounded-lg shadow-sm p-3 space-y-2">

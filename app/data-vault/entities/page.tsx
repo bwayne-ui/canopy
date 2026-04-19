@@ -24,6 +24,7 @@ interface EntityRow {
   domicile: string;
   vintage: number | null;
   navMm: number | null;
+  commitmentMm: number | null;
   grossIrrPct: number | null;
   lifecycleStatus: string;
   scopeStatus: string | null;
@@ -34,13 +35,13 @@ interface EntityRow {
 
 /* ─── filter types ─────────────────────────────────────────────────── */
 
-type FilterKey = 'clientName' | 'entityType' | 'strategy' | 'lifecycleStatus' | 'assetClass' | 'scopeStatus';
+type FilterKey = 'clientName' | 'entityType' | 'strategy' | 'domicile' | 'lifecycleStatus' | 'scopeStatus';
 
 const FILTER_DEFS: { key: FilterKey; label: string }[] = [
   { key: 'clientName',      label: 'Client' },
   { key: 'entityType',      label: 'Type' },
-  { key: 'assetClass',      label: 'Asset Class' },
   { key: 'strategy',        label: 'Strategy' },
+  { key: 'domicile',        label: 'Domicile' },
   { key: 'lifecycleStatus', label: 'Lifecycle' },
   { key: 'scopeStatus',     label: 'Scope' },
 ];
@@ -117,8 +118,8 @@ export default function EntitiesPage() {
   const [filters, setFilters] = useState<Record<FilterKey, Set<string>>>({
     clientName: new Set(),
     entityType: new Set(),
-    assetClass: new Set(),
     strategy: new Set(),
+    domicile: new Set(),
     lifecycleStatus: new Set(),
     scopeStatus: new Set(),
   });
@@ -164,7 +165,7 @@ export default function EntitiesPage() {
 
   // distinct values for filter chips (from permissioned set, not allData)
   const distinctValues = useMemo(() => {
-    const out: Record<FilterKey, string[]> = { clientName: [], entityType: [], assetClass: [], strategy: [], lifecycleStatus: [], scopeStatus: [] };
+    const out: Record<FilterKey, string[]> = { clientName: [], entityType: [], strategy: [], domicile: [], lifecycleStatus: [], scopeStatus: [] };
     for (const { key } of FILTER_DEFS) {
       out[key] = Array.from(new Set(permissioned.map((e) => e[key] as string))).filter(Boolean).sort();
     }
@@ -181,7 +182,7 @@ export default function EntitiesPage() {
   };
 
   const clearFilters = () => {
-    setFilters({ clientName: new Set(), entityType: new Set(), assetClass: new Set(), strategy: new Set(), lifecycleStatus: new Set(), scopeStatus: new Set() });
+    setFilters({ clientName: new Set(), entityType: new Set(), strategy: new Set(), domicile: new Set(), lifecycleStatus: new Set(), scopeStatus: new Set() });
     setExpandedFilter(null);
   };
 
@@ -215,12 +216,6 @@ export default function EntitiesPage() {
       sortable: true,
       render: (v: string) => typeBadge(v ?? ''),
     },
-    {
-      key: 'assetClass',
-      label: 'Asset Class',
-      sortable: true,
-      render: (v: string) => v ? <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-teal-50 text-teal-700">{v}</span> : <span className="text-gray-300">—</span>,
-    },
     { key: 'strategy', label: 'Strategy', sortable: true },
     {
       key: 'vintage',
@@ -228,6 +223,19 @@ export default function EntitiesPage() {
       sortable: true,
       align: 'center',
       render: (v: number | null) => <span className="text-gray-600">{v ?? '—'}</span>,
+    },
+    {
+      key: 'commitmentMm',
+      label: 'Commitment',
+      sortable: true,
+      align: 'right',
+      render: (v: number | null) => <span className="">{v != null ? fmtMoney(v) : '—'}</span>,
+    },
+    {
+      key: 'domicile',
+      label: 'Domicile',
+      sortable: true,
+      render: (v: string) => v ? <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700">{v}</span> : <span className="text-gray-300">—</span>,
     },
     {
       key: 'navMm',

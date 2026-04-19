@@ -19,6 +19,7 @@ export async function GET() {
       domicile: e.domicile, vintage: e.vintage,
       assetClass: e.assetClass, entityRole: e.entityRole, fundStructure: e.fundStructure,
       navMm: toNum(e.navMm),
+      commitmentMm: e.commitmentMm ? toNum(e.commitmentMm) : null,
       grossIrrPct: e.grossIrrPct ? toNum(e.grossIrrPct) : null,
       netIrrPct: e.netIrrPct ? toNum(e.netIrrPct) : null,
       lifecycleStatus: e.lifecycleStatus,
