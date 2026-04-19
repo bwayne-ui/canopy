@@ -62,16 +62,22 @@ const CATEGORIES = [
   'Fee & Expense',
   'Carried Interest',
   'Facility / Debt',
+  'GP Secondary & Restructuring',
+  'Tax & Regulatory',
+  'Valuation & Adjustment',
   'Other',
 ];
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'Capital Call':    'bg-[#F0FBF6] text-[#005868] border border-[#00AA6C]/30',
-  'Distribution':    'bg-blue-50 text-blue-700 border border-blue-200',
-  'Fee & Expense':   'bg-amber-50 text-amber-700 border border-amber-200',
-  'Carried Interest':'bg-purple-50 text-purple-700 border border-purple-200',
-  'Facility / Debt': 'bg-gray-100 text-gray-600 border border-gray-200',
-  'Other':           'bg-slate-50 text-slate-600 border border-slate-200',
+  'Capital Call':                   'bg-[#F0FBF6] text-[#005868] border border-[#00AA6C]/30',
+  'Distribution':                   'bg-blue-50 text-blue-700 border border-blue-200',
+  'Fee & Expense':                  'bg-amber-50 text-amber-700 border border-amber-200',
+  'Carried Interest':               'bg-purple-50 text-purple-700 border border-purple-200',
+  'Facility / Debt':                'bg-gray-100 text-gray-600 border border-gray-200',
+  'GP Secondary & Restructuring':   'bg-rose-50 text-rose-700 border border-rose-200',
+  'Tax & Regulatory':               'bg-orange-50 text-orange-700 border border-orange-200',
+  'Valuation & Adjustment':         'bg-sky-50 text-sky-700 border border-sky-200',
+  'Other':                          'bg-slate-50 text-slate-600 border border-slate-200',
 };
 
 const DIRECTION_ICON: Record<string, React.ReactNode> = {
@@ -576,13 +582,16 @@ export default function TransParametersPage() {
       />
 
       {/* Metric cards */}
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-        <MetricCard value={params.length} label="Total Types" sub="Across all categories" />
-        <MetricCard value={counts['Capital Call'] ?? 0} label="Capital Call" sub="CC-* codes" />
-        <MetricCard value={counts['Distribution'] ?? 0} label="Distribution" sub="DIST-* codes" />
-        <MetricCard value={counts['Fee & Expense'] ?? 0} label="Fees & Expenses" sub="ILPA RT v2.0 (22 cat)" />
-        <MetricCard value={counts['Carried Interest'] ?? 0} label="Carried Interest" sub="CARRY-* codes" />
-        <MetricCard value={(counts['Facility / Debt'] ?? 0) + (counts['Other'] ?? 0)} label="Facility & Other" sub="FACIL-* / INC-* / ADJ-*" />
+      <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-3">
+        <MetricCard value={params.length} label="Total Types" sub="All categories" />
+        <MetricCard value={counts['Capital Call'] ?? 0} label="Capital Calls" sub="CC-*" />
+        <MetricCard value={counts['Distribution'] ?? 0} label="Distributions" sub="DIST-*" />
+        <MetricCard value={counts['Fee & Expense'] ?? 0} label="Fees & Expenses" sub="FEE-* / EXP-*" />
+        <MetricCard value={counts['Carried Interest'] ?? 0} label="Carried Interest" sub="CARRY-*" />
+        <MetricCard value={counts['Facility / Debt'] ?? 0} label="Facility / Debt" sub="FACIL-*" />
+        <MetricCard value={counts['GP Secondary & Restructuring'] ?? 0} label="GP Secondary" sub="SEC-*" />
+        <MetricCard value={counts['Tax & Regulatory'] ?? 0} label="Tax & Reg" sub="TAX-*" />
+        <MetricCard value={(counts['Valuation & Adjustment'] ?? 0) + (counts['Other'] ?? 0)} label="Val & Other" sub="VAL-* / ADJ-* / INC-*" />
       </div>
 
       {/* Filter bar */}
